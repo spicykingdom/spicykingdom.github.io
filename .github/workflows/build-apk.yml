@@ -1,0 +1,83 @@
+name: Build Auto-Updating Spicy Kingdom POS APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Prepare Square 1024x1024 App Icon & Build APK
+        run: |
+          mkdir -p www assets
+          cp index.html www/index.html
+
+          # 1. Download your logo if assets/icon.png is not uploaded in the repo
+          if [ ! -f "assets/icon.png" ]; then
+            curl -L -s "https://i.ibb.co/Gf35mFfm/spicy-kingdom-black-transparent.png" -o raw_logo.png
+            # Pad rectangular logo onto a 1024x1024 square canvas with 15% safe margin so Android never crops it
+            convert raw_logo.png -resize 780x780 -background "#FFF7ED" -gravity center -extent 1024x1024 assets/icon-only.png
+            cp assets/icon-only.png assets/icon.png
+          else
+            convert assets/icon.png -resize 1024x1024 -background "#FFF7ED" -gravity center -extent 1024x1024 assets/icon-only.png
+          fi
+
+          # 2. Initialize Capacitor & Live GitHub Pages URL Wrapper
+          npm init -y
+          npm install @capacitor/core@6 @capacitor/cli@6 @capacitor/android@6 @capacitor/assets
+          npx cap init "Spicy Kingdom POS" "com.spicykingdom.pos" --web-dir www
+
+          cat << 'EOF' > capacitor.config.json
+          {
+            "appId": "com.spicykingdom.pos",
+            "appName": "Spicy Kingdom POS",
+            "webDir": "www",
+            "server": {
+              "url": "https://ipbp.github.io/spicykingdom.github.io/",
+              "cleartext": true,
+              "androidScheme": "https"
+            }
+          }
+          EOF
+
+          npx cap add android
+
+          # 3. Generate All Android Mipmap & Adaptive Launcher Icons
+          npx capacitor-assets generate --android --iconBackgroundColor '#FFF7ED'
+
+          # 4. Enable HTTPS/Cleartext & Rose Status Bar
+          MANIFEST="android/app/src/main/AndroidManifest.xml"
+          sed -i 's/<application/<application android:usesCleartextTraffic="true"/' "$MANIFEST"
+
+          MAIN_ACT=$(find android/app/src/main/java -name "MainActivity.java")
+          if [ -n "$MAIN_ACT" ]; then
+            sed -i 's/super.onCreate(savedInstanceState);/super.onCreate(savedInstanceState); getWindow().setStatusBarColor(android.graphics.Color.parseColor("#E11D48"));/' "$MAIN_ACT"
+          fi
+
+          # 5. Sync & Compile APK
+          npx cap sync android
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - name: Upload Spicy Kingdom POS APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Spicy-Kingdom-POS-APK
+          path: android/app/build/outputs/apk/debug/app-debug.apk
