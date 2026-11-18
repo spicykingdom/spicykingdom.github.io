@@ -238,7 +238,7 @@
     </main>
 
     <!-- ============================================================
-         VIEW 2: POS BILLING (Mobile List View + Desktop Split-Screen)
+         VIEW 2: POS BILLING (Custom Styled Dropdowns + Mobile List View)
          ============================================================ -->
     <main id="view-BILLING" class="hidden flex-1 max-w-7xl w-full mx-auto p-2 sm:p-3 flex flex-col">
       <div class="lg:hidden grid grid-cols-2 gap-1.5 bg-white p-1.5 rounded-2xl border border-slate-200 mb-2 text-xs font-extrabold shadow-xs">
@@ -284,23 +284,30 @@
                 <button onclick="requestClearCurrentOrder()" class="px-2 py-1 rounded-lg bg-rose-50 text-rose-600 border border-rose-200">Clear</button>
               </div>
               <div id="channelActionGroup" class="hidden flex items-center gap-1 text-[11px] font-extrabold">
-                <select id="channelSwitchSelect" onchange="changeActiveChannelType(this.value)" class="px-2 py-1 rounded-lg bg-indigo-50 text-indigo-800 border border-indigo-200">
-                  <option value="Takeaway">Takeaway</option>
-                  <option value="Delivery">Delivery</option>
-                  <option value="Swiggy">Swiggy</option>
-                  <option value="Zomato">Zomato</option>
-                </select>
+                <div class="relative">
+                  <select id="channelSwitchSelect" onchange="changeActiveChannelType(this.value)" class="appearance-none pl-2.5 pr-6 py-1 rounded-lg bg-indigo-50 text-indigo-800 border border-indigo-200 cursor-pointer focus:outline-none">
+                    <option value="Takeaway">Takeaway</option>
+                    <option value="Delivery">Delivery</option>
+                    <option value="Swiggy">Swiggy</option>
+                    <option value="Zomato">Zomato</option>
+                  </select>
+                  <svg class="w-3 h-3 text-indigo-700 pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                </div>
                 <button onclick="requestClearCurrentOrder()" class="px-2.5 py-1 rounded-lg bg-rose-600 text-white">Cancel</button>
               </div>
             </div>
 
+            <!-- Customer Mobile, Name & Custom-Styled Local / Non-Local Dropdown -->
             <div class="grid grid-cols-12 gap-1.5">
-              <input type="tel" id="orderCustPhone" oninput="onCustomerPhoneInput(this.value)" placeholder="Mobile (Auto-CRM)" class="col-span-4 px-2 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-xs font-bold" />
-              <input type="text" id="orderCustName" oninput="updateOrderMeta()" placeholder="Guest Name" class="col-span-4 px-2 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-xs font-semibold" />
-              <select id="orderCustType" onchange="updateOrderMeta()" class="col-span-4 px-1.5 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-extrabold">
-                <option value="Local">Local Guest</option>
-                <option value="Non-Local">Non-Local</option>
-              </select>
+              <input type="tel" id="orderCustPhone" oninput="onCustomerPhoneInput(this.value)" placeholder="Mobile (Auto-CRM)" class="col-span-4 px-2 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-rose-500" />
+              <input type="text" id="orderCustName" oninput="updateOrderMeta()" placeholder="Guest Name" class="col-span-4 px-2 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-rose-500" />
+              <div class="col-span-4 relative">
+                <select id="orderCustType" onchange="updateOrderMeta()" class="w-full appearance-none pl-2.5 pr-6 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-extrabold focus:outline-none focus:ring-2 focus:ring-emerald-400 cursor-pointer">
+                  <option value="Local">Local Guest</option>
+                  <option value="Non-Local">Non-Local</option>
+                </select>
+                <svg class="w-3.5 h-3.5 text-emerald-700 pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+              </div>
             </div>
             <div class="flex items-center justify-between text-[11px] px-1">
               <span class="font-bold text-slate-500 flex items-center gap-1">
@@ -313,7 +320,7 @@
 
           <div id="posCartItemsList" class="flex-1 overflow-y-auto py-2 space-y-2"></div>
 
-          <!-- Billing Footer -->
+          <!-- Billing Footer with Custom-Styled Tip Employee Pool Dropdown -->
           <div class="pt-2 border-t border-slate-200 space-y-1.5 bg-slate-50/70 -mx-2.5 sm:-mx-3 -mb-2.5 sm:-mb-3 p-2.5 sm:p-3 rounded-b-2xl">
             <div class="flex flex-wrap items-center justify-between gap-1 text-[11px] font-extrabold">
               <div class="flex items-center gap-1">
@@ -321,12 +328,15 @@
                 <button onclick="setOrderDiscount(0)" class="disc-btn px-1.5 py-1 rounded bg-white border border-slate-200" data-d="0">0%</button>
                 <button onclick="setOrderDiscount(5)" class="disc-btn px-1.5 py-1 rounded bg-white border border-slate-200" data-d="5">5%</button>
                 <button onclick="setOrderDiscount(10)" class="disc-btn px-1.5 py-1 rounded bg-white border border-slate-200" data-d="10">10%</button>
-                <input type="number" min="0" max="15" step="0.5" id="customDiscInput" oninput="setOrderDiscount(this.value)" placeholder="Max 15" class="w-12 px-1 py-1 rounded bg-white border border-slate-300 text-center font-extrabold tabular-nums" />
+                <input type="number" min="0" max="15" step="0.5" id="customDiscInput" oninput="setOrderDiscount(this.value)" placeholder="Max 15" class="w-12 px-1 py-1 rounded bg-white border border-slate-300 text-center font-extrabold tabular-nums focus:outline-none focus:ring-2 focus:ring-rose-500" />
               </div>
               <div class="flex items-center gap-1">
                 <span class="text-slate-500">Tip ₹:</span>
-                <input type="number" min="0" id="orderTipInput" oninput="updateOrderTip(this.value)" placeholder="0" class="w-12 px-1 py-1 rounded bg-white border border-slate-300 text-right font-extrabold tabular-nums" />
-                <select id="orderTipStaffSelect" onchange="updateOrderMeta()" class="px-1 py-1 rounded bg-white border border-slate-300 text-[10px] font-bold max-w-[92px]"></select>
+                <input type="number" min="0" id="orderTipInput" oninput="updateOrderTip(this.value)" placeholder="0" class="w-12 px-1 py-1 rounded bg-white border border-slate-300 text-right font-extrabold tabular-nums focus:outline-none focus:ring-2 focus:ring-amber-400" />
+                <div class="relative">
+                  <select id="orderTipStaffSelect" onchange="updateOrderMeta()" class="appearance-none pl-2 pr-5 py-1 rounded-lg bg-white border border-slate-300 text-slate-800 text-[10px] font-extrabold max-w-[112px] focus:outline-none focus:ring-2 focus:ring-amber-400 cursor-pointer"></select>
+                  <svg class="w-3 h-3 text-slate-500 pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                </div>
               </div>
             </div>
 
@@ -615,7 +625,7 @@
     </div>
   </div>
 
-  <!-- 2. SHEET-DRIVEN VARIANT SELECTOR MODAL (Shown ONLY when Variant1/Variant2 is filled in Google Sheets) -->
+  <!-- 2. SHEET-DRIVEN VARIANT SELECTOR MODAL -->
   <div id="variantPickerModal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-[78] hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-sm w-full p-5 space-y-3.5 shadow-2xl">
       <div class="flex justify-between items-center border-b border-slate-100 pb-2">
@@ -831,7 +841,7 @@
     </div>
   </div>
 
-  <!-- 9. MENU ITEM ADD / EDIT MODAL (With Availability & Optional Sheet Variants) -->
+  <!-- 9. MENU ITEM ADD / EDIT MODAL -->
   <div id="menuItemModal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-[75] hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-sm w-full p-5 space-y-3 shadow-2xl max-h-[90vh] overflow-y-auto">
       <div class="flex justify-between items-center">
@@ -1032,7 +1042,6 @@
       </button>
     </div>
   </div>
-
   <script>
     // ============================================================
     // 1. LIVE CONNECTED APPS SCRIPT URLS
@@ -1041,7 +1050,7 @@
     const DEFAULT_ERP_BRIDGE_URL = "https://script.google.com/macros/s/AKfycbyi6CUoUYgRzABSnQIsnjl6EeEs_WxnP3hHmLUYQrlvMpFZvtT-LljrxMT1mZtT-V4j/exec";
 
     // ============================================================
-    // 2. YOUR EXACT 135 MENU ITEMS FROM EXCEL (Sorted Veg -> Non-Veg)
+    // 2. SPICY KINGDOM MENU CATALOG (Sorted Veg -> Non-Veg)
     // ============================================================
     const SPICY_KINGDOM_MENU = [
       {"code":"101","name":"Coca Cola (170 ML)","category":"Beverages","price":15,"diet":"VEG"},
@@ -1272,7 +1281,6 @@
       setTimeout(() => t.classList.add("hidden"), 3000);
     }
 
-    // Balanced 16px FSSAI Dietary Badges (Not too big, clear color coding)
     function getDietBadgeHtml(diet) {
       if (diet === "VEG") {
         return `<span class="w-4 h-4 border-2 border-emerald-600 rounded-xs flex items-center justify-center shrink-0 bg-white" title="Pure Veg">
@@ -1345,7 +1353,6 @@
         await syncFromCloud(false);
       }
 
-      // Gentle 45s background sync (paused when Settings modal is open)
       setInterval(() => {
         if (currentPosUser && document.getElementById("settingsModal").classList.contains("hidden")) {
           syncFromCloud(false);
@@ -1354,7 +1361,7 @@
     };
 
     // ============================================================
-    // 3. ROLE-BASED 6-DIGIT PIN LOGIN & LIVE EMPLOYEE LIST
+    // 3. ROLE-BASED 6-DIGIT PIN LOGIN & TIP-ELIGIBLE STAFF (Excl. Owner & IT Admin)
     // ============================================================
     function updatePosPinDots() {
       document.querySelectorAll(".p-dot").forEach((d, i) => {
@@ -1430,29 +1437,45 @@
       showPosToast("Logged Out");
     }
 
-    function getRealEmployeeNames() {
+    // Excludes Owner & IT Admin from Tip Pool Dropdown & Equal Tip Distribution
+    function getTipEligibleStaff() {
+      const excludedNames = new Set();
+      if (Array.isArray(cloudUsers)) {
+        cloudUsers.forEach(u => {
+          if (u.Role === "Owner" || u.Role === "IT Admin") {
+            excludedNames.add(String(u.Name || "").trim().toLowerCase());
+          }
+        });
+      }
+      excludedNames.add("mc naik");
+      excludedNames.add("p bhanu prakash");
+
       let names = [];
       if (erpSnapshot && Array.isArray(erpSnapshot.employees)) {
         erpSnapshot.employees.filter(e => e.Status === "Active").forEach(e => {
-          if (e.Name) names.push(e.Name);
+          const n = String(e.Name || "").trim();
+          const r = String(e.Role || "").trim();
+          if (n && r !== "Owner" && r !== "IT Admin" && !excludedNames.has(n.toLowerCase())) {
+            names.push(n);
+          }
         });
       }
       if (Array.isArray(cloudUsers)) {
         cloudUsers.forEach(u => {
-          if (u.Name && !names.includes(u.Name)) names.push(u.Name);
+          const n = String(u.Name || "").trim();
+          if (n && u.Role !== "Owner" && u.Role !== "IT Admin" && !excludedNames.has(n.toLowerCase()) && !names.includes(n)) {
+            names.push(n);
+          }
         });
       }
-      if (currentPosUser && currentPosUser.name && !names.includes(currentPosUser.name)) {
-        names.unshift(currentPosUser.name);
-      }
-      return names.length > 0 ? names : ["Counter Staff"];
+      return names.length > 0 ? names : ["Floor Staff"];
     }
 
     function populateEmployeeDropdowns() {
-      const staff = getRealEmployeeNames();
+      const tipStaff = getTipEligibleStaff();
       const tipEl = document.getElementById("orderTipStaffSelect");
       if (tipEl) {
-        tipEl.innerHTML = `<option value="Pool / All Staff">Pool (All Staff)</option>` + staff.map(n => `<option value="${n}">${n}</option>`).join("");
+        tipEl.innerHTML = `<option value="Pool / All Staff">Pool (All Staff)</option>` + tipStaff.map(n => `<option value="${n}">${n}</option>`).join("");
       }
     }
 
@@ -1491,7 +1514,6 @@
         if (res.status === "success") {
           if (res.users && res.users.length > 0) cloudUsers = res.users;
 
-          // Sync Settings directly from POS_Settings sheet (Mobile No, UPI ID, Logo, GST toggles)
           if (Array.isArray(res.settings) && res.settings.length > 0) {
             res.settings.forEach(row => {
               const k = String(row.Key || "").trim();
@@ -1505,12 +1527,10 @@
             document.getElementById("headerRestoName").textContent = posState.settings.restoName || "SPICY KINGDOM";
           }
 
-          // Exact Session Counter sync (Resets cleanly to #1 when POS_Sessions is cleared)
           if (typeof res.totalSessionsCount === "number") {
             posState.sessionCounter = res.totalSessionsCount + 1;
           }
 
-          // Sync Menu, Availability & Optional Sheet Variants (Variant1Label/Price, Variant2Label/Price)
           if (Array.isArray(res.menu) && res.menu.length > 0) {
             posState.menu = res.menu.map(m => {
               let variants = [];
@@ -1606,7 +1626,7 @@
     }
 
     // ============================================================
-    // 4. AUTO-SYNCED SESSION OPENING / CLOSING REGISTER + Z-REPORT & X-REPORT
+    // 4. SESSION OPENING / CLOSING REGISTER + Z-REPORT & X-REPORT
     // ============================================================
     function getLiveOpsCashBoxBalance() {
       if (erpSnapshot && Array.isArray(erpSnapshot.funds)) {
@@ -2246,7 +2266,6 @@
       }).join("");
     }
 
-    // Clean Non-Overlapping Menu Cards (Desktop) + Horizontal List (Mobile) + Sheet-Driven Variants
     function renderPosMenu() {
       const q = document.getElementById("posMenuSearch").value.toLowerCase().trim();
       const order = getActiveOrderObj();
@@ -2307,7 +2326,6 @@
       if (m.available === false) {
         return showPosToast(`"${m.name}" is currently marked Sold Out!`, true);
       }
-      // Show variant popup ONLY if Variant1/Variant2 is filled in Google Sheets
       if (Array.isArray(m.variants) && m.variants.length > 0) {
         document.getElementById("vpDishName").textContent = m.name;
         document.getElementById("vpOptionsGrid").innerHTML = m.variants.map(v => `
@@ -2778,7 +2796,6 @@
       window.open(`https://wa.me/${formattedPhone}?text=${encodeURIComponent(msg)}`, "_blank");
     }
 
-    // Strict Register Open Guard before opening Settlement Modal
     function openSettleModal() {
       if (!posState.activeSession) {
         openSessionRegisterModal();
@@ -2926,7 +2943,7 @@
     }
 
     // ============================================================
-    // 8. CUSTOMER CRM, MENU MANAGER (Direct Cloud Save), REPORTS & DASHBOARD
+    // 8. CUSTOMER CRM, MENU MANAGER, REPORTS & DASHBOARD
     // ============================================================
     function setCrmFilter(f) {
       crmFilter = f;
@@ -3198,12 +3215,12 @@
     function openTipsSplitModal() {
       const totalTips = posState.invoices.reduce((s, i) => s + (Number(i.tip) || 0), 0);
       if (totalTips <= 0) return showPosToast("No accumulated tips to distribute.", true);
-      const staff = getRealEmployeeNames();
+      const staff = getTipEligibleStaff();
       const perHead = Math.round((totalTips / staff.length) * 100) / 100;
       openThemedConfirm(
         "Equal Worker Tip Distribution",
-        `Cumulative Tips Collected: ₹${totalTips.toFixed(2)}\nActive Staff (${staff.length}): ${staff.join(", ")}\n\nEach Employee Share: ₹${perHead.toFixed(2)}`,
-        () => showPosToast(`Calculated ₹${perHead.toFixed(2)} per employee!`)
+        `Cumulative Tips Collected: ₹${totalTips.toFixed(2)}\nEligible Staff (${staff.length} • Excl. Owner & IT Admin):\n${staff.join(", ")}\n\nEach Worker Share: ₹${perHead.toFixed(2)}`,
+        () => showPosToast(`Calculated ₹${perHead.toFixed(2)} per eligible worker!`)
       );
     }
 
@@ -3292,7 +3309,7 @@
     }
 
     // ============================================================
-    // 10. SHIFT/MERGE TABLES, SETTINGS (Synced with POS_Settings) & DASHBOARD
+    // 10. SHIFT/MERGE TABLES, SETTINGS & DASHBOARD
     // ============================================================
     function openShiftTableModal() {
       const cur = getActiveOrderObj();
@@ -3564,3 +3581,4 @@
   </script>
 </body>
 </html>
+  
