@@ -28,19 +28,28 @@ jobs:
           mkdir -p www assets
           cp index.html www/index.html
 
-          # 1. Download your logo if assets/icon.png is not uploaded in the repo
+          # 1. Initialize Capacitor & install sharp for reliable 1024x1024 icon generation
+          npm init -y
+          npm install @capacitor/core@6 @capacitor/cli@6 @capacitor/android@6 @capacitor/assets sharp
+
+          # 2. Download your logo & pad onto a 1024x1024 square canvas using sharp
           if [ ! -f "assets/icon.png" ]; then
             curl -L -s "https://i.ibb.co/Gf35mFfm/spicy-kingdom-black-transparent.png" -o raw_logo.png
-            # Pad rectangular logo onto a 1024x1024 square canvas with 15% safe margin so Android never crops it
-            convert raw_logo.png -resize 780x780 -background "#FFF7ED" -gravity center -extent 1024x1024 assets/icon-only.png
-            cp assets/icon-only.png assets/icon.png
+            node -e '
+              const sharp = require("sharp");
+              sharp("raw_logo.png")
+                .resize(780, 780, { fit: "inside" })
+                .extend({ top: 122, bottom: 122, left: 122, right: 122, background: "#FFF7ED" })
+                .resize(1024, 1024, { fit: "contain", background: "#FFF7ED" })
+                .png()
+                .toFile("assets/icon-only.png")
+                .then(() => require("fs").copyFileSync("assets/icon-only.png", "assets/icon.png"));
+            '
           else
-            convert assets/icon.png -resize 1024x1024 -background "#FFF7ED" -gravity center -extent 1024x1024 assets/icon-only.png
+            cp assets/icon.png assets/icon-only.png
           fi
 
-          # 2. Initialize Capacitor & Live GitHub Pages URL Wrapper
-          npm init -y
-          npm install @capacitor/core@6 @capacitor/cli@6 @capacitor/android@6 @capacitor/assets
+          # 3. Initialize Capacitor with your live GitHub Pages URL
           npx cap init "Spicy Kingdom POS" "com.spicykingdom.pos" --web-dir www
 
           cat << 'EOF' > capacitor.config.json
@@ -49,7 +58,7 @@ jobs:
             "appName": "Spicy Kingdom POS",
             "webDir": "www",
             "server": {
-              "url": "https://ipbp.github.io/spicykingdom.github.io/",
+              "url": "https://spicykingdom.github.io/",
               "cleartext": true,
               "androidScheme": "https"
             }
@@ -58,10 +67,10 @@ jobs:
 
           npx cap add android
 
-          # 3. Generate All Android Mipmap & Adaptive Launcher Icons
+          # 4. Generate Custom Android App Icons
           npx capacitor-assets generate --android --iconBackgroundColor '#FFF7ED'
 
-          # 4. Enable HTTPS/Cleartext & Rose Status Bar
+          # 5. Allow HTTPS/Cleartext & set Rose Status Bar
           MANIFEST="android/app/src/main/AndroidManifest.xml"
           sed -i 's/<application/<application android:usesCleartextTraffic="true"/' "$MANIFEST"
 
@@ -70,7 +79,7 @@ jobs:
             sed -i 's/super.onCreate(savedInstanceState);/super.onCreate(savedInstanceState); getWindow().setStatusBarColor(android.graphics.Color.parseColor("#E11D48"));/' "$MAIN_ACT"
           fi
 
-          # 5. Sync & Compile APK
+          # 6. Sync & Compile APK
           npx cap sync android
           cd android
           chmod +x gradlew
