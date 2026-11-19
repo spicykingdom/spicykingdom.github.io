@@ -10,6 +10,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     body {
@@ -44,22 +45,77 @@
     .shimmer-bar { animation: shimmer 1.4s infinite linear; }
 
     @media print {
-      body * { visibility: hidden !important; }
-      #thermalPrintArea, #thermalPrintArea * { visibility: visible !important; }
-      #thermalPrintArea {
-        position: fixed !important;
-        left: 0 !important;
-        top: 0 !important;
-        width: 76mm !important;
+      html, body {
+        width: 72mm !important;
+        height: auto !important;
+        min-height: 0 !important;
         margin: 0 !important;
-        padding: 2mm !important;
+        padding: 0 !important;
+        background: #FFFFFF !important;
+        overflow: visible !important;
+      }
+      body > *:not(#receiptModal) {
+        display: none !important;
+      }
+      #receiptModal {
+        position: static !important;
+        inset: auto !important;
+        display: block !important;
+        width: 72mm !important;
+        height: auto !important;
+        max-height: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        background: #FFFFFF !important;
+        box-shadow: none !important;
+        overflow: visible !important;
+      }
+      #receiptModal > div {
+        display: block !important;
+        width: 72mm !important;
+        max-width: 72mm !important;
+        max-height: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        box-shadow: none !important;
+        border: none !important;
+        overflow: visible !important;
+      }
+      #receiptModal > div > :not(#receiptScrollWrap) {
+        display: none !important;
+      }
+      #receiptScrollWrap {
+        display: block !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        background: #FFFFFF !important;
+        overflow: visible !important;
+      }
+      #thermalPrintArea {
+        position: static !important;
+        width: 68mm !important;
+        max-width: 68mm !important;
+        box-sizing: border-box !important;
+        margin: 0 auto !important;
+        padding: 1mm 1.5mm !important;
         background: #FFFFFF !important;
         color: #000000 !important;
-        font-family: 'Courier New', Courier, monospace !important;
+        font-family: 'Consolas', 'DejaVu Sans Mono', 'Courier New', monospace !important;
         font-size: 11px !important;
+        font-weight: 700 !important;
+        line-height: 1.3 !important;
         box-shadow: none !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
       }
-      @page { size: 80mm auto; margin: 0; }
+      #thermalPrintArea * {
+        color: #000000 !important;
+        box-sizing: border-box !important;
+      }
+      @page {
+        size: 80mm auto;
+        margin: 0;
+      }
     }
   </style>
 </head>
@@ -677,8 +733,8 @@
         <button onclick="togglePosModal('receiptModal')" class="text-2xl text-slate-400 leading-none">&times;</button>
       </div>
 
-      <div class="overflow-y-auto flex-1 bg-slate-100 p-3 rounded-xl flex justify-center">
-        <div id="thermalPrintArea" class="bg-white text-black w-[76mm] p-3 shadow-sm font-mono text-[11px] leading-snug"></div>
+      <div id="receiptScrollWrap" class="overflow-y-auto flex-1 bg-slate-100 p-3 rounded-xl flex justify-center">
+        <div id="thermalPrintArea" class="bg-white text-black w-[68mm] p-2.5 shadow-sm font-mono text-[11px] font-bold leading-snug"></div>
       </div>
 
       <div class="flex flex-wrap gap-2">
@@ -1220,11 +1276,25 @@
 
     function createInitialTables() {
       const list = [];
-      for (let i = 1; i <= 15; i++) {
-        const sec = i <= 6 ? "Main Dining" : i <= 11 ? "AC Hall" : "Family / Rooftop";
+      // Section 1: Main Dining — Table 1-5 (6 Pax), Table 6-9 (4 Pax), Table 10-11 (3 Pax), Table 12 (12 Pax)
+      const mainDiningPax = {
+        1: 6, 2: 6, 3: 6, 4: 6, 5: 6,
+        6: 4, 7: 4, 8: 4, 9: 4,
+        10: 3, 11: 3, 12: 12
+      };
+      for (let i = 1; i <= 12; i++) {
         list.push({
-          id: `T${i}`, baseTable: `T${i}`, label: `T${i}`, section: sec,
-          pax: i % 3 === 0 ? 6 : 4, status: "VACANT", orderNo: "",
+          id: `T${i}`, baseTable: `T${i}`, label: `Table ${i}`, section: "Main Dining",
+          pax: mainDiningPax[i], status: "VACANT", orderNo: "",
+          startedAt: null, waiter: "", customerName: "", customerPhone: "", customerType: "Local",
+          discountPct: 0, tipAmt: 0, tipStaff: "Pool / All Staff", items: []
+        });
+      }
+      // Section 2: Daba — Table 1-9 (All 4 Pax)
+      for (let j = 1; j <= 9; j++) {
+        list.push({
+          id: `D${j}`, baseTable: `D${j}`, label: `Table ${j}`, section: "Daba",
+          pax: 4, status: "VACANT", orderNo: "",
           startedAt: null, waiter: "", customerName: "", customerPhone: "", customerType: "Local",
           discountPct: 0, tipAmt: 0, tipStaff: "Pool / All Staff", items: []
         });
@@ -1249,7 +1319,7 @@
         posApiUrl: DEFAULT_POS_API_URL,
         erpBridgeUrl: DEFAULT_ERP_BRIDGE_URL
       },
-      sections: ["Main Dining", "AC Hall", "Family / Rooftop"],
+      sections: ["Main Dining", "Daba"],
       menu: SPICY_KINGDOM_MENU,
       tables: createInitialTables(),
       channelOrders: [],
@@ -1263,8 +1333,20 @@
       proformaPrintCount: 0,
       orderCounter: 1001,
       invoiceCounter: 1001,
-      kotCounter: 101
+      kotCounter: 101,
+      tableLayoutV2Applied: true
     };
+
+    // Migrate cached floor sections/tables once if all tables are currently vacant
+    if (!posState.tableLayoutV2Applied) {
+      const hasOccupied = Array.isArray(posState.tables) && posState.tables.some(t => t.status !== "VACANT");
+      if (!hasOccupied) {
+        posState.sections = ["Main Dining", "Daba"];
+        posState.tables = createInitialTables();
+      }
+      posState.tableLayoutV2Applied = true;
+      localStorage.setItem("sk_pos_state_v6", JSON.stringify(posState));
+    }
 
     let posPinBuffer = "";
     let currentPosUser = JSON.parse(localStorage.getItem("sk_pos_user") || "null");
@@ -1879,53 +1961,102 @@
       const st = getSessionStats(sess);
       const bd = buildCategoryBreakdown(st.sInvs);
       const s = posState.settings;
-      const logoHtml = s.logoDataUrl ? `<img src="${s.logoDataUrl}" style="max-height:48px; margin:0 auto 4px auto; display:block;" />` : `<div style="font-size:15px; font-weight:bold;">${s.restoName}</div>`;
+      const logoHtml = s.logoDataUrl
+        ? `<img src="${s.logoDataUrl}" style="max-height:46px; max-width:58mm; margin:0 auto 4px auto; display:block;" />`
+        : `<div style="font-size:15px; font-weight:900; color:#000;">${s.restoName}</div>`;
 
       document.getElementById("receiptModalTitle").textContent = `80mm Z-Report (${sess.sessionId})`;
       document.getElementById("whatsappReceiptBtn").classList.add("hidden");
 
       const catBlocks = Object.entries(bd.catMap).map(([cat, info]) => `
         <div style="margin-top:6px;">
-          <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:12px;">
-            <span>${info.qty}x ${cat}</span><span>₹ ${info.amount.toFixed(2)}</span>
+          <div style="display:flex; justify-content:space-between; font-weight:900; font-size:11px; color:#000;">
+            <span>${info.qty}x ${cat}</span><span>₹${info.amount.toFixed(2)}</span>
           </div>
           ${Object.entries(info.dishes).map(([dName, dInfo]) => `
-            <div style="display:flex; justify-content:space-between; font-size:10px; padding-left:4px;">
-              <span>${dInfo.qty}x ${dName}</span><span>₹ ${dInfo.amount.toFixed(2)}</span>
+            <div style="display:flex; justify-content:space-between; font-size:10px; font-weight:800; padding-left:4px; color:#000;">
+              <span style="max-width:44mm; word-wrap:break-word;">${dInfo.qty}x ${dName}</span><span>₹${dInfo.amount.toFixed(2)}</span>
             </div>
           `).join("")}
         </div>
       `).join("");
 
       document.getElementById("thermalPrintArea").innerHTML = `
-        <div style="text-align:center;">
+        <div style="text-align:center; color:#000; font-weight:800;">
           ${logoHtml}
-          <div style="font-size:15px; font-weight:bold; margin-top:4px;">Z Report</div>
-          <div style="font-size:13px; font-weight:bold;">SOLD:</div>
+          <div style="font-size:14px; font-weight:900; margin-top:3px;">Z REPORT</div>
+          <div style="font-size:12px; font-weight:900;">SOLD:</div>
         </div>
-        ${catBlocks || `<div style="text-align:center; padding:8px 0;">No items sold in session</div>`}
-        <div style="border-top:1px dashed #000; margin-top:8px; padding-top:4px;">
-          <div style="text-align:center; font-weight:bold; font-size:13px;">PAYMENTS:</div>
-          <div style="display:flex; justify-content:space-between;"><span>Cash ${sess.sessionId}</span><span>₹ ${st.cashSales.toFixed(2)}</span></div>
-          <div style="display:flex; justify-content:space-between;"><span>Digital/UPI ${sess.sessionId}</span><span>₹ ${st.digitalSales.toFixed(2)}</span></div>
+        ${catBlocks || `<div style="text-align:center; padding:6px 0; font-weight:800; color:#000;">No items sold in session</div>`}
+        <div style="border-top:1.5px dashed #000; margin-top:6px; padding-top:4px; font-weight:800; font-size:10.5px; color:#000;">
+          <div style="text-align:center; font-weight:900; font-size:12px;">PAYMENTS:</div>
+          <div style="display:flex; justify-content:space-between;"><span>Cash ${sess.sessionId}</span><span>₹${st.cashSales.toFixed(2)}</span></div>
+          <div style="display:flex; justify-content:space-between;"><span>Digital/UPI ${sess.sessionId}</span><span>₹${st.digitalSales.toFixed(2)}</span></div>
         </div>
-        <div style="border-top:1px dashed #000; margin-top:6px; padding-top:4px;">
-          <div style="text-align:center; font-weight:bold; font-size:13px;">TAXES:</div>
-          <div style="display:flex; justify-content:space-between;"><span>CGST (2.5%)</span><span>₹ ${bd.totalCgst.toFixed(2)}</span></div>
-          <div style="display:flex; justify-content:space-between;"><span>SGST (2.5%)</span><span>₹ ${bd.totalSgst.toFixed(2)}</span></div>
+        <div style="border-top:1.5px dashed #000; margin-top:5px; padding-top:4px; font-weight:800; font-size:10.5px; color:#000;">
+          <div style="text-align:center; font-weight:900; font-size:12px;">TAXES:</div>
+          <div style="display:flex; justify-content:space-between;"><span>CGST (2.5%)</span><span>₹${bd.totalCgst.toFixed(2)}</span></div>
+          <div style="display:flex; justify-content:space-between;"><span>SGST (2.5%)</span><span>₹${bd.totalSgst.toFixed(2)}</span></div>
         </div>
-        <div style="border-top:1px dashed #000; margin-top:6px; padding-top:4px;">
-          <div style="text-align:center; font-weight:bold; font-size:14px;">TOTAL:</div>
-          <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:13px;"><span>Total paid</span><span>₹ ${bd.totalSales.toFixed(2)}</span></div>
-          <div style="display:flex; justify-content:space-between; font-size:10px;"><span>Expected Drawer Cash</span><span>₹ ${st.expectedCash.toFixed(2)}</span></div>
+        <div style="border-top:1.5px dashed #000; margin-top:5px; padding-top:4px; color:#000;">
+          <div style="text-align:center; font-weight:900; font-size:13px;">TOTAL:</div>
+          <div style="display:flex; justify-content:space-between; font-weight:900; font-size:12.5px;"><span>Total paid</span><span>₹${bd.totalSales.toFixed(2)}</span></div>
+          <div style="display:flex; justify-content:space-between; font-size:10px; font-weight:800;"><span>Expected Drawer Cash</span><span>₹${st.expectedCash.toFixed(2)}</span></div>
         </div>
-        <div style="border-top:1px dashed #000; margin-top:8px; padding-top:6px; font-size:10px; display:flex; justify-content:space-between;">
-          <div>${s.restoAddress}</div>
-          <div style="text-align:right;">Tel: ${s.restoPhone}<br>${s.restoEmail || ""}</div>
+        <div style="border-top:1.5px dashed #000; margin-top:6px; padding-top:5px; font-size:9.5px; font-weight:800; color:#000;">
+          <div style="word-wrap:break-word;">${s.restoAddress}</div>
+          <div>Tel: ${s.restoPhone}${s.restoEmail ? ` • ${s.restoEmail}` : ""}</div>
+          <div style="margin-top:3px;">${new Date().toLocaleString()}</div>
         </div>
-        <div style="font-size:10px; margin-top:4px;">${new Date().toLocaleString()}</div>
       `;
       togglePosModal("receiptModal");
+    }
+
+    function downloadHtmlAsDirectPdf(htmlContent, filename) {
+      const container = document.createElement("div");
+      container.style.position = "fixed";
+      container.style.left = "-9999px";
+      container.style.top = "0";
+      container.style.width = "780px";
+      container.style.background = "#FFFFFF";
+      container.innerHTML = htmlContent;
+      document.body.appendChild(container);
+
+      const finishCleanup = () => {
+        if (container && container.parentNode) container.parentNode.removeChild(container);
+      };
+
+      if (typeof html2pdf !== "undefined") {
+        html2pdf()
+          .set({
+            margin: 10,
+            filename: filename,
+            image: { type: "jpeg", quality: 0.98 },
+            html2canvas: { scale: 2, useCORS: true },
+            jsPDF: { unit: "mm", format: "a4", orientation: "portrait" }
+          })
+          .from(container)
+          .save()
+          .then(() => {
+            finishCleanup();
+            showPosToast(`Downloaded ${filename}`);
+          })
+          .catch(() => {
+            finishCleanup();
+            showPosToast("PDF export failed", true);
+          });
+      } else {
+        // Fallback Blob download if CDN offline
+        const blob = new Blob([htmlContent], { type: "text/html" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = filename.replace(/\.pdf$/i, ".html");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        finishCleanup();
+        showPosToast("Report file downloaded!");
+      }
     }
 
     function printDailySalesReportX(period = "DAILY") {
@@ -1945,53 +2076,44 @@
       const st = getSessionStats(sess);
       const s = posState.settings;
 
-      const win = window.open("", "_blank");
-      win.document.write(`
-        <html><head><title>Daily Sales Report X — ${s.restoName}</title>
-        <style>
-          body { font-family: Arial, sans-serif; padding: 28px; color: #111; font-size: 13px; }
-          h1 { margin: 0; font-size: 22px; }
-          h2 { margin: 18px 0 6px; font-size: 16px; border-bottom: 2px solid #000; padding-bottom: 4px; }
-          table { width: 100%; border-collapse: collapse; margin-top: 8px; }
-          td, th { padding: 6px 4px; border-bottom: 1px solid #e2e8f0; text-align: left; }
-          .cat-row td { font-weight: bold; background: #f8fafc; padding-top: 10px; }
-          .num { text-align: right; font-variant-numeric: tabular-nums; }
-        </style></head><body>
-        <h1>${s.restoName}</h1>
-        <p style="margin:2px 0;">${s.restoAddress}<br>Tel: ${s.restoPhone} • ${s.restoEmail || ""}</p>
-        <h2>Daily Sales Report X (${period})</h2>
-        <p><strong>Session ID:</strong> ${sess.sessionId}<br>
-        <strong>Opening Date:</strong> ${new Date(sess.openedAt).toLocaleString()}<br>
-        <strong>Generated As Of:</strong> ${now.toLocaleString()}</p>
+      const htmlBody = `
+        <div style="font-family: Arial, sans-serif; padding: 20px; color: #000; font-size: 13px; background: #fff;">
+          <h1 style="margin: 0; font-size: 22px; font-weight: 900;">${s.restoName}</h1>
+          <p style="margin: 4px 0; font-weight: 600;">${s.restoAddress}<br>Tel: ${s.restoPhone} • ${s.restoEmail || ""}</p>
+          <h2 style="margin: 16px 0 6px; font-size: 16px; border-bottom: 2px solid #000; padding-bottom: 4px;">Daily Sales Report X (${period})</h2>
+          <p><strong>Session ID:</strong> ${sess.sessionId}<br>
+          <strong>Opening Date:</strong> ${new Date(sess.openedAt).toLocaleString()}<br>
+          <strong>Generated As Of:</strong> ${now.toLocaleString()}</p>
 
-        <h2>Sales Breakdown</h2>
-        <table>
-          <thead><tr><th>Category / Item</th><th class="num">Qty</th><th class="num">Amount (₹)</th></tr></thead>
-          <tbody>
-            ${Object.entries(bd.catMap).map(([cat, info]) => `
-              <tr class="cat-row"><td>${cat}</td><td class="num">${info.qty.toFixed(1)}</td><td class="num">${info.amount.toFixed(2)}</td></tr>
-              ${Object.entries(info.dishes).map(([dName, dInfo]) => `
-                <tr><td style="padding-left:18px;">${dName}</td><td class="num">${dInfo.qty.toFixed(1)}</td><td class="num">${dInfo.amount.toFixed(2)}</td></tr>
+          <h2 style="margin: 16px 0 6px; font-size: 16px; border-bottom: 2px solid #000; padding-bottom: 4px;">Sales Breakdown</h2>
+          <table style="width: 100%; border-collapse: collapse; margin-top: 8px;">
+            <thead><tr><th style="padding:6px 4px; border-bottom:1.5px solid #000; text-align:left;">Category / Item</th><th style="padding:6px 4px; border-bottom:1.5px solid #000; text-align:right;">Qty</th><th style="padding:6px 4px; border-bottom:1.5px solid #000; text-align:right;">Amount (₹)</th></tr></thead>
+            <tbody>
+              ${Object.entries(bd.catMap).map(([cat, info]) => `
+                <tr style="font-weight:bold; background:#f8fafc;"><td style="padding:7px 4px; border-bottom:1px solid #cbd5e1;">${cat}</td><td style="padding:7px 4px; border-bottom:1px solid #cbd5e1; text-align:right;">${info.qty.toFixed(1)}</td><td style="padding:7px 4px; border-bottom:1px solid #cbd5e1; text-align:right;">${info.amount.toFixed(2)}</td></tr>
+                ${Object.entries(info.dishes).map(([dName, dInfo]) => `
+                  <tr><td style="padding:5px 4px 5px 18px; border-bottom:1px solid #e2e8f0;">${dName}</td><td style="padding:5px 4px; border-bottom:1px solid #e2e8f0; text-align:right;">${dInfo.qty.toFixed(1)}</td><td style="padding:5px 4px; border-bottom:1px solid #e2e8f0; text-align:right;">${dInfo.amount.toFixed(2)}</td></tr>
+                `).join("")}
               `).join("")}
-            `).join("")}
-            <tr class="cat-row"><td>Total Sales</td><td class="num">${bd.totalQty.toFixed(1)}</td><td class="num">₹${bd.totalSales.toFixed(2)}</td></tr>
-          </tbody>
-        </table>
+              <tr style="font-weight:900; background:#f1f5f9;"><td style="padding:8px 4px; border-top:1.5px solid #000;">Total Sales</td><td style="padding:8px 4px; border-top:1.5px solid #000; text-align:right;">${bd.totalQty.toFixed(1)}</td><td style="padding:8px 4px; border-top:1.5px solid #000; text-align:right;">₹${bd.totalSales.toFixed(2)}</td></tr>
+            </tbody>
+          </table>
 
-        <h2>Payments & Taxes</h2>
-        <table>
-          <tr><td>Cash (${sess.sessionId})</td><td class="num">₹${st.cashSales.toFixed(2)}</td></tr>
-          <tr><td>Digital / UPI / Card (${sess.sessionId})</td><td class="num">₹${st.digitalSales.toFixed(2)}</td></tr>
-          <tr><td>CGST (2.5%) + SGST (2.5%)</td><td class="num">₹${(bd.totalCgst + bd.totalSgst).toFixed(2)}</td></tr>
-          <tr class="cat-row"><td>Total Collected</td><td class="num">₹${bd.totalSales.toFixed(2)}</td></tr>
-        </table>
+          <h2 style="margin: 16px 0 6px; font-size: 16px; border-bottom: 2px solid #000; padding-bottom: 4px;">Payments & Taxes</h2>
+          <table style="width: 100%; border-collapse: collapse; margin-top: 8px;">
+            <tr><td style="padding:6px 4px; border-bottom:1px solid #e2e8f0;">Cash (${sess.sessionId})</td><td style="padding:6px 4px; border-bottom:1px solid #e2e8f0; text-align:right;">₹${st.cashSales.toFixed(2)}</td></tr>
+            <tr><td style="padding:6px 4px; border-bottom:1px solid #e2e8f0;">Digital / UPI / Card (${sess.sessionId})</td><td style="padding:6px 4px; border-bottom:1px solid #e2e8f0; text-align:right;">₹${st.digitalSales.toFixed(2)}</td></tr>
+            <tr><td style="padding:6px 4px; border-bottom:1px solid #e2e8f0;">CGST (2.5%) + SGST (2.5%)</td><td style="padding:6px 4px; border-bottom:1px solid #e2e8f0; text-align:right;">₹${(bd.totalCgst + bd.totalSgst).toFixed(2)}</td></tr>
+            <tr style="font-weight:900; background:#f1f5f9;"><td style="padding:8px 4px;">Total Collected</td><td style="padding:8px 4px; text-align:right;">₹${bd.totalSales.toFixed(2)}</td></tr>
+          </table>
 
-        <h2>Discounts & Session Control</h2>
-        <p>Number of discounts: ${bd.discCount} • Amount of discounts: ₹${bd.totalDisc.toFixed(2)}<br>
-        Number of transactions: ${invs.length} • Expected Cash in Drawer: <strong>₹${st.expectedCash.toFixed(2)}</strong></p>
-        <script>window.print();<\/script></body></html>
-      `);
-      win.document.close();
+          <h2 style="margin: 16px 0 6px; font-size: 16px; border-bottom: 2px solid #000; padding-bottom: 4px;">Discounts & Session Control</h2>
+          <p>Number of discounts: ${bd.discCount} • Amount of discounts: ₹${bd.totalDisc.toFixed(2)}<br>
+          Number of transactions: ${invs.length} • Expected Cash in Drawer: <strong>₹${st.expectedCash.toFixed(2)}</strong></p>
+        </div>
+      `;
+
+      downloadHtmlAsDirectPdf(htmlBody, `SpicyKingdom_Daily_X_Report_${period}_${todayStr}.pdf`);
     }
 
     // ============================================================
@@ -2026,9 +2148,9 @@
 
     function openAddTableModal() {
       document.getElementById("newTableSection").innerHTML = posState.sections.map(s => `<option value="${s}">${s}</option>`).join("");
-      const nums = posState.tables.map(t => parseInt(String(t.baseTable).replace(/\D/g, ""), 10)).filter(n => !isNaN(n));
+      const nums = posState.tables.map(t => parseInt(String(t.label).replace(/\D/g, ""), 10)).filter(n => !isNaN(n));
       const nextNum = nums.length > 0 ? Math.max(...nums) + 1 : 1;
-      document.getElementById("newTableName").value = `T${nextNum}`;
+      document.getElementById("newTableName").value = `Table ${nextNum}`;
       document.getElementById("newTablePax").value = 4;
       togglePosModal("addTableModal");
     }
@@ -2039,20 +2161,23 @@
       const pax = Number(document.getElementById("newTablePax").value) || 4;
       if (!name) return showPosToast("Enter table label", true);
 
-      const existing = posState.tables.find(t => t.id.toLowerCase() === name.toLowerCase() || t.baseTable.toLowerCase() === name.toLowerCase());
+      const existing = posState.tables.find(t =>
+        t.section === sec && (t.label.toLowerCase() === name.toLowerCase() || t.id.toLowerCase() === name.toLowerCase())
+      );
       if (existing) {
-        posState.tables.filter(t => t.baseTable.toLowerCase() === existing.baseTable.toLowerCase()).forEach(t => {
+        posState.tables.filter(t => t.baseTable === existing.baseTable).forEach(t => {
           t.pax = pax;
           t.section = sec;
         });
         saveState();
         togglePosModal("addTableModal");
         renderFloor();
-        return showPosToast(`Updated ${existing.baseTable}: ${pax} Pax (${sec})`);
+        return showPosToast(`Updated ${existing.label} (${sec}): ${pax} Pax`);
       }
 
+      const uid = `${sec.slice(0, 2).toUpperCase()}-${Date.now().toString().slice(-4)}`;
       posState.tables.push({
-        id: name, baseTable: name, label: name, section: sec, pax,
+        id: uid, baseTable: uid, label: name, section: sec, pax,
         status: "VACANT", orderNo: "", startedAt: null,
         waiter: currentPosUser.name, customerName: "", customerPhone: "", customerType: "Local",
         discountPct: 0, tipAmt: 0, tipStaff: "Pool / All Staff", items: []
@@ -2060,7 +2185,7 @@
       saveState();
       togglePosModal("addTableModal");
       renderFloor();
-      showPosToast(`Added Table ${name} (${pax} Pax)`);
+      showPosToast(`Added ${name} (${pax} Pax) in ${sec}`);
     }
 
     function calcOrderTotals(orderObj) {
@@ -2186,7 +2311,7 @@
       const siblings = posState.tables.filter(x => x.baseTable === t.baseTable);
       if (siblings.length === 1 && siblings[0].id.includes("-")) {
         siblings[0].id = t.baseTable;
-        siblings[0].label = t.baseTable;
+        siblings[0].label = siblings[0].label.replace(/-[A-D]$/, "");
       }
       saveState();
       renderFloor();
@@ -2197,11 +2322,12 @@
       const siblings = posState.tables.filter(t => t.baseTable === baseTable);
       if (siblings.length >= 4) return showPosToast("Maximum 4 split orders per table!", true);
       const letters = ["A", "B", "C", "D"];
+      const baseDisplayName = siblings[0].label.replace(/-[A-D]$/, "");
 
       if (siblings.length === 1 && !siblings[0].id.includes("-")) {
         const oldId = siblings[0].id;
         siblings[0].id = `${baseTable}-A`;
-        siblings[0].label = `${baseTable}-A`;
+        siblings[0].label = `${baseDisplayName}-A`;
         if (activeOrderTarget.type === "TABLE" && activeOrderTarget.id === oldId) {
           activeOrderTarget.id = `${baseTable}-A`;
         }
@@ -2210,11 +2336,12 @@
       const used = posState.tables.filter(t => t.baseTable === baseTable).map(t => t.id.split("-")[1]);
       const nextLetter = letters.find(l => !used.includes(l));
       const newId = `${baseTable}-${nextLetter}`;
+      const newLabel = `${baseDisplayName}-${nextLetter}`;
       const template = siblings[0];
       const idx = posState.tables.findIndex(t => t.id === siblings[siblings.length - 1].id);
 
       posState.tables.splice(idx + 1, 0, {
-        id: newId, baseTable, label: newId, section: template.section, pax: 2,
+        id: newId, baseTable, label: newLabel, section: template.section, pax: 2,
         status: "VACANT", orderNo: "", startedAt: null, waiter: currentPosUser.name,
         customerName: "", customerPhone: "", customerType: "Local",
         discountPct: 0, tipAmt: 0, tipStaff: "Pool / All Staff", items: []
@@ -2222,7 +2349,7 @@
       saveState();
       renderFloor();
       if (!document.getElementById("view-BILLING").classList.contains("hidden")) renderActiveCart();
-      showPosToast(`Existing ${baseTable} order kept on ${baseTable}-A • Added ${newId}`);
+      showPosToast(`Existing order kept on ${baseDisplayName}-A • Added ${newLabel}`);
     }
 
     function splitCurrentTable() {
@@ -2457,7 +2584,7 @@
       if (!order) return;
 
       const isTable = activeOrderTarget.type === "TABLE";
-      document.getElementById("activeOrderBadge").textContent = isTable ? `${order.label} • Dine-In` : order.label;
+      document.getElementById("activeOrderBadge").textContent = isTable ? `${order.label} (${order.section}) • Dine-In` : order.label;
       document.getElementById("activeOrderNoPill").textContent = order.orderNo || "NEW ORDER";
       document.getElementById("tableActionGroup").classList.toggle("hidden", !isTable);
       document.getElementById("channelActionGroup").classList.toggle("hidden", isTable);
@@ -2623,7 +2750,7 @@
     }
 
     // ============================================================
-    // 6. CONSOLIDATED KOT + KOT PRINT COUNTER
+    // 6. CONSOLIDATED KOT + THICK DARK 80MM KOT SLIP
     // ============================================================
     function sendConsolidatedKot(openPrintSlip = false) {
       const order = getActiveOrderObj();
@@ -2656,6 +2783,7 @@
       order.kotsSentCount = (order.kotsSentCount || 0) + 1;
       const kotType = hasCancellations && !hasAdditions ? "CANCELLED" : isAddon ? "ADD-ON / UPDATE" : "NEW ORDER";
       const channelName = activeOrderTarget.type === "TABLE" ? "DINE-IN" : String(order.channel || "TAKEAWAY").toUpperCase();
+      const tableDisplay = activeOrderTarget.type === "TABLE" ? `${order.label} (${order.section})` : order.label;
 
       const kotObj = {
         kotNo,
@@ -2663,7 +2791,7 @@
         kotType,
         createdAt: new Date().toISOString(),
         channel: channelName,
-        tableRef: order.label,
+        tableRef: tableDisplay,
         customerName: order.customerName || "",
         waiter: currentPosUser.name,
         items: deltaItems
@@ -2695,28 +2823,33 @@
       document.getElementById("whatsappReceiptBtn").classList.add("hidden");
 
       document.getElementById("thermalPrintArea").innerHTML = `
-        <div style="text-align:center; border-bottom:1px dashed #000; padding-bottom:6px; margin-bottom:6px;">
-          <div style="font-size:14px; font-weight:bold;">${posState.settings.restoName}</div>
-          <div style="font-size:13px; font-weight:bold; border:2px solid #000; padding:2px 6px; display:inline-block; margin:3px 0;">
+        <div style="text-align:center; border-bottom:1.5px dashed #000; padding-bottom:5px; margin-bottom:5px; font-weight:800; color:#000;">
+          <div style="font-size:14px; font-weight:900;">${posState.settings.restoName}</div>
+          <div style="font-size:12px; font-weight:900; border:2px solid #000; padding:2px 6px; display:inline-block; margin:3px 0;">
             [ ${kot.channel} ]
           </div>
-          <div style="font-size:13px; font-weight:bold;">KOT #${kot.kotNo} (${kot.kotType})</div>
-          <div style="font-size:12px; font-weight:bold;">Order: ${kot.orderNo} | ${kot.tableRef}</div>
-          ${kot.customerName ? `<div style="font-size:11px; font-weight:bold;">Guest: ${kot.customerName}</div>` : ""}
-          <div>${new Date(kot.createdAt).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})} • ${kot.waiter}</div>
+          <div style="font-size:13px; font-weight:900;">KOT #${kot.kotNo} (${kot.kotType})</div>
+          <div style="font-size:11px; font-weight:900;">Order: ${kot.orderNo} | ${kot.tableRef}</div>
+          ${kot.customerName ? `<div style="font-size:11px; font-weight:900;">Guest: ${kot.customerName}</div>` : ""}
+          <div style="font-size:10px; font-weight:800;">${new Date(kot.createdAt).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})} • ${kot.waiter}</div>
         </div>
-        <table style="width:100%; border-collapse:collapse;">
-          <thead><tr style="border-bottom:1px dashed #000;"><th style="text-align:left;">ITEM</th><th style="text-align:right;">QTY</th></tr></thead>
+        <table style="width:100%; table-layout:fixed; border-collapse:collapse; font-size:11px; font-weight:800; color:#000;">
+          <thead>
+            <tr style="border-bottom:1.5px dashed #000;">
+              <th style="width:78%; text-align:left; font-weight:900;">ITEM</th>
+              <th style="width:22%; text-align:right; font-weight:900;">QTY</th>
+            </tr>
+          </thead>
           <tbody>
             ${kot.items.map(i => `
               <tr>
-                <td style="padding:4px 0; font-weight:bold;">${i.qty < 0 ? "[CANCEL] " : ""}${i.name}${i.note ? `<br><span style="font-size:10px;">** ${i.note} **</span>` : ""}</td>
-                <td style="text-align:right; font-size:13px; font-weight:bold; vertical-align:top;">${i.qty > 0 ? "+" + i.qty : i.qty}</td>
+                <td style="padding:4px 2px 4px 0; font-weight:900; word-wrap:break-word;">${i.qty < 0 ? "[CANCEL] " : ""}${i.name}${i.note ? `<br><span style="font-size:10px; font-weight:900;">** ${i.note} **</span>` : ""}</td>
+                <td style="text-align:right; font-size:13px; font-weight:900; vertical-align:top;">${i.qty > 0 ? "+" + i.qty : i.qty}</td>
               </tr>
             `).join("")}
           </tbody>
         </table>
-        <div style="border-top:1px dashed #000; margin-top:8px; padding-top:4px; text-align:center;">--- END OF KOT #${kot.kotNo} ---</div>
+        <div style="border-top:1.5px dashed #000; margin-top:6px; padding-top:4px; text-align:center; font-weight:900; color:#000;">--- END OF KOT #${kot.kotNo} ---</div>
       `;
       togglePosModal("receiptModal");
     }
@@ -2776,7 +2909,7 @@
     }
 
     // ============================================================
-    // 7. PROFORMA BILL PRINT, REGISTER GUARD & SETTLEMENT
+    // 7. PROFORMA & TAX INVOICE (68MM INSIDE MARGIN, THICK & DARK)
     // ============================================================
     function printBillAction() {
       const order = getActiveOrderObj();
@@ -2789,7 +2922,7 @@
         invoiceNo: `PROFORMA`,
         orderNo: order.orderNo,
         timestamp: new Date().toISOString(),
-        channel: activeOrderTarget.type === "TABLE" ? "Dine-In" : order.channel,
+        channel: activeOrderTarget.type === "TABLE" ? `Dine-In (${order.section})` : order.channel,
         tableRef: order.label,
         customerName: order.customerName,
         customerPhone: order.customerPhone,
@@ -2813,70 +2946,70 @@
       const printableGrandTotal = Math.round((Number(inv.subtotal) + Number(inv.cgst) + Number(inv.sgst) + printableTip) * 100) / 100;
 
       const headerBrandHtml = s.logoDataUrl
-        ? `<img src="${s.logoDataUrl}" style="max-height:54px; margin:0 auto 4px auto; display:block;" />`
-        : `<div style="font-size:15px; font-weight:bold;">${s.restoName}</div>`;
+        ? `<img src="${s.logoDataUrl}" style="max-height:48px; max-width:58mm; margin:0 auto 4px auto; display:block;" />`
+        : `<div style="font-size:15px; font-weight:900; color:#000;">${s.restoName}</div>`;
 
-      const gstHeader = s.gstIn ? `<div>GSTIN: ${s.gstIn}</div>` : "";
+      const gstHeader = s.gstIn ? `<div style="font-weight:900; color:#000;">GSTIN: ${s.gstIn}</div>` : "";
       const gstLines = (s.gstEnabled && s.showGstOnBill) ? `
-        <div style="display:flex; justify-content:space-between;"><span>CGST (2.5%):</span><span>₹${Number(inv.cgst).toFixed(2)}</span></div>
-        <div style="display:flex; justify-content:space-between;"><span>SGST (2.5%):</span><span>₹${Number(inv.sgst).toFixed(2)}</span></div>
+        <div style="display:flex; justify-content:space-between; font-weight:800; color:#000;"><span>CGST (2.5%):</span><span>₹${Number(inv.cgst).toFixed(2)}</span></div>
+        <div style="display:flex; justify-content:space-between; font-weight:800; color:#000;"><span>SGST (2.5%):</span><span>₹${Number(inv.sgst).toFixed(2)}</span></div>
       ` : "";
 
       document.getElementById("thermalPrintArea").innerHTML = `
-        <div style="text-align:center; border-bottom:1px dashed #000; padding-bottom:6px; margin-bottom:6px;">
+        <div style="text-align:center; border-bottom:1.5px dashed #000; padding-bottom:5px; margin-bottom:5px; font-weight:800; color:#000;">
           ${headerBrandHtml}
-          <div style="font-size:10px;">${s.restoAddress}</div>
-          <div style="font-size:10px;">Mob: ${s.restoPhone}</div>
+          <div style="font-size:10px; font-weight:800; word-wrap:break-word; color:#000;">${s.restoAddress}</div>
+          <div style="font-size:10px; font-weight:900; color:#000;">Mob: ${s.restoPhone}</div>
           ${gstHeader}
         </div>
-        <div style="font-size:10px; border-bottom:1px dashed #000; padding-bottom:4px; margin-bottom:6px;">
-          <div>Bill: <strong>${inv.invoiceNo}</strong> | <strong>${inv.orderNo || ""}</strong></div>
+        <div style="font-size:10px; font-weight:800; border-bottom:1.5px dashed #000; padding-bottom:4px; margin-bottom:5px; color:#000;">
+          <div>Bill: <strong style="font-weight:900;">${inv.invoiceNo}</strong> | <strong style="font-weight:900;">${inv.orderNo || ""}</strong></div>
           <div>Table/Ref: ${inv.tableRef} (${inv.channel})</div>
           <div>Date: ${new Date(inv.timestamp).toLocaleString()}</div>
-          ${inv.customerName && inv.customerName !== "Walk-in" ? `<div>Guest: <strong>${inv.customerName}</strong></div>` : ""}
+          ${inv.customerName && inv.customerName !== "Walk-in" ? `<div>Guest: <strong style="font-weight:900;">${inv.customerName}</strong></div>` : ""}
           ${inv.customerPhone && inv.customerPhone !== "-" ? `<div>Mobile: ${inv.customerPhone}</div>` : ""}
         </div>
-        <table style="width:100%; border-collapse:collapse; font-size:10px;">
+        <table style="width:100%; table-layout:fixed; border-collapse:collapse; font-size:10px; font-weight:800; color:#000;">
           <thead>
-            <tr style="border-bottom:1px dashed #000;">
-              <th style="text-align:left;">ITEM</th>
-              <th style="text-align:center;">QTY</th>
-              <th style="text-align:right;">RATE</th>
-              <th style="text-align:right;">AMT</th>
+            <tr style="border-bottom:1.5px dashed #000;">
+              <th style="width:45%; text-align:left; font-weight:900;">ITEM</th>
+              <th style="width:12%; text-align:center; font-weight:900;">QTY</th>
+              <th style="width:19%; text-align:right; font-weight:900;">RATE</th>
+              <th style="width:24%; text-align:right; font-weight:900;">AMT</th>
             </tr>
           </thead>
           <tbody>
             ${inv.items.map(it => `
               <tr>
-                <td style="padding:3px 0;">${it.name}</td>
-                <td style="text-align:center;">${it.qty}</td>
-                <td style="text-align:right;">${it.price}</td>
-                <td style="text-align:right;">${(it.price * it.qty).toFixed(2)}</td>
+                <td style="padding:3px 2px 3px 0; font-weight:900; word-wrap:break-word;">${it.name}</td>
+                <td style="text-align:center; font-weight:900; vertical-align:top; padding-top:3px;">${it.qty}</td>
+                <td style="text-align:right; font-weight:800; vertical-align:top; padding-top:3px;">${Number(it.price).toFixed(0)}</td>
+                <td style="text-align:right; font-weight:900; vertical-align:top; padding-top:3px;">${(it.price * it.qty).toFixed(2)}</td>
               </tr>
             `).join("")}
           </tbody>
         </table>
-        <div style="border-top:1px dashed #000; margin-top:6px; padding-top:4px; font-size:11px;">
+        <div style="border-top:1.5px dashed #000; margin-top:5px; padding-top:4px; font-size:11px; font-weight:800; color:#000;">
           <div style="display:flex; justify-content:space-between;"><span>Subtotal:</span><span>₹${Number(inv.subtotal).toFixed(2)}</span></div>
           ${inv.discAmt > 0 ? `<div style="display:flex; justify-content:space-between;"><span>Discount:</span><span>-₹${Number(inv.discAmt).toFixed(2)}</span></div>` : ""}
           ${gstLines}
           ${printableTip > 0 ? `<div style="display:flex; justify-content:space-between;"><span>Service Tip:</span><span>₹${printableTip.toFixed(2)}</span></div>` : ""}
-          <div style="display:flex; justify-content:space-between; font-size:14px; font-weight:bold; border-top:1px dashed #000; margin-top:4px; padding-top:4px;">
+          <div style="display:flex; justify-content:space-between; font-size:13px; font-weight:900; border-top:1.5px dashed #000; margin-top:4px; padding-top:4px;">
             <span>GRAND TOTAL:</span><span>₹${printableGrandTotal.toFixed(2)}</span>
           </div>
-          <div style="font-size:10px; margin-top:2px;">Mode: ${inv.paymentMode}</div>
+          <div style="font-size:10px; font-weight:900; margin-top:2px;">Mode: ${inv.paymentMode}</div>
         </div>
-        <div style="text-align:center; margin-top:8px; padding-top:6px; border-top:1px dashed #000;">
-          <div style="font-size:10px; font-weight:bold; margin-bottom:4px;">Scan UPI QR to Pay ₹${printableGrandTotal.toFixed(2)}</div>
+        <div style="text-align:center; margin-top:6px; padding-top:5px; border-top:1.5px dashed #000; font-weight:800; color:#000;">
+          <div style="font-size:10px; font-weight:900; margin-bottom:4px;">Scan UPI QR to Pay ₹${printableGrandTotal.toFixed(2)}</div>
           <div id="receiptQrBox" style="display:flex; justify-content:center;"></div>
-          <div style="font-size:9px; margin-top:3px;">${s.upiId}</div>
-          <div style="font-size:10px; font-weight:bold; margin-top:6px;">Thank you for dining at ${s.restoName}!</div>
-          <div style="font-size:9px; margin-top:3px;">Feel free to share feedback with us on WhatsApp: ${s.restoPhone}</div>
+          <div style="font-size:10px; font-weight:900; margin-top:3px;">${s.upiId}</div>
+          <div style="font-size:10px; font-weight:900; margin-top:5px;">Thank you for dining at ${s.restoName}!</div>
+          <div style="font-size:9px; font-weight:800; margin-top:2px;">Feedback on WhatsApp: ${s.restoPhone}</div>
         </div>
       `;
 
       const upiUri = `upi://pay?pa=${encodeURIComponent(s.upiId || "ipbp8@ybl")}&pn=${encodeURIComponent(s.restoName)}&am=${printableGrandTotal.toFixed(2)}&cu=INR`;
-      new QRCode(document.getElementById("receiptQrBox"), { text: upiUri, width: 96, height: 96 });
+      new QRCode(document.getElementById("receiptQrBox"), { text: upiUri, width: 92, height: 92 });
       togglePosModal("receiptModal");
     }
 
@@ -2957,7 +3090,7 @@
       if (!order) return;
       const totals = calcOrderTotals(order);
       const invoiceNo = `INV-${posState.invoiceCounter++}`;
-      const channel = activeOrderTarget.type === "TABLE" ? "Dine-In" : order.channel;
+      const channel = activeOrderTarget.type === "TABLE" ? `Dine-In (${order.section})` : order.channel;
       const cleanPhone = String(order.customerPhone || "").replace(/\D/g, "");
 
       const settledInv = {
@@ -3035,7 +3168,7 @@
     }
 
     // ============================================================
-    // 8. CUSTOMER CRM, MENU MANAGER, REPORTS & DASHBOARD
+    // 8. CUSTOMER CRM, MENU MANAGER, DIRECT PDF REPORTS & DASHBOARD
     // ============================================================
     function setCrmFilter(f) {
       crmFilter = f;
@@ -3384,18 +3517,17 @@
         showPosToast("Excel report downloaded!");
       } else {
         const headers = Object.keys(rows[0]);
-        const win = window.open("", "_blank");
-        win.document.write(`
-          <html><head><title>Spicy Kingdom ${type} Report</title>
-          <style>body{font-family:sans-serif;padding:24px;} h2{margin:0 0 4px;} table{width:100%;border-collapse:collapse;margin-top:16px;font-size:12px;} th,td{border:1px solid #cbd5e1;padding:8px;text-align:left;} th{background:#f1f5f9;}</style>
-          </head><body>
-          <h2>${posState.settings.restoName} — ${type} REPORT (${period})</h2>
-          <p>GSTIN: ${posState.settings.gstIn || "N/A"} • Generated: ${todayStr} by ${currentPosUser.name}</p>
-          <table><thead><tr>${headers.map(h => `<th>${h}</th>`).join("")}</tr></thead>
-          <tbody>${rows.map(r => `<tr>${headers.map(h => `<td>${r[h]}</td>`).join("")}</tr>`).join("")}</tbody></table>
-          <script>window.print();<\/script></body></html>
-        `);
-        win.document.close();
+        const htmlBody = `
+          <div style="font-family: Arial, sans-serif; padding: 20px; color: #000; background: #fff;">
+            <h2 style="margin: 0 0 4px; font-size: 18px; font-weight: 900;">${posState.settings.restoName} — ${type} REPORT (${period})</h2>
+            <p style="margin: 0 0 12px; font-size: 12px;">GSTIN: ${posState.settings.gstIn || "N/A"} • Generated: ${todayStr} by ${currentPosUser.name}</p>
+            <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
+              <thead><tr>${headers.map(h => `<th style="border: 1px solid #000; padding: 6px; text-align: left; background: #f1f5f9; font-weight: 800;">${h}</th>`).join("")}</tr></thead>
+              <tbody>${rows.map(r => `<tr>${headers.map(h => `<td style="border: 1px solid #cbd5e1; padding: 6px;">${r[h]}</td>`).join("")}</tr>`).join("")}</tbody>
+            </table>
+          </div>
+        `;
+        downloadHtmlAsDirectPdf(htmlBody, `SpicyKingdom_POS_${type}_${period}_${todayStr}.pdf`);
       }
       togglePosModal("reportsExportModal");
     }
@@ -3406,10 +3538,12 @@
     function openShiftTableModal() {
       const cur = getActiveOrderObj();
       if (!cur || cur.items.length === 0) return showPosToast("Current table has no active items.", true);
-      document.getElementById("transferModalTitle").textContent = `Shift ${cur.label} to Vacant Table`;
+      document.getElementById("transferModalTitle").textContent = `Shift ${cur.label} (${cur.section}) to Vacant Table`;
       const vacants = posState.tables.filter(t => t.status === "VACANT" && t.id !== cur.id);
       document.getElementById("transferTargetList").innerHTML = vacants.map(t => `
-        <button onclick="executeShiftTable('${t.id}')" class="p-3 rounded-xl bg-emerald-50 border border-emerald-300 font-extrabold text-xs text-emerald-900">${t.label}</button>
+        <button onclick="executeShiftTable('${t.id}')" class="p-2.5 rounded-xl bg-emerald-50 border border-emerald-300 font-extrabold text-[11px] text-emerald-900">
+          ${t.label}<br><span class="text-[9px] font-semibold opacity-75">${t.section}</span>
+        </button>
       `).join("") || `<p class="col-span-3 text-xs text-slate-400">No vacant tables available.</p>`;
       togglePosModal("tableTransferModal");
     }
@@ -3428,15 +3562,17 @@
       saveState();
       togglePosModal("tableTransferModal");
       renderActiveCart();
-      showPosToast(`Shifted order to ${dst.label}`);
+      showPosToast(`Shifted order to ${dst.label} (${dst.section})`);
     }
 
     function openMergeTableModal() {
       const cur = getActiveOrderObj();
-      document.getElementById("transferModalTitle").textContent = `Merge Another Table into ${cur.label}`;
+      document.getElementById("transferModalTitle").textContent = `Merge Another Table into ${cur.label} (${cur.section})`;
       const others = posState.tables.filter(t => t.status !== "VACANT" && t.id !== cur.id);
       document.getElementById("transferTargetList").innerHTML = others.map(t => `
-        <button onclick="executeMergeTable('${t.id}')" class="p-3 rounded-xl bg-amber-50 border border-amber-300 font-extrabold text-xs text-amber-900">${t.label}</button>
+        <button onclick="executeMergeTable('${t.id}')" class="p-2.5 rounded-xl bg-amber-50 border border-amber-300 font-extrabold text-[11px] text-amber-900">
+          ${t.label}<br><span class="text-[9px] font-semibold opacity-75">${t.section}</span>
+        </button>
       `).join("") || `<p class="col-span-3 text-xs text-slate-400">No other running tables to merge.</p>`;
       togglePosModal("tableTransferModal");
     }
@@ -3637,6 +3773,7 @@
         return showPosToast("Only IT Admin can reset POS data.", true);
       }
       openThemedConfirm("IT Admin: Reset All POS Data?", "This will clear all active tables, KOTs, sessions, and test invoices in both local cache and Google Sheets.", async () => {
+        posState.sections = ["Main Dining", "Daba"];
         posState.tables = createInitialTables();
         posState.channelOrders = [];
         posState.kots = [];
