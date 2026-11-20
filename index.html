@@ -489,7 +489,7 @@
       <div class="bg-white rounded-2xl p-4 border border-slate-200 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 class="text-base font-extrabold text-slate-900" id="menuMgrHeaderCount">Menu Catalog Manager (135 Items)</h2>
-          <p class="text-xs text-slate-500">Toggle Available / Sold Out or configure optional variants directly in Google Sheets</p>
+          <p class="text-xs text-slate-500">Toggle Available / Sold Out or configure optional variants</p>
         </div>
         <div class="flex gap-2">
           <button onclick="togglePosModal('importModal')" class="px-3 py-2 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-extrabold">Import Excel/CSV</button>
@@ -1091,7 +1091,7 @@
       </div>
 
       <div class="p-3 rounded-xl bg-emerald-50/60 border border-emerald-200 space-y-2">
-        <p class="font-extrabold text-emerald-900">Google Sheets POS DB & Operations DB Bridge URLs</p>
+        <p class="font-extrabold text-emerald-900"> POS DB & Operations DB Bridge URLs</p>
         <input type="url" id="setPosApiUrl" class="w-full p-2 rounded-lg border border-emerald-200 bg-white" />
         <input type="url" id="setErpBridgeUrl" class="w-full p-2 rounded-lg border border-emerald-200 bg-white" />
       </div>
@@ -3338,7 +3338,7 @@
       togglePosModal("menuItemModal");
       renderMenuManagerList();
       await syncToCloud({ action: "saveMenuFull", items: posState.menu });
-      showPosToast(`Saved "${dish.name}" to Google Sheets!`);
+      showPosToast(`Saved "${dish.name}" to Menu!`);
     }
 
     function deleteMenuDish(idx) {
@@ -3669,7 +3669,7 @@
       togglePosModal("settingsModal");
       renderActiveCart();
       await syncToCloud({ action: "saveSettings", settings: posState.settings });
-      showPosToast("Settings saved to Google Sheets!");
+      showPosToast("Settings saved!");
     }
 
     function renderDashboard() {
