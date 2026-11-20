@@ -2017,6 +2017,48 @@
       togglePosModal("receiptModal");
     }
 
+    async function saveBase64FileUniversal(base64Data, filename, mimeType) {
+      const cleanBase64 = base64Data.includes(",") ? base64Data.split(",")[1] : base64Data;
+      const isNativeApk = window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform();
+
+      if (isNativeApk && window.Capacitor.Plugins && window.Capacitor.Plugins.Filesystem) {
+        try {
+          const { Filesystem, Share } = window.Capacitor.Plugins;
+          const saved = await Filesystem.writeFile({
+            path: filename,
+            data: cleanBase64,
+            directory: "CACHE"
+          });
+          if (Share) {
+            await Share.share({
+              title: filename,
+              url: saved.uri,
+              dialogTitle: "Save or Share Report"
+            });
+          }
+          showPosToast(`Ready: ${filename}`);
+          return;
+        } catch (err) {
+          showPosToast("APK file save error: " + (err.message || err), true);
+          return;
+        }
+      }
+
+      // Desktop & Mobile Web Browser Download
+      const byteChars = atob(cleanBase64);
+      const byteNumbers = new Array(byteChars.length);
+      for (let i = 0; i < byteChars.length; i++) byteNumbers[i] = byteChars.charCodeAt(i);
+      const blob = new Blob([new Uint8Array(byteNumbers)], { type: mimeType });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setTimeout(() => URL.revokeObjectURL(link.href), 2000);
+      showPosToast(`Downloaded ${filename}`);
+    }
+
     function downloadHtmlAsDirectPdf(htmlContent, filename) {
       const container = document.createElement("div");
       container.style.position = "fixed";
@@ -2041,26 +2083,18 @@
             jsPDF: { unit: "mm", format: "a4", orientation: "portrait" }
           })
           .from(container)
-          .save()
-          .then(() => {
+          .outputPdf("datauristring")
+          .then(async (pdfDataUri) => {
             finishCleanup();
-            showPosToast(`Downloaded ${filename}`);
+            await saveBase64FileUniversal(pdfDataUri, filename, "application/pdf");
           })
           .catch(() => {
             finishCleanup();
-            showPosToast("PDF export failed", true);
+            showPosToast("PDF generation failed", true);
           });
       } else {
-        // Fallback Blob download if CDN offline
-        const blob = new Blob([htmlContent], { type: "text/html" });
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = filename.replace(/\.pdf$/i, ".html");
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
         finishCleanup();
-        showPosToast("Report file downloaded!");
+        showPosToast("PDF library not loaded", true);
       }
     }
 
@@ -3518,7 +3552,8 @@
         const ws = XLSX.utils.json_to_sheet(rows);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, type);
-        XLSX.writeFile(wb, `SpicyKingdom_POS_${type}_${period}.xlsx`);
+        const wbBase64 = XLSX.write(wb, { bookType: "xlsx", type: "base64" });
+        saveBase64FileUniversal(wbBase64, `SpicyKingdom_POS_${type}_${period}.xlsx`, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         showPosToast("Excel report downloaded!");
       } else {
         const headers = Object.keys(rows[0]);
