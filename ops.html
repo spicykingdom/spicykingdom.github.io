@@ -202,17 +202,17 @@
   <div id="appShell" class="hidden max-w-[480px] lg:max-w-7xl mx-auto min-h-screen">
 
     <!-- STICKY GLASS HEADER -->
-    <header class="sticky top-0 z-30 glass-card rounded-b-3xl lg:rounded-b-2xl px-4 lg:px-6 py-3 flex items-center justify-between gap-3">
-      <div class="flex items-center gap-2.5 min-w-0">
-        <div class="hidden lg:flex w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 via-orange-600 to-rose-600 text-white font-extrabold text-sm items-center justify-center shrink-0 shadow">
+    <header class="sticky top-0 z-30 glass-card rounded-b-3xl lg:rounded-b-2xl px-3 sm:px-4 lg:px-6 py-2.5 flex items-center justify-between gap-2">
+      <div class="flex items-center gap-2 min-w-0 flex-1">
+        <div class="w-8 h-8 lg:w-10 lg:h-10 rounded-xl bg-gradient-to-br from-amber-500 via-orange-600 to-rose-600 text-white font-extrabold text-xs lg:text-sm flex items-center justify-center shrink-0 shadow">
           SK
         </div>
-        <div class="min-w-0">
-          <div class="flex items-center gap-1.5">
-            <span class="text-xs font-extrabold tracking-wider uppercase bg-gradient-to-r from-amber-600 to-rose-600 bg-clip-text text-transparent">Spicy Kingdom Ops</span>
-            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        <div class="min-w-0 flex-1">
+          <div class="flex items-center gap-1">
+            <span class="text-[11px] lg:text-xs font-extrabold tracking-tight uppercase bg-gradient-to-r from-amber-600 to-rose-600 bg-clip-text text-transparent whitespace-nowrap">Spicy Kingdom Ops</span>
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
           </div>
-          <h2 class="text-sm font-bold truncate" id="welcomeBanner">Welcome</h2>
+          <h2 class="text-xs lg:text-sm font-bold whitespace-nowrap overflow-hidden text-ellipsis" id="welcomeBanner">Welcome</h2>
         </div>
       </div>
 
@@ -226,25 +226,22 @@
       </nav>
 
       <!-- RIGHT ACTION BUTTONS -->
-      <div class="flex items-center gap-1.5 shrink-0">
-        <a href="index.html" class="px-3 py-2 rounded-xl bg-rose-600 text-white text-xs font-extrabold shadow-sm hover:bg-rose-700 active:scale-95 transition flex items-center gap-1" title="Open POS Billing">
-          <span>POS</span>
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-        </a>
-        <button onclick="toggleTheme(true)" class="p-2.5 rounded-xl glass-card active:scale-90 transition" title="Theme">
+      <div class="flex items-center gap-1 shrink-0">
+		<a href="index.html" class="px-2 py-1.5 rounded-xl bg-rose-50 text-rose-600 border border-rose-200 text-[10px] sm:text-xs font-extrabold active:scale-95 transition" title="Open POS Billing">POS</a>
+        <button onclick="toggleTheme(true)" class="p-2 rounded-xl glass-card active:scale-90 transition" title="Theme">
           <svg id="themeIconSun" class="w-4 h-4 hidden text-amber-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
           <svg id="themeIconMoon" class="w-4 h-4 text-slate-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
         </button>
-        <button id="reportsHeaderBtn" onclick="toggleModal('reportsModal')" class="hidden p-2.5 rounded-xl glass-card active:scale-90 transition" title="PDF & Excel Reports">
+        <button id="reportsHeaderBtn" onclick="toggleModal('reportsModal')" class="hidden p-2 rounded-xl glass-card active:scale-90 transition" title="PDF & Excel Reports">
           <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
         </button>
-        <button id="adminSettingsBtn" onclick="openAdminModal()" class="hidden p-2.5 rounded-xl glass-card active:scale-90 transition" title="Control Center">
+        <button id="adminSettingsBtn" onclick="openAdminModal()" class="hidden p-2 rounded-xl glass-card active:scale-90 transition" title="Control Center">
           <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
         </button>
-        <button onclick="refreshData(true)" class="p-2.5 rounded-xl glass-card active:scale-90 transition" title="Sync">
+        <button onclick="refreshData(true)" class="p-2 rounded-xl glass-card active:scale-90 transition" title="Sync">
           <svg id="syncSvg" class="w-4 h-4 text-cyan-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
         </button>
-        <button onclick="logout()" class="p-2.5 rounded-xl bg-rose-500/15 text-rose-500 active:scale-90 transition" title="Lock Terminal">
+        <button onclick="logout()" class="p-2 rounded-xl bg-rose-500/15 text-rose-500 active:scale-90 transition" title="Lock Terminal">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
         </button>
       </div>
@@ -1298,7 +1295,7 @@
     function showApp() {
       document.getElementById("loginScreen").classList.add("hidden");
       document.getElementById("appShell").classList.remove("hidden");
-      document.getElementById("welcomeBanner").textContent = `Welcome ${currentUser.designation} ${currentUser.name}`;
+      document.getElementById("welcomeBanner").textContent = `${currentUser.name} • ${currentUser.designation || currentUser.role}`;
 
       const priv = isPriv();
       document.getElementById("addEmpBtn").classList.toggle("hidden", !priv);
@@ -2373,9 +2370,89 @@
       if (res.status === "success") { showToast(res.message); toggleModal("addEmpModal"); e.target.reset(); refreshData(); }
     }
 
+	// ============================================================
+    // 8. DIRECT PDF & EXCEL REPORT EXPORT ENGINE (APK + BROWSER)
     // ============================================================
-    // 8. DIRECT PDF & EXCEL REPORT EXPORT ENGINE
-    // ============================================================
+    async function saveBase64FileUniversal(base64Data, filename, mimeType) {
+      const cleanBase64 = base64Data.includes(",") ? base64Data.split(",")[1] : base64Data;
+      const isNativeApk = window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform();
+
+      if (isNativeApk && window.Capacitor.Plugins && window.Capacitor.Plugins.Filesystem) {
+        try {
+          const { Filesystem, Share } = window.Capacitor.Plugins;
+          const saved = await Filesystem.writeFile({
+            path: filename,
+            data: cleanBase64,
+            directory: "CACHE"
+          });
+          if (Share) {
+            await Share.share({
+              title: filename,
+              url: saved.uri,
+              dialogTitle: "Save or Share Report"
+            });
+          }
+          showToast(`Ready: ${filename}`);
+          return;
+        } catch (err) {
+          showToast("APK file save error: " + (err.message || err), true);
+          return;
+        }
+      }
+
+      const byteChars = atob(cleanBase64);
+      const byteNumbers = new Array(byteChars.length);
+      for (let i = 0; i < byteChars.length; i++) byteNumbers[i] = byteChars.charCodeAt(i);
+      const blob = new Blob([new Uint8Array(byteNumbers)], { type: mimeType });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setTimeout(() => URL.revokeObjectURL(link.href), 2000);
+      showToast(`Downloaded ${filename}`);
+    }
+
+    function downloadHtmlAsDirectPdf(htmlContent, filename) {
+      const container = document.createElement("div");
+      container.style.position = "fixed";
+      container.style.left = "-9999px";
+      container.style.top = "0";
+      container.style.width = "780px";
+      container.style.background = "#FFFFFF";
+      container.innerHTML = htmlContent;
+      document.body.appendChild(container);
+
+      const finishCleanup = () => {
+        if (container && container.parentNode) container.parentNode.removeChild(container);
+      };
+
+      if (typeof html2pdf !== "undefined") {
+        html2pdf()
+          .set({
+            margin: 10,
+            filename: filename,
+            image: { type: "jpeg", quality: 0.98 },
+            html2canvas: { scale: 2, useCORS: true },
+            jsPDF: { unit: "mm", format: "a4", orientation: "portrait" }
+          })
+          .from(container)
+          .outputPdf("datauristring")
+          .then(async (pdfDataUri) => {
+            finishCleanup();
+            await saveBase64FileUniversal(pdfDataUri, filename, "application/pdf");
+          })
+          .catch(() => {
+            finishCleanup();
+            showToast("PDF generation failed", true);
+          });
+      } else {
+        finishCleanup();
+        showToast("PDF library not loaded", true);
+      }
+    }
+
     function exportReport(format) {
       const type = document.getElementById("repType").value;
       const period = document.getElementById("repPeriod").value;
@@ -2435,17 +2512,11 @@
         const ws = XLSX.utils.json_to_sheet(rows);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, type);
-        XLSX.writeFile(wb, `SpicyKingdom_Ops_${type}_${period}.xlsx`);
-        showToast("Excel report downloaded!");
+        const wbBase64 = XLSX.write(wb, { bookType: "xlsx", type: "base64" });
+        saveBase64FileUniversal(wbBase64, `SpicyKingdom_Ops_${type}_${period}.xlsx`, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
       } else {
         const headers = Object.keys(rows[0]);
-        const container = document.createElement("div");
-        container.style.position = "fixed";
-        container.style.left = "-9999px";
-        container.style.top = "0";
-        container.style.width = "780px";
-        container.style.background = "#FFFFFF";
-        container.innerHTML = `
+        const htmlBody = `
           <div style="font-family:sans-serif; padding:20px; color:#000; background:#fff;">
             <h2 style="margin:0 0 4px; font-size:18px; font-weight:900;">SPICY KINGDOM OPS — ${type} REPORT</h2>
             <p style="margin:0 0 12px; font-size:12px;">Period: ${period} • Generated on ${todayStr} by ${currentUser.name}</p>
@@ -2455,21 +2526,10 @@
             </table>
           </div>
         `;
-        document.body.appendChild(container);
-        html2pdf().set({
-          margin: 10,
-          filename: `SpicyKingdom_Ops_${type}_${period}_${todayStr}.pdf`,
-          image: { type: "jpeg", quality: 0.98 },
-          html2canvas: { scale: 2 },
-          jsPDF: { unit: "mm", format: "a4", orientation: "portrait" }
-        }).from(container).save().then(() => {
-          document.body.removeChild(container);
-          showToast("PDF report downloaded!");
-        });
+        downloadHtmlAsDirectPdf(htmlBody, `SpicyKingdom_Ops_${type}_${period}_${todayStr}.pdf`);
       }
       toggleModal("reportsModal");
     }
-
     // ============================================================
     // 9. ADMIN CONTROL CENTER, RESET DATA & REIMBURSEMENTS
     // ============================================================
