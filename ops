@@ -1,0 +1,2735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Spicy Kingdom — Operations & ERP</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-base: #FBF6F3;
+      --card-bg: rgba(255, 255, 255, 0.84);
+      --card-border: rgba(255, 255, 255, 0.94);
+      --text-main: #18100E;
+      --text-muted: #6B5E5B;
+      --input-bg: rgba(255, 255, 255, 0.94);
+      --input-border: #E2D6D1;
+      --sheet-bg: #FFFFFF;
+    }
+    .dark-mode {
+      --bg-base: #120B0D;
+      --card-bg: rgba(31, 20, 24, 0.82);
+      --card-border: rgba(255, 255, 255, 0.12);
+      --text-main: #FDF8F6;
+      --text-muted: #B8A5A0;
+      --input-bg: rgba(22, 14, 17, 0.92);
+      --input-border: rgba(255, 255, 255, 0.16);
+      --sheet-bg: #1B1114;
+    }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      -webkit-tap-highlight-color: transparent;
+      overflow-x: hidden;
+    }
+    .mesh-bg { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+    .orb {
+      position: absolute; border-radius: 9999px; filter: blur(85px); opacity: 0.25;
+      animation: floatOrb 14s infinite alternate ease-in-out;
+    }
+    @keyframes floatOrb {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(25px, -30px) scale(1.1); }
+    }
+    .glass-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(18px) saturate(180%);
+      -webkit-backdrop-filter: blur(18px) saturate(180%);
+      border: 1px solid var(--card-border);
+      box-shadow: 0 8px 32px rgba(185, 28, 28, 0.06);
+    }
+    .bottom-sheet {
+      background: var(--sheet-bg);
+      color: var(--text-main);
+      border-top: 1px solid var(--card-border);
+      box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.36);
+    }
+    @media (min-width: 1024px) {
+      .bottom-sheet {
+        border-radius: 24px !important;
+        border: 1px solid var(--card-border);
+        margin-bottom: auto;
+        margin-top: auto;
+      }
+    }
+    .glass-input, .custom-select-btn {
+      background: var(--input-bg);
+      border: 1px solid var(--input-border);
+      color: var(--text-main);
+    }
+    .tabular-nums { font-variant-numeric: tabular-nums; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-8px); }
+      40%, 80% { transform: translateX(8px); }
+    }
+    .shake { animation: shake 0.35s ease-in-out; }
+    @keyframes waveDot {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-7px) scale(1.3); }
+    }
+    .dot-wave { animation: waveDot 0.7s infinite ease-in-out; }
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(200%); }
+    }
+    .shimmer-bar { animation: shimmer 1.4s infinite linear; }
+    @keyframes iosSlideRight {
+      from { opacity: 0; transform: translateX(20px) scale(0.99); }
+      to { opacity: 1; transform: translateX(0) scale(1); }
+    }
+    @keyframes iosSlideLeft {
+      from { opacity: 0; transform: translateX(-20px) scale(0.99); }
+      to { opacity: 1; transform: translateX(0) scale(1); }
+    }
+    .anim-slide-right { animation: iosSlideRight 0.25s cubic-bezier(0.22, 1, 0.36, 1); }
+    .anim-slide-left { animation: iosSlideLeft 0.25s cubic-bezier(0.22, 1, 0.36, 1); }
+    .key-tile:active { transform: scale(0.92); background: rgba(234, 88, 12, 0.22); }
+  </style>
+</head>
+<body class="pb-28 lg:pb-8 transition-colors duration-300">
+
+  <!-- AMBIENT RESTAURANT MESH ORBS -->
+  <div class="mesh-bg">
+    <div class="orb w-72 h-72 lg:w-96 lg:h-96 bg-amber-500 top-[-40px] left-[-40px]"></div>
+    <div class="orb w-80 h-80 lg:w-[28rem] lg:h-[28rem] bg-rose-600 top-[28%] right-[-60px]" style="animation-delay: -4s;"></div>
+    <div class="orb w-72 h-72 lg:w-96 lg:h-96 bg-orange-500 bottom-[5%] left-[10%]" style="animation-delay: -8s;"></div>
+  </div>
+
+  <!-- ============================================================
+       ANIMATED BRAND SPLASH SCREEN
+       ============================================================ -->
+  <div id="splashScreen" class="fixed inset-0 z-[100] glass-card flex flex-col items-center justify-center p-6 text-center transition-opacity duration-500">
+    <div class="relative flex items-center justify-center mb-5">
+      <div class="absolute w-28 h-28 rounded-full bg-orange-500/20 animate-ping"></div>
+      <div class="relative w-20 h-20 rounded-3xl bg-gradient-to-br from-amber-500 via-orange-600 to-rose-600 text-white flex items-center justify-center shadow-2xl shadow-orange-500/40">
+        <span class="text-3xl font-extrabold tracking-tighter">SK</span>
+      </div>
+    </div>
+    <h1 class="text-2xl font-extrabold tracking-tight bg-gradient-to-r from-amber-600 via-orange-600 to-rose-600 bg-clip-text text-transparent">SPICY KINGDOM</h1>
+    <p class="text-xs font-semibold opacity-70 mt-1" id="splashStatus">Initializing Operations & ERP...</p>
+    <div class="w-48 h-1.5 bg-slate-500/15 rounded-full overflow-hidden mt-5">
+      <div class="w-1/2 h-full bg-gradient-to-r from-amber-500 to-rose-600 rounded-full shimmer-bar"></div>
+    </div>
+  </div>
+
+  <!-- GLASSMORPHIC TOP TOAST NOTIFICATION -->
+  <div id="toast" class="fixed top-4 left-1/2 -translate-x-1/2 lg:left-auto lg:translate-x-0 lg:right-5 z-[95] hidden max-w-sm w-[92%] px-4 py-3 rounded-2xl shadow-2xl text-xs font-bold backdrop-blur-2xl border transition-all duration-300 flex items-center gap-2.5">
+    <span id="toastIcon" class="w-5 h-5 rounded-full flex items-center justify-center shrink-0"></span>
+    <span id="toastMsg"></span>
+  </div>
+
+  <!-- ============================================================
+       SCREEN 1: SPICY KINGDOM LOGIN VAULT
+       ============================================================ -->
+  <div id="loginScreen" class="min-h-screen flex flex-col justify-between px-5 py-6 max-w-[440px] mx-auto">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-2.5">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-500 via-orange-600 to-rose-600 text-white flex items-center justify-center font-extrabold text-sm shadow-md shadow-orange-500/30">
+          SK
+        </div>
+        <span class="font-extrabold text-base tracking-tight bg-gradient-to-r from-amber-600 via-orange-600 to-rose-600 bg-clip-text text-transparent">Spicy Kingdom Ops</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <a href="index.html" class="px-3 py-2 rounded-full glass-card text-xs font-extrabold text-rose-600 hover:opacity-90 transition">POS ↗</a>
+        <button onclick="toggleTheme(true)" class="w-10 h-10 rounded-full glass-card flex items-center justify-center shadow-sm active:scale-90 transition" title="Switch Theme">
+          <svg class="login-sun w-4 h-4 hidden text-amber-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+          <svg class="login-moon w-4 h-4 text-orange-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="text-center my-auto py-4">
+      <div class="relative w-16 h-16 rounded-2xl glass-card border-2 border-orange-500/40 flex items-center justify-center mx-auto mb-3 shadow-lg shadow-orange-500/15">
+        <svg class="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+        <span class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-gradient-to-r from-amber-500 to-rose-600 text-white flex items-center justify-center shadow">
+          <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+        </span>
+      </div>
+      <h2 class="text-2xl font-extrabold">Operations & ERP</h2>
+      <p class="text-xs opacity-65 mt-1" id="loginSubtext">Enter your 6-digit Spicy Kingdom PIN</p>
+
+      <div id="pinDotsContainer" class="flex justify-center gap-3 my-6">
+        <div class="pin-dot w-3.5 h-3.5 rounded-full border-2 border-orange-500/50 transition-all duration-200" style="animation-delay:0s"></div>
+        <div class="pin-dot w-3.5 h-3.5 rounded-full border-2 border-orange-500/50 transition-all duration-200" style="animation-delay:0.1s"></div>
+        <div class="pin-dot w-3.5 h-3.5 rounded-full border-2 border-orange-500/50 transition-all duration-200" style="animation-delay:0.2s"></div>
+        <div class="pin-dot w-3.5 h-3.5 rounded-full border-2 border-orange-500/50 transition-all duration-200" style="animation-delay:0.3s"></div>
+        <div class="pin-dot w-3.5 h-3.5 rounded-full border-2 border-orange-500/50 transition-all duration-200" style="animation-delay:0.4s"></div>
+        <div class="pin-dot w-3.5 h-3.5 rounded-full border-2 border-orange-500/50 transition-all duration-200" style="animation-delay:0.5s"></div>
+      </div>
+
+      <div class="grid grid-cols-3 gap-3 mt-4">
+        <button type="button" onclick="pressPin('1')" class="key-tile h-[58px] rounded-2xl glass-card text-xl font-bold transition">1</button>
+        <button type="button" onclick="pressPin('2')" class="key-tile h-[58px] rounded-2xl glass-card text-xl font-bold transition">2</button>
+        <button type="button" onclick="pressPin('3')" class="key-tile h-[58px] rounded-2xl glass-card text-xl font-bold transition">3</button>
+        <button type="button" onclick="pressPin('4')" class="key-tile h-[58px] rounded-2xl glass-card text-xl font-bold transition">4</button>
+        <button type="button" onclick="pressPin('5')" class="key-tile h-[58px] rounded-2xl glass-card text-xl font-bold transition">5</button>
+        <button type="button" onclick="pressPin('6')" class="key-tile h-[58px] rounded-2xl glass-card text-xl font-bold transition">6</button>
+        <button type="button" onclick="pressPin('7')" class="key-tile h-[58px] rounded-2xl glass-card text-xl font-bold transition">7</button>
+        <button type="button" onclick="pressPin('8')" class="key-tile h-[58px] rounded-2xl glass-card text-xl font-bold transition">8</button>
+        <button type="button" onclick="pressPin('9')" class="key-tile h-[58px] rounded-2xl glass-card text-xl font-bold transition">9</button>
+        <button type="button" onclick="submitPinLogin()" class="key-tile h-[58px] rounded-2xl glass-card flex items-center justify-center text-orange-600 transition" title="Unlock">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4"/></svg>
+        </button>
+        <button type="button" onclick="pressPin('0')" class="key-tile h-[58px] rounded-2xl glass-card text-xl font-bold transition">0</button>
+        <button type="button" onclick="backspacePin()" class="key-tile h-[58px] rounded-2xl glass-card flex items-center justify-center text-rose-500 transition" title="Backspace">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M3 12l6.414 6.414a2 2 0 001.414.586H19a2 2 0 002-2V7a2 2 0 00-2-2h-8.172a2 2 0 00-1.414.586L3 12z"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="text-center text-[10px] opacity-50">Spicy Kingdom Secure Terminal • Live Cloud Sync</div>
+  </div>
+
+  <!-- ============================================================
+       SCREEN 2: RESPONSIVE APP CONTAINER (Mobile 480px + Desktop 1280px)
+       ============================================================ -->
+  <div id="appShell" class="hidden max-w-[480px] lg:max-w-7xl mx-auto min-h-screen">
+
+    <!-- STICKY GLASS HEADER -->
+    <header class="sticky top-0 z-30 glass-card rounded-b-3xl lg:rounded-b-2xl px-4 lg:px-6 py-3 flex items-center justify-between gap-3">
+      <div class="flex items-center gap-2.5 min-w-0">
+        <div class="hidden lg:flex w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 via-orange-600 to-rose-600 text-white font-extrabold text-sm items-center justify-center shrink-0 shadow">
+          SK
+        </div>
+        <div class="min-w-0">
+          <div class="flex items-center gap-1.5">
+            <span class="text-xs font-extrabold tracking-wider uppercase bg-gradient-to-r from-amber-600 to-rose-600 bg-clip-text text-transparent">Spicy Kingdom Ops</span>
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          </div>
+          <h2 class="text-sm font-bold truncate" id="welcomeBanner">Welcome</h2>
+        </div>
+      </div>
+
+      <!-- DESKTOP TOP NAVIGATION BAR -->
+      <nav class="hidden lg:flex items-center gap-1.5 bg-slate-500/10 p-1 rounded-2xl text-xs font-extrabold">
+        <button onclick="switchTab('dashboard')" class="desk-nav-btn px-4 py-2 rounded-xl transition-all" data-tab="dashboard">Dashboard</button>
+        <button onclick="switchTab('purchase')" class="desk-nav-btn px-4 py-2 rounded-xl transition-all" data-tab="purchase">Purchases</button>
+        <button onclick="switchTab('inventory')" class="desk-nav-btn px-4 py-2 rounded-xl transition-all" data-tab="inventory">Inventory</button>
+        <button onclick="switchTab('kitchen')" class="desk-nav-btn px-4 py-2 rounded-xl transition-all" data-tab="kitchen">Kitchen & Waste</button>
+        <button onclick="switchTab('staff')" class="desk-nav-btn px-4 py-2 rounded-xl transition-all" data-tab="staff">Staff & Payroll</button>
+      </nav>
+
+      <!-- RIGHT ACTION BUTTONS -->
+      <div class="flex items-center gap-1.5 shrink-0">
+        <a href="index.html" class="px-3 py-2 rounded-xl bg-rose-600 text-white text-xs font-extrabold shadow-sm hover:bg-rose-700 active:scale-95 transition flex items-center gap-1" title="Open POS Billing">
+          <span>POS</span>
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+        </a>
+        <button onclick="toggleTheme(true)" class="p-2.5 rounded-xl glass-card active:scale-90 transition" title="Theme">
+          <svg id="themeIconSun" class="w-4 h-4 hidden text-amber-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+          <svg id="themeIconMoon" class="w-4 h-4 text-slate-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+        </button>
+        <button id="reportsHeaderBtn" onclick="toggleModal('reportsModal')" class="hidden p-2.5 rounded-xl glass-card active:scale-90 transition" title="PDF & Excel Reports">
+          <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        </button>
+        <button id="adminSettingsBtn" onclick="openAdminModal()" class="hidden p-2.5 rounded-xl glass-card active:scale-90 transition" title="Control Center">
+          <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+        </button>
+        <button onclick="refreshData(true)" class="p-2.5 rounded-xl glass-card active:scale-90 transition" title="Sync">
+          <svg id="syncSvg" class="w-4 h-4 text-cyan-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+        </button>
+        <button onclick="logout()" class="p-2.5 rounded-xl bg-rose-500/15 text-rose-500 active:scale-90 transition" title="Lock Terminal">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- ============================================================
+         TAB 1: DASHBOARD (Responsive Grid for Mobile & Desktop)
+         ============================================================ -->
+    <section id="tab-dashboard" class="p-4 lg:p-6 space-y-4 lg:space-y-6">
+      <div class="flex items-center justify-between">
+        <h3 class="text-xs lg:text-sm font-extrabold uppercase tracking-wider opacity-70">Treasury & Balances</h3>
+        <button onclick="toggleModal('inflowModal')" class="text-xs font-bold bg-gradient-to-r from-emerald-500 to-teal-600 text-white px-3.5 py-2 rounded-full shadow-lg shadow-emerald-500/25 active:scale-95 transition">
+          + Cash Inflow
+        </button>
+      </div>
+
+      <div id="fundsBentoGrid" class="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4"></div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+        <!-- Left Column on Desktop: Self Ledger + Alerts -->
+        <div class="lg:col-span-5 space-y-4">
+          <div class="glass-card rounded-2xl p-4 border-l-4 border-violet-500">
+            <div class="flex justify-between items-center mb-2">
+              <div>
+                <h4 class="text-xs font-extrabold uppercase tracking-wider text-violet-600">Self Purchases (Individual Owed)</h4>
+                <p class="text-[11px] opacity-65">Out-of-pocket expenses per staff member</p>
+              </div>
+              <button onclick="openReimburseModal()" class="text-[11px] font-bold bg-violet-600 text-white px-3 py-1.5 rounded-xl shadow">Reimburse</button>
+            </div>
+            <div id="selfLedgerList" class="space-y-1.5 text-xs"></div>
+          </div>
+
+          <div class="grid grid-cols-3 gap-2.5">
+            <div onclick="switchTab('inventory'); setInvFilter('LOW');" class="cursor-pointer glass-card p-3 rounded-2xl border-l-4 border-rose-500 flex items-center justify-between active:scale-95 transition">
+              <div>
+                <p class="text-[10px] font-bold text-rose-500">Low Stock</p>
+                <p class="text-xl font-extrabold tabular-nums mt-0.5" id="dashLowStockCount">0</p>
+              </div>
+              <div class="w-8 h-8 rounded-full bg-rose-500/15 text-rose-500 flex items-center justify-center shrink-0">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+              </div>
+            </div>
+            <div onclick="switchTab('inventory'); setInvFilter('EXPIRY');" class="cursor-pointer glass-card p-3 rounded-2xl border-l-4 border-amber-500 flex items-center justify-between active:scale-95 transition">
+              <div>
+                <p class="text-[10px] font-bold text-amber-500">Expiring</p>
+                <p class="text-xl font-extrabold tabular-nums mt-0.5" id="dashExpiryCount">0</p>
+              </div>
+              <div class="w-8 h-8 rounded-full bg-amber-500/15 text-amber-500 flex items-center justify-center shrink-0">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              </div>
+            </div>
+            <div onclick="switchTab('kitchen'); setKitchenMode('WASTE');" class="cursor-pointer glass-card p-3 rounded-2xl border-l-4 border-pink-600 flex items-center justify-between active:scale-95 transition">
+              <div>
+                <p class="text-[10px] font-bold text-pink-600">Waste Loss</p>
+                <p class="text-base font-extrabold tabular-nums mt-0.5" id="dashWasteLoss">₹0</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column on Desktop: Cashflow Chart -->
+        <div class="lg:col-span-7">
+          <div class="glass-card rounded-3xl p-4 lg:p-5 h-full flex flex-col justify-between">
+            <div class="flex justify-between items-center mb-2">
+              <div>
+                <h4 class="text-xs lg:text-sm font-extrabold">Cashflow Pulse</h4>
+                <p class="text-[10px] lg:text-xs opacity-65">Inflows (Emerald) vs Outflows (Crimson)</p>
+              </div>
+              <div class="flex gap-1 bg-slate-500/10 p-1 rounded-xl text-[10px] font-bold">
+                <button onclick="renderCashflowChart(7)" id="cfBtn7" class="px-2.5 py-1 rounded-lg bg-emerald-600 text-white">7D</button>
+                <button onclick="renderCashflowChart(30)" id="cfBtn30" class="px-2.5 py-1 rounded-lg opacity-70">30D</button>
+              </div>
+            </div>
+            <div id="cashflowSvgContainer" class="w-full h-32 lg:h-44"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- OWNER / MANAGER EXECUTIVE INSIGHTS & EOQ ENGINE -->
+      <div id="ownerAnalyticsSection" class="hidden space-y-3 lg:space-y-4">
+        <div class="flex items-center justify-between pt-1">
+          <h3 class="text-xs lg:text-sm font-extrabold uppercase tracking-wider text-indigo-500">Executive Analytics & EOQ</h3>
+          <button onclick="toggleModal('reportsModal')" class="text-[10px] lg:text-xs font-bold px-3 py-1.5 rounded-full bg-indigo-500/15 text-indigo-500">Export PDF / Excel</button>
+        </div>
+
+        <div class="grid grid-cols-3 gap-2.5 lg:gap-4 text-center">
+          <div class="glass-card p-3 lg:p-4 rounded-2xl">
+            <p class="text-[10px] lg:text-xs opacity-65 font-semibold">Stock Worth</p>
+            <p class="text-sm lg:text-xl font-extrabold text-cyan-600 tabular-nums mt-0.5" id="kpiStockWorth">₹0</p>
+          </div>
+          <div class="glass-card p-3 lg:p-4 rounded-2xl">
+            <p class="text-[10px] lg:text-xs opacity-65 font-semibold">Month Spend</p>
+            <p class="text-sm lg:text-xl font-extrabold text-amber-600 tabular-nums mt-0.5" id="kpiMonthSpend">₹0</p>
+          </div>
+          <div class="glass-card p-3 lg:p-4 rounded-2xl">
+            <p class="text-[10px] lg:text-xs opacity-65 font-semibold">Payroll + Adv</p>
+            <p class="text-sm lg:text-xl font-extrabold text-fuchsia-600 tabular-nums mt-0.5" id="kpiPayrollTotal">₹0</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div class="glass-card p-4 lg:p-5 rounded-2xl">
+            <h4 class="text-xs lg:text-sm font-bold mb-2.5">Category Spend Breakdown</h4>
+            <div id="categoryAnalyticsList" class="space-y-2 text-xs"></div>
+          </div>
+
+          <div class="glass-card p-4 lg:p-5 rounded-2xl">
+            <h4 class="text-xs lg:text-sm font-bold mb-1">Smart Reorder & EOQ Recommendations</h4>
+            <p class="text-[10px] opacity-60 mb-2.5">Economic Order Quantity & days remaining based on kitchen burn rate</p>
+            <div id="consumptionRunwayList" class="space-y-2 text-xs"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+	<!-- ============================================================
+         TAB 2: PURCHASES (Responsive 2-Column Desktop Layout)
+         ============================================================ -->
+    <section id="tab-purchase" class="hidden p-4 lg:p-6 space-y-4">
+      <div class="rounded-3xl p-4 lg:p-5 text-white bg-gradient-to-br from-amber-500 via-orange-600 to-rose-600 shadow-xl shadow-orange-500/20">
+        <div class="flex justify-between items-start">
+          <div>
+            <p class="text-[11px] lg:text-xs font-semibold opacity-85">Total Recorded Outflows</p>
+            <p class="text-2xl lg:text-3xl font-extrabold tabular-nums mt-0.5" id="purBannerTotal">₹0</p>
+          </div>
+          <button onclick="togglePurchaseFormDrawer()" class="bg-white text-orange-600 text-xs font-extrabold px-3.5 py-2 rounded-full shadow-md active:scale-95 transition">
+            + Record Purchase
+          </button>
+        </div>
+        <div class="w-full h-2 bg-white/25 rounded-full overflow-hidden flex mt-3.5" id="purCatStackedBar"></div>
+        <div class="flex justify-between text-[10px] lg:text-xs font-semibold opacity-90 mt-1.5" id="purCatLegend"></div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+        <div id="purchaseFormCard" class="lg:col-span-5 glass-card rounded-3xl p-4 lg:p-5 border-t-4 border-amber-500">
+          <div class="flex justify-between items-center mb-3">
+            <h3 class="text-sm font-extrabold">New Purchase Entry</h3>
+            <button type="button" onclick="togglePurchaseFormDrawer()" class="text-xs opacity-60 font-bold lg:hidden">Hide</button>
+          </div>
+
+          <form id="purchaseForm" onsubmit="submitPurchase(event)" class="space-y-3">
+            <div>
+              <div class="flex justify-between items-center mb-1">
+                <label class="text-xs font-bold opacity-80">Category *</label>
+                <button type="button" onclick="openInputDialog('New Purchase Category', 'Enter category name', (val)=>{ purchaseCategories.push({label:val,value:val}); selectDirect('purCategory','purCategoryBtn',val,val); })" class="text-[11px] font-bold text-amber-600">+ New Category</button>
+              </div>
+              <input type="hidden" id="purCategory" value="Groceries" />
+              <button type="button" id="purCategoryBtn" onclick="openPicker('Select Purchase Category', purchaseCategories, 'purCategory', 'purCategoryBtn')" class="custom-select-btn w-full p-3 rounded-xl text-sm font-semibold flex justify-between items-center">
+                <span>Groceries</span><span class="opacity-50">▾</span>
+              </button>
+            </div>
+
+            <div>
+              <div id="liveStockIndicator" class="hidden mb-1.5 px-3 py-2 rounded-xl text-xs font-bold flex items-center justify-between"></div>
+              <div class="flex justify-between items-center mb-1">
+                <label class="text-xs font-bold opacity-80">Item Name *</label>
+                <button type="button" onclick="openInventoryPicker('purItemName', null, (val)=>selectCanonicalFromName(val))" class="text-[11px] font-bold text-cyan-600">Pick Existing</button>
+              </div>
+              <input type="text" id="purItemName" oninput="checkExistingStock(this.value)" placeholder="Type item name (e.g., Toor Dal, Milk)" required class="w-full p-2.5 rounded-xl glass-input text-sm" />
+            </div>
+
+            <div class="grid grid-cols-3 gap-2">
+              <div>
+                <label class="block text-xs font-bold opacity-80 mb-1">Qty *</label>
+                <input type="number" step="0.01" id="purQty" oninput="calcPurchaseTotal()" placeholder="3" required class="w-full p-2.5 rounded-xl glass-input text-sm" />
+              </div>
+              <div>
+                <label class="block text-xs font-bold opacity-80 mb-1">Unit *</label>
+                <input type="hidden" id="purUnit" value="kg" />
+                <button type="button" id="purUnitBtn" onclick="openPicker('Select Unit', unitOptions, 'purUnit', 'purUnitBtn')" class="custom-select-btn w-full p-2.5 rounded-xl text-sm font-semibold flex justify-between items-center">
+                  <span>kg</span><span class="opacity-50">▾</span>
+                </button>
+              </div>
+              <div>
+                <label class="block text-xs font-bold opacity-80 mb-1">Rate/Unit *</label>
+                <input type="number" step="0.01" id="purUnitPrice" oninput="calcPurchaseTotal()" placeholder="140" required class="w-full p-2.5 rounded-xl glass-input text-sm" />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2.5">
+              <div>
+                <label class="block text-xs font-bold opacity-80 mb-1">Total ₹ (Editable) *</label>
+                <input type="number" step="0.01" id="purTotal" required class="w-full p-2.5 rounded-xl border border-amber-400 bg-amber-500/10 font-extrabold text-sm tabular-nums" />
+              </div>
+              <div>
+                <label class="block text-xs font-bold opacity-80 mb-1">Expiry Date (Future Only)</label>
+                <input type="hidden" id="purExpiry" value="" />
+                <button type="button" id="purExpiryBtn" onclick="openCustomDatePicker('Select Expiry Date', 'purExpiry', 'purExpiryBtn', true)" class="custom-select-btn w-full p-2.5 rounded-xl text-xs font-bold flex justify-between items-center">
+                  <span>Optional</span><span class="opacity-50">📅</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2.5">
+              <div>
+                <label class="block text-xs font-bold opacity-80 mb-1">Paid From *</label>
+                <input type="hidden" id="purPaidFrom" value="Petty Cash Fund" />
+                <button type="button" id="purPaidFromBtn" onclick="openPaidFromPicker()" class="custom-select-btn w-full p-2.5 rounded-xl text-xs font-bold flex justify-between items-center text-left">
+                  <span class="truncate">Petty Cash Fund</span><span class="opacity-50 ml-1">▾</span>
+                </button>
+              </div>
+              <div>
+                <label class="block text-xs font-bold opacity-80 mb-1">Payment Mode</label>
+                <input type="hidden" id="purPayMethod" value="Cash" />
+                <button type="button" id="purPayMethodBtn" onclick="openPicker('Payment Mode', payModeOptions, 'purPayMethod', 'purPayMethodBtn')" class="custom-select-btn w-full p-2.5 rounded-xl text-xs font-bold flex justify-between items-center">
+                  <span>Cash</span><span class="opacity-50">▾</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2.5">
+              <div>
+                <label class="block text-xs font-bold opacity-80 mb-1">Shop / Supplier</label>
+                <input type="text" id="purSupplier" placeholder="Shop name" class="w-full p-2.5 rounded-xl glass-input text-sm" />
+              </div>
+              <div>
+                <label class="block text-xs font-bold opacity-80 mb-1">Bill No.</label>
+                <input type="text" id="purBillNo" placeholder="Optional" class="w-full p-2.5 rounded-xl glass-input text-sm" />
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold opacity-80 mb-1">Bill Photo (Saves to Drive by Date)</label>
+              <input type="file" accept="image/*" capture="environment" id="purBillPhoto" class="w-full text-xs file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-amber-500/20 file:text-amber-600" />
+            </div>
+
+            <button type="submit" class="w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white font-bold py-3.5 rounded-2xl shadow-lg active:scale-[0.99] transition">
+              Submit Purchase & Update Stock
+            </button>
+          </form>
+        </div>
+
+        <div class="lg:col-span-7 space-y-2.5" id="purchaseFeedList"></div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         TAB 3: STOCK INVENTORY (Responsive 3-Col Grid + Low/Max Limits)
+         ============================================================ -->
+    <section id="tab-inventory" class="hidden p-4 lg:p-6 space-y-4">
+      <div class="flex flex-wrap items-center justify-between gap-2.5">
+        <input type="text" id="invSearch" oninput="renderInventory()" placeholder="Search stock item..." class="flex-1 min-w-[220px] max-w-md p-2.5 rounded-xl glass-input text-sm" />
+        <div class="flex items-center gap-2">
+          <div class="flex gap-1.5 overflow-x-auto no-scrollbar text-xs font-bold">
+            <button onclick="setInvFilter('ALL')" class="inv-filter-btn px-3.5 py-2 rounded-full transition" data-filter="ALL">All Items</button>
+            <button onclick="setInvFilter('BY_CAT')" class="inv-filter-btn px-3.5 py-2 rounded-full transition" data-filter="BY_CAT">By Category</button>
+            <button onclick="setInvFilter('LOW')" class="inv-filter-btn px-3.5 py-2 rounded-full transition" data-filter="LOW">Low Stock</button>
+            <button onclick="setInvFilter('EXPIRY')" class="inv-filter-btn px-3.5 py-2 rounded-full transition" data-filter="EXPIRY">Expiring ≤3d</button>
+          </div>
+          <button id="invAddBtn" onclick="openUpsertInvModal()" class="hidden bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-xs font-bold px-3.5 py-2.5 rounded-xl shadow shrink-0">+ Add Stock</button>
+        </div>
+      </div>
+
+      <div id="inventoryList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+    </section>
+
+    <!-- ============================================================
+         TAB 4: BATCH TRANSFER CART & WASTE WITH PHOTO PROOF
+         ============================================================ -->
+    <section id="tab-kitchen" class="hidden p-4 lg:p-6 space-y-4">
+      <div class="grid grid-cols-3 gap-1.5 glass-card p-1.5 rounded-2xl text-[11px] lg:text-xs font-extrabold max-w-xl">
+        <button type="button" onclick="setKitchenMode('ISSUE')" id="kitModeIssue" class="py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-pink-600 text-white shadow transition">
+          Store ➔ Kitchen
+        </button>
+        <button type="button" onclick="setKitchenMode('RETURN')" id="kitModeReturn" class="py-2.5 rounded-xl opacity-75 transition">
+          Kitchen ➔ Store
+        </button>
+        <button type="button" onclick="setKitchenMode('WASTE')" id="kitModeWaste" class="py-2.5 rounded-xl opacity-75 transition">
+          Waste / Spoilage
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+        <div class="lg:col-span-5">
+          <div id="kitchenTransferCard" class="glass-card rounded-3xl p-4 lg:p-5 border-t-4 border-pink-500 space-y-3">
+            <div class="flex justify-between items-center">
+              <h3 class="text-sm font-extrabold" id="kitCardHeading">Issue Stock to Kitchen / Staff</h3>
+              <span class="text-[11px] font-extrabold px-2.5 py-0.5 rounded-full bg-pink-500/15 text-pink-600" id="kitCartBadge">0 in Cart</span>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold opacity-80 mb-1">Select Item *</label>
+              <input type="hidden" id="kitItemName" />
+              <button type="button" id="kitItemBtn" onclick="openInventoryPicker('kitItemName', 'kitItemBtn', updateKitchenUnitHint)" class="custom-select-btn w-full p-3 rounded-xl text-sm font-semibold flex justify-between items-center">
+                <span>Choose Stock Item...</span><span class="opacity-50">▾</span>
+              </button>
+              <p id="kitAvailableHint" class="text-[11px] font-bold text-cyan-600 mt-1"></p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2.5">
+              <div>
+                <label class="block text-xs font-bold opacity-80 mb-1">Quantity *</label>
+                <input type="number" step="0.01" id="kitQty" placeholder="1.5" class="w-full p-2.5 rounded-xl glass-input text-sm" />
+              </div>
+              <div>
+                <label class="block text-xs font-bold opacity-80 mb-1" id="kitSectionLabel">Issue To (Kitchen / Staff) *</label>
+                <input type="hidden" id="kitSection" value="Main Kitchen" />
+                <button type="button" id="kitSectionBtn" onclick="openTransferTargetPicker()" class="custom-select-btn w-full p-2.5 rounded-xl text-xs font-bold flex justify-between items-center">
+                  <span>Main Kitchen</span><span class="opacity-50">▾</span>
+                </button>
+              </div>
+            </div>
+
+            <button type="button" onclick="addToTransferCart()" class="w-full py-2.5 rounded-xl border-2 border-dashed border-pink-500/50 text-pink-600 font-extrabold text-xs hover:bg-pink-500/10 transition">
+              + Add Item to Transfer Queue
+            </button>
+
+            <div id="transferCartList" class="space-y-1.5"></div>
+
+            <button type="button" onclick="submitBatchTransfer()" class="w-full bg-gradient-to-r from-orange-500 to-pink-600 text-white font-bold py-3.5 rounded-2xl shadow-lg">
+              Confirm & Transfer All Queued Items
+            </button>
+          </div>
+
+          <div id="wasteManagementCard" class="hidden glass-card rounded-3xl p-4 lg:p-5 border-t-4 border-rose-600 space-y-3">
+            <div class="flex justify-between items-center">
+              <div>
+                <h3 class="text-sm font-extrabold text-rose-500">Waste & Spoilage Queue</h3>
+                <p class="text-[10px] opacity-65">Upload photo proof of rotten/expired items</p>
+              </div>
+              <span class="text-xs font-extrabold px-2.5 py-1 rounded-xl bg-rose-500/15 text-rose-500 tabular-nums" id="wasteTotalBadge">Month: ₹0</span>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold opacity-80 mb-1">Waste Category *</label>
+              <input type="hidden" id="wasteCategory" value="Raw Stock Spoilage / Rotten" />
+              <button type="button" id="wasteCatBtn" onclick="openPicker('Select Waste Category', wasteCategoryOptions, 'wasteCategory', 'wasteCatBtn', toggleWasteMode)" class="custom-select-btn w-full p-2.5 rounded-xl text-sm font-semibold flex justify-between items-center">
+                <span>Raw Stock Spoilage / Rotten</span><span class="opacity-50">▾</span>
+              </button>
+            </div>
+
+            <div id="wasteRawPickerBox">
+              <label class="block text-xs font-bold opacity-80 mb-1">Raw Item (Auto-Deducts Stock) *</label>
+              <input type="hidden" id="wasteRawItem" />
+              <button type="button" id="wasteRawItemBtn" onclick="openInventoryPicker('wasteRawItem', 'wasteRawItemBtn', autoCalcWasteLoss)" class="custom-select-btn w-full p-2.5 rounded-xl text-sm font-semibold flex justify-between items-center">
+                <span>Choose Raw Item...</span><span class="opacity-50">▾</span>
+              </button>
+            </div>
+
+            <div id="wasteCookedBox" class="hidden">
+              <label class="block text-xs font-bold opacity-80 mb-1">Cooked Food / Dish Name *</label>
+              <input type="text" id="wasteCookedName" placeholder="e.g., Chicken Biryani, Gravy" class="w-full p-2.5 rounded-xl glass-input text-sm" />
+            </div>
+
+            <div class="grid grid-cols-3 gap-2">
+              <div>
+                <label class="block text-xs font-bold opacity-80 mb-1">Qty *</label>
+                <input type="number" step="0.01" id="wasteQty" oninput="autoCalcWasteLoss()" placeholder="2" class="w-full p-2.5 rounded-xl glass-input text-sm" />
+              </div>
+              <div>
+                <label class="block text-xs font-bold opacity-80 mb-1">Unit</label>
+                <input type="hidden" id="wasteUnit" value="kg" />
+                <button type="button" id="wasteUnitBtn" onclick="openPicker('Unit', unitOptions, 'wasteUnit', 'wasteUnitBtn')" class="custom-select-btn w-full p-2.5 rounded-xl text-sm font-semibold flex justify-between items-center">
+                  <span>kg</span><span class="opacity-50">▾</span>
+                </button>
+              </div>
+              <div>
+                <label class="block text-xs font-bold opacity-80 mb-1">Loss ₹ *</label>
+                <input type="number" step="0.01" id="wasteLoss" placeholder="300" class="w-full p-2.5 rounded-xl border border-rose-400 bg-rose-500/10 font-extrabold text-sm tabular-nums" />
+              </div>
+            </div>
+
+            <input type="text" id="wasteReason" placeholder="Reason (e.g., Expired batch, rotten vegetables)" class="w-full p-2.5 rounded-xl glass-input text-sm" />
+
+            <div>
+              <label class="block text-xs font-bold opacity-80 mb-1">Photo of Expired / Rotten Item (For Verification)</label>
+              <input type="file" accept="image/*" capture="environment" id="wastePhotoInput" class="w-full text-xs file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-rose-500/20 file:text-rose-500" />
+            </div>
+
+            <button type="button" onclick="addToWasteCart()" class="w-full py-2.5 rounded-xl border-2 border-dashed border-rose-500/50 text-rose-500 font-extrabold text-xs hover:bg-rose-500/10 transition">
+              + Add to Waste Queue
+            </button>
+
+            <div id="wasteCartList" class="space-y-1.5"></div>
+
+            <button type="button" onclick="submitBatchWaste()" class="w-full bg-gradient-to-r from-rose-600 to-pink-600 text-white font-bold py-3.5 rounded-2xl shadow-lg">
+              Submit All Waste Entries
+            </button>
+          </div>
+        </div>
+
+        <div class="lg:col-span-7 glass-card rounded-2xl p-4 lg:p-5">
+          <h3 class="text-xs lg:text-sm font-extrabold uppercase tracking-wider opacity-70 mb-3">Recent Kitchen & Waste Logs</h3>
+          <div id="kitchenLogList" class="space-y-2 text-xs"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         TAB 5: STAFF ATTENDANCE & PAYROLL (Responsive 2-Col Desktop)
+         ============================================================ -->
+    <section id="tab-staff" class="hidden p-4 lg:p-6 space-y-4">
+      <div class="rounded-3xl p-5 text-white bg-gradient-to-br from-purple-600 via-fuchsia-600 to-pink-600 shadow-xl shadow-purple-500/25 flex items-center justify-between">
+        <div>
+          <p class="text-xs font-semibold opacity-85">Shift Attendance & Payroll</p>
+          <h3 class="text-2xl lg:text-3xl font-extrabold mt-0.5 tabular-nums" id="staffHeroRatio">0 / 0 Present</h3>
+          <p class="text-xs font-semibold opacity-90 mt-1 tabular-nums" id="staffHeroPending">Pending Payroll: ₹0</p>
+        </div>
+        <div class="relative w-16 h-16 flex items-center justify-center">
+          <svg class="w-16 h-16 -rotate-90" viewBox="0 0 36 36">
+            <circle cx="18" cy="18" r="15" fill="none" stroke="rgba(255,255,255,0.22)" stroke-width="3.5"/>
+            <circle id="staffDonutCircle" cx="18" cy="18" r="15" fill="none" stroke="#FFFFFF" stroke-width="3.5" stroke-dasharray="94.2" stroke-dashoffset="94.2" stroke-linecap="round"/>
+          </svg>
+          <span class="absolute text-xs font-extrabold tabular-nums" id="staffHeroPct">0%</span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+        <div class="lg:col-span-5 space-y-4">
+          <div class="flex items-center justify-between">
+            <h3 class="text-xs font-extrabold uppercase tracking-wider text-purple-500">Attendance & Payout Entry</h3>
+            <button id="addEmpBtn" onclick="toggleModal('addEmpModal')" class="hidden text-xs font-bold bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white px-3 py-1.5 rounded-xl shadow">+ Add Staff</button>
+          </div>
+
+          <div class="glass-card rounded-3xl p-4 border-t-4 border-purple-500">
+            <form onsubmit="submitStaffActivity(event)" class="space-y-3">
+              <div>
+                <label class="block text-xs font-bold opacity-80 mb-1">Select Employee *</label>
+                <input type="hidden" id="stfEmpId" />
+                <input type="hidden" id="stfEmpName" />
+                <button type="button" id="stfEmpBtn" onclick="openEmployeePicker()" class="custom-select-btn w-full p-3 rounded-xl text-sm font-bold flex justify-between items-center">
+                  <span>Select Employee...</span><span class="opacity-50">▾</span>
+                </button>
+              </div>
+
+              <div class="grid grid-cols-2 gap-2.5">
+                <div>
+                  <label class="block text-xs font-bold opacity-80 mb-1">Status / Action *</label>
+                  <input type="hidden" id="stfActivityType" value="ATTENDANCE" />
+                  <button type="button" id="stfActivityBtn" onclick="openStaffActionPicker()" class="custom-select-btn w-full p-2.5 rounded-xl text-xs font-extrabold flex justify-between items-center">
+                    <span>Present</span><span class="opacity-50">▾</span>
+                  </button>
+                </div>
+                <div>
+                  <label class="block text-xs font-bold opacity-80 mb-1">Date *</label>
+                  <input type="hidden" id="stfDate" />
+                  <button type="button" id="stfDateBtn" onclick="openCustomDatePicker('Select Attendance Date', 'stfDate', 'stfDateBtn', false)" class="custom-select-btn w-full p-2.5 rounded-xl text-xs font-bold flex justify-between items-center">
+                    <span id="stfDateLabel">Today</span><span class="opacity-50">📅</span>
+                  </button>
+                </div>
+              </div>
+
+              <div id="stfAmountWrapper" class="hidden grid grid-cols-2 gap-2.5 pt-1">
+                <div>
+                  <label class="block text-xs font-bold opacity-80 mb-1" id="stfAmountLabel">Amount ₹ *</label>
+                  <input type="number" id="stfAmount" placeholder="0" class="w-full p-2.5 rounded-xl glass-input text-sm font-bold" />
+                </div>
+                <div id="stfFundWrapper">
+                  <label class="block text-xs font-bold opacity-80 mb-1">Paid From *</label>
+                  <input type="hidden" id="stfPaidFrom" value="Restaurant Cash Box" />
+                  <button type="button" id="stfPaidFromBtn" onclick="openPicker('Paid From Fund', fundOptions, 'stfPaidFrom', 'stfPaidFromBtn')" class="custom-select-btn w-full p-2.5 rounded-xl text-xs font-bold flex justify-between items-center">
+                    <span>Restaurant Cash Box</span><span class="opacity-50">▾</span>
+                  </button>
+                </div>
+              </div>
+
+              <button type="submit" class="w-full bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white font-bold py-3.5 rounded-2xl shadow-lg shadow-purple-500/25">
+                Save / Update Staff Record
+              </button>
+            </form>
+          </div>
+
+          <div class="glass-card rounded-3xl p-4">
+            <div class="flex justify-between items-center mb-2">
+              <div>
+                <h4 class="text-xs font-extrabold" id="heatmapTitle">Attendance Heatmap</h4>
+                <p class="text-[10px] opacity-65">Tap any employee card to inspect</p>
+              </div>
+              <div class="flex items-center gap-1">
+                <button type="button" onclick="shiftHeatmapMonth(-1)" class="px-2 py-1 rounded-lg glass-card text-xs font-bold">‹</button>
+                <span class="text-xs font-extrabold px-1.5 tabular-nums" id="heatmapMonthLabel"></span>
+                <button type="button" onclick="shiftHeatmapMonth(1)" class="px-2 py-1 rounded-lg glass-card text-xs font-bold">›</button>
+              </div>
+            </div>
+            <div class="flex flex-wrap gap-2.5 text-[10px] font-bold mb-2.5">
+              <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-xs bg-emerald-500 inline-block"></span> Present</span>
+              <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-xs bg-amber-500 inline-block"></span> Half/LOP</span>
+              <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-xs bg-rose-500 inline-block"></span> Absent</span>
+              <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-xs bg-sky-500 inline-block"></span> Paid Leave</span>
+            </div>
+            <div id="calendarHeatmapGrid" class="grid grid-cols-7 gap-1.5 text-center text-xs"></div>
+          </div>
+        </div>
+
+        <div class="lg:col-span-7 space-y-2.5">
+          <h3 class="text-xs font-extrabold uppercase tracking-wider text-purple-500">Active Staff Roster</h3>
+          <div id="employeeCardsList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-2.5"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FLOATING FROSTED MOBILE BOTTOM NAVIGATION DOCK (Hidden on Desktop) -->
+    <nav class="lg:hidden fixed bottom-3 left-3 right-3 max-w-[456px] mx-auto glass-card rounded-[24px] z-40 px-2 py-2 shadow-2xl">
+      <div class="grid grid-cols-5 text-[10px] font-bold">
+        <button onclick="switchTab('dashboard')" class="nav-btn flex flex-col items-center gap-1 py-1.5 rounded-2xl transition-all duration-300" data-tab="dashboard">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+          <span>Home</span>
+        </button>
+        <button onclick="switchTab('purchase')" class="nav-btn flex flex-col items-center gap-1 py-1.5 rounded-2xl transition-all duration-300" data-tab="purchase">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+          <span>Purchase</span>
+        </button>
+        <button onclick="switchTab('inventory')" class="nav-btn flex flex-col items-center gap-1 py-1.5 rounded-2xl transition-all duration-300" data-tab="inventory">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+          <span>Inventory</span>
+        </button>
+        <button onclick="switchTab('kitchen')" class="nav-btn flex flex-col items-center gap-1 py-1.5 rounded-2xl transition-all duration-300" data-tab="kitchen">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+          <span>Kitchen</span>
+        </button>
+        <button onclick="switchTab('staff')" class="nav-btn flex flex-col items-center gap-1 py-1.5 rounded-2xl transition-all duration-300" data-tab="staff">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          <span>Staff</span>
+        </button>
+      </div>
+    </nav>
+  </div>
+
+  <!-- ============================================================
+       IN-APP MODALS & DRAWERS (Centered on Desktop, Bottom Sheet on Mobile)
+       ============================================================ -->
+
+  <!-- 1. UNIVERSAL IN-APP PICKER -->
+  <div id="customPickerModal" class="fixed inset-0 bg-slate-950/65 backdrop-blur-sm z-[85] hidden flex items-end lg:items-center justify-center lg:p-4">
+    <div class="bottom-sheet rounded-t-[28px] w-full max-w-[480px] p-5 pb-8 max-h-[82vh] flex flex-col">
+      <div class="w-10 h-1 bg-slate-400/40 rounded-full mx-auto mb-3 lg:hidden"></div>
+      <div class="flex justify-between items-center mb-3">
+        <h3 class="font-extrabold text-base" id="pickerTitle">Select Option</h3>
+        <button onclick="toggleModal('customPickerModal')" class="text-2xl leading-none opacity-60">&times;</button>
+      </div>
+      <input type="text" id="pickerSearchInput" oninput="filterPickerOptions()" placeholder="Type to filter..." class="hidden w-full p-2.5 mb-3 rounded-xl glass-input text-sm" />
+      <div id="pickerOptionsList" class="overflow-y-auto space-y-1.5 pr-1"></div>
+    </div>
+  </div>
+
+  <!-- 2. IN-APP CUSTOM CALENDAR DATE PICKER -->
+  <div id="customDateModal" class="fixed inset-0 bg-slate-950/65 backdrop-blur-sm z-[85] hidden flex items-end lg:items-center justify-center lg:p-4">
+    <div class="bottom-sheet rounded-t-[28px] w-full max-w-[480px] p-5 pb-8 space-y-3">
+      <div class="w-10 h-1 bg-slate-400/40 rounded-full mx-auto lg:hidden"></div>
+      <div class="flex justify-between items-center">
+        <h3 class="font-extrabold text-base" id="datePickerTitle">Select Date</h3>
+        <button onclick="toggleModal('customDateModal')" class="text-2xl opacity-60">&times;</button>
+      </div>
+      <div class="flex justify-between items-center px-2">
+        <button type="button" onclick="shiftPickerMonth(-1)" class="px-3 py-1.5 rounded-xl glass-card font-bold">‹ Prev</button>
+        <span class="font-extrabold text-sm" id="datePickerMonthLabel"></span>
+        <button type="button" onclick="shiftPickerMonth(1)" class="px-3 py-1.5 rounded-xl glass-card font-bold">Next ›</button>
+      </div>
+      <div id="datePickerGrid" class="grid grid-cols-7 gap-1.5 text-center text-xs"></div>
+    </div>
+  </div>
+
+  <!-- 3. IN-APP TEXT / NUMBER INPUT DIALOG -->
+  <div id="inAppInputModal" class="fixed inset-0 bg-slate-950/65 backdrop-blur-sm z-[88] hidden flex items-end lg:items-center justify-center lg:p-4">
+    <div class="bottom-sheet rounded-t-[28px] w-full max-w-[480px] p-6 pb-8 space-y-4">
+      <div class="w-10 h-1 bg-slate-400/40 rounded-full mx-auto lg:hidden"></div>
+      <div class="flex justify-between items-center">
+        <h3 class="font-extrabold text-base" id="inAppInputTitle">Enter Value</h3>
+        <button onclick="toggleModal('inAppInputModal')" class="text-2xl opacity-60">&times;</button>
+      </div>
+      <p class="text-xs opacity-70" id="inAppInputSub"></p>
+      <input type="text" id="inAppInputField" class="w-full p-3 rounded-xl glass-input text-sm font-bold" />
+      <input type="text" id="inAppInputField2" class="hidden w-full p-3 rounded-xl glass-input text-sm font-bold" />
+      <button type="button" onclick="confirmInAppInput()" class="w-full bg-gradient-to-r from-amber-500 to-rose-600 text-white font-bold py-3.5 rounded-2xl shadow-lg">Confirm</button>
+    </div>
+  </div>
+
+  <!-- 4. DIGITAL RECEIPT & VERIFICATION MODAL -->
+  <div id="voucherModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-[75] hidden flex items-end lg:items-center justify-center lg:p-4">
+    <div class="bottom-sheet rounded-t-[28px] w-full max-w-[480px] p-6 pb-8 space-y-4">
+      <div class="w-10 h-1 bg-slate-400/40 rounded-full mx-auto lg:hidden"></div>
+      <div class="flex justify-between items-center">
+        <span id="vchStatusBadge" class="text-xs font-extrabold px-3 py-1 rounded-full bg-blue-500/15 text-blue-600">Verified Digital Voucher</span>
+        <button onclick="toggleModal('voucherModal')" class="w-8 h-8 rounded-full bg-slate-500/10 flex items-center justify-center text-lg">&times;</button>
+      </div>
+      <div class="p-4 rounded-2xl border border-dashed border-slate-400/40 bg-slate-500/5 space-y-2.5 text-xs">
+        <div class="flex justify-between items-start border-b border-slate-400/20 pb-2.5">
+          <div>
+            <p class="text-[10px] font-bold uppercase opacity-55">Supplier / Vendor</p>
+            <p class="text-base font-extrabold mt-0.5" id="vchSupplier">Vendor</p>
+          </div>
+          <span class="font-bold opacity-60" id="vchBillNo">#PUR-000</span>
+        </div>
+        <div class="flex justify-between py-1"><span class="opacity-65">Purchased Item</span><span class="font-bold" id="vchItem">-</span></div>
+        <div class="flex justify-between py-1"><span class="opacity-65">Payment Source</span><span class="font-bold" id="vchSource">-</span></div>
+        <div class="flex justify-between py-1"><span class="opacity-65">Logged By & Time</span><span class="font-bold" id="vchTime">-</span></div>
+        <div class="flex justify-between items-center border-t border-slate-400/20 pt-2.5">
+          <span class="font-extrabold text-sm">Total Paid</span>
+          <span class="font-extrabold text-xl text-rose-500 tabular-nums" id="vchTotal">₹0</span>
+        </div>
+      </div>
+
+      <div id="vchDriveLinkBox" class="hidden">
+        <a id="vchDriveAnchor" href="#" target="_blank" class="w-full py-2.5 rounded-xl bg-blue-500/15 text-blue-600 font-extrabold text-xs flex items-center justify-center gap-2">
+          Open Uploaded Bill Photo (Google Drive)
+        </a>
+      </div>
+
+      <div id="vchVerifyActions" class="hidden grid grid-cols-3 gap-2">
+        <button type="button" onclick="setPurchaseVerifyStatus('Verified')" class="py-2 rounded-xl bg-emerald-500/15 text-emerald-600 text-xs font-extrabold">✓ Verify</button>
+        <button type="button" onclick="setPurchaseVerifyStatus('Disputed')" class="py-2 rounded-xl bg-amber-500/15 text-amber-600 text-xs font-extrabold">⚠ Dispute</button>
+        <button type="button" onclick="setPurchaseVerifyStatus('Cancelled')" class="py-2 rounded-xl bg-rose-500/15 text-rose-500 text-xs font-extrabold">✕ Cancel</button>
+      </div>
+
+      <button onclick="toggleModal('voucherModal')" class="w-full bg-slate-900 text-white font-bold py-3.5 rounded-2xl">Close Receipt</button>
+    </div>
+  </div>
+
+  <!-- 5. STAFF PAYROLL SETTLEMENT & KYC DRAWER -->
+  <div id="payrollDrawerModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-[75] hidden flex items-end lg:items-center justify-center lg:p-4">
+    <div class="bottom-sheet rounded-t-[28px] w-full max-w-[480px] p-6 pb-8 space-y-4 max-h-[88vh] overflow-y-auto">
+      <div class="w-10 h-1 bg-slate-400/40 rounded-full mx-auto lg:hidden"></div>
+      <div class="flex justify-between items-center">
+        <div>
+          <h3 class="font-extrabold text-base" id="payDrawerName">Employee Payroll</h3>
+          <p class="text-xs opacity-65" id="payDrawerRole">Role</p>
+        </div>
+        <button onclick="toggleModal('payrollDrawerModal')" class="text-2xl opacity-60">&times;</button>
+      </div>
+
+      <div id="payDrawerKycBox" class="p-3.5 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 space-y-1 text-xs">
+        <p class="text-[10px] font-extrabold uppercase text-indigo-500 mb-1">Confidential KYC & Bank Account</p>
+        <p><span class="opacity-65">Mobile:</span> <strong id="kycMobile">-</strong></p>
+        <p><span class="opacity-65">ID Proof:</span> <strong id="kycId">-</strong></p>
+        <p><span class="opacity-65">Address:</span> <strong id="kycAddress">-</strong></p>
+        <p><span class="opacity-65">Bank / UPI:</span> <strong id="kycBank">-</strong></p>
+      </div>
+
+      <div class="grid grid-cols-3 gap-2 text-center glass-card p-3 rounded-2xl text-xs tabular-nums">
+        <div><p class="text-[10px] opacity-65">Base Salary</p><p class="font-extrabold mt-0.5" id="payDrawerBase">₹0</p></div>
+        <div><p class="text-[10px] opacity-65">Adv / LOP / Half</p><p class="font-extrabold text-amber-500 mt-0.5" id="payDrawerDed">₹0</p></div>
+        <div><p class="text-[10px] opacity-65">Net Payable</p><p class="font-extrabold text-purple-600 mt-0.5" id="payDrawerNet">₹0</p></div>
+      </div>
+
+      <div id="payDrawerPrivilegedBtns" class="hidden space-y-2.5">
+        <button type="button" onclick="disburseNetSalary()" class="w-full bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white font-bold py-3.5 rounded-2xl shadow-lg">
+          Disburse Net Salary & Mark Paid
+        </button>
+        <div class="grid grid-cols-2 gap-2">
+          <button type="button" onclick="editDrawerSalary()" class="py-2.5 rounded-xl glass-card text-xs font-extrabold text-cyan-600">Edit Base Salary</button>
+          <button type="button" onclick="settleDrawerEmployee()" class="py-2.5 rounded-xl bg-rose-500/15 text-rose-500 text-xs font-extrabold">Mark Settled / Remove</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. ADD / MERGE INVENTORY STOCK MODAL -->
+  <div id="upsertInvModal" class="fixed inset-0 bg-slate-950/65 backdrop-blur-sm z-50 hidden flex items-end lg:items-center justify-center lg:p-4">
+    <div class="bottom-sheet rounded-t-[28px] w-full max-w-[480px] p-6 pb-8 space-y-3">
+      <div class="w-10 h-1 bg-slate-400/40 rounded-full mx-auto lg:hidden"></div>
+      <div class="flex justify-between items-center">
+        <h3 class="font-extrabold">Add / Adjust Inventory Item</h3>
+        <button onclick="toggleModal('upsertInvModal')" class="text-2xl opacity-60">&times;</button>
+      </div>
+      <form onsubmit="submitUpsertInv(event)" class="space-y-3 text-sm">
+        <div id="invFuzzyBadge" class="hidden px-3 py-2 rounded-xl text-xs font-bold bg-cyan-500/15 text-cyan-600 flex justify-between items-center"></div>
+        <input type="text" id="upInvName" oninput="checkInvModalFuzzy(this.value)" placeholder="Item Name (e.g., Milk, Toor Dal)" required class="w-full p-3 rounded-xl glass-input" />
+        <div>
+          <input type="hidden" id="upInvCat" value="Groceries" />
+          <button type="button" id="upInvCatBtn" onclick="openPicker('Select Category', purchaseCategories, 'upInvCat', 'upInvCatBtn')" class="custom-select-btn w-full p-3 rounded-xl text-sm font-semibold flex justify-between items-center">
+            <span>Groceries</span><span class="opacity-50">▾</span>
+          </button>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <input type="number" step="0.01" id="upInvQty" placeholder="Quantity to Add (e.g. 4.5)" required class="w-full p-3 rounded-xl glass-input font-bold" />
+          <div>
+            <input type="hidden" id="upInvUnit" value="kg" />
+            <button type="button" id="upInvUnitBtn" onclick="openPicker('Unit', unitOptions, 'upInvUnit', 'upInvUnitBtn')" class="custom-select-btn w-full p-3 rounded-xl text-sm font-bold flex justify-between items-center">
+              <span>kg</span><span class="opacity-50">▾</span>
+            </button>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-[11px] font-bold text-rose-500 mb-1">Low Stock Alert (Red)</label>
+            <input type="number" step="0.01" id="upInvMin" placeholder="e.g. 2" class="w-full p-3 rounded-xl glass-input font-bold" />
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-emerald-600 mb-1">Max / Par Target (Green)</label>
+            <input type="number" step="0.01" id="upInvMax" placeholder="e.g. 20" class="w-full p-3 rounded-xl glass-input font-bold" />
+          </div>
+        </div>
+        <button type="submit" class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold py-3.5 rounded-2xl shadow-lg">Save / Merge Stock</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 6B. EDIT LOW & MAX STOCK ALERT THRESHOLDS MODAL -->
+  <div id="stockAlertModal" class="fixed inset-0 bg-slate-950/65 backdrop-blur-sm z-[80] hidden flex items-end lg:items-center justify-center lg:p-4">
+    <div class="bottom-sheet rounded-t-[28px] w-full max-w-[440px] p-6 pb-8 space-y-4">
+      <div class="w-10 h-1 bg-slate-400/40 rounded-full mx-auto lg:hidden"></div>
+      <div class="flex justify-between items-center">
+        <div>
+          <h3 class="font-extrabold text-base" id="saItemHeading">Stock Alert Limits</h3>
+          <p class="text-[11px] opacity-65" id="saItemSub">Configure Low Stock & Par Max Targets</p>
+        </div>
+        <button onclick="toggleModal('stockAlertModal')" class="text-2xl opacity-60">&times;</button>
+      </div>
+      <form onsubmit="saveStockAlertLimits(event)" class="space-y-3 text-sm">
+        <input type="hidden" id="saItemName" />
+        <input type="hidden" id="saItemCat" />
+        <input type="hidden" id="saItemUnit" />
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-extrabold text-rose-500 mb-1">Low Stock Alert (Min)</label>
+            <input type="number" step="0.01" min="0" id="saMinAlert" required class="w-full p-3 rounded-xl border border-rose-400 bg-rose-500/10 font-extrabold text-sm tabular-nums" />
+          </div>
+          <div>
+            <label class="block text-xs font-extrabold text-emerald-600 mb-1">Max / Par Target (Max)</label>
+            <input type="number" step="0.01" min="0" id="saMaxTarget" required class="w-full p-3 rounded-xl border border-emerald-400 bg-emerald-500/10 font-extrabold text-sm tabular-nums" />
+          </div>
+        </div>
+        <button type="submit" class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold py-3.5 rounded-2xl shadow-lg">
+          Update Alert Limits
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 7. PDF & EXCEL REPORTS EXPORT MODAL -->
+  <div id="reportsModal" class="fixed inset-0 bg-slate-950/65 backdrop-blur-sm z-[75] hidden flex items-end lg:items-center justify-center lg:p-4">
+    <div class="bottom-sheet rounded-t-[28px] w-full max-w-[480px] p-6 pb-8 space-y-4">
+      <div class="w-10 h-1 bg-slate-400/40 rounded-full mx-auto lg:hidden"></div>
+      <div class="flex justify-between items-center">
+        <h3 class="font-extrabold text-base">Generate Business Reports</h3>
+        <button onclick="toggleModal('reportsModal')" class="text-2xl opacity-60">&times;</button>
+      </div>
+      <div class="space-y-3 text-sm">
+        <div>
+          <label class="block text-xs font-bold opacity-80 mb-1">Report Type</label>
+          <input type="hidden" id="repType" value="LEDGER" />
+          <button type="button" id="repTypeBtn" onclick="openPicker('Select Report Type', reportTypeOptions, 'repType', 'repTypeBtn')" class="custom-select-btn w-full p-3 rounded-xl text-sm font-bold flex justify-between items-center">
+            <span>Cash Inflows & Outflows Ledger</span><span class="opacity-50">▾</span>
+          </button>
+        </div>
+        <div>
+          <label class="block text-xs font-bold opacity-80 mb-1">Time Period</label>
+          <input type="hidden" id="repPeriod" value="MONTHLY" />
+          <button type="button" id="repPeriodBtn" onclick="openPicker('Select Time Period', reportPeriodOptions, 'repPeriod', 'repPeriodBtn')" class="custom-select-btn w-full p-3 rounded-xl text-sm font-bold flex justify-between items-center">
+            <span>Monthly (This Month)</span><span class="opacity-50">▾</span>
+          </button>
+        </div>
+        <div class="grid grid-cols-2 gap-3 pt-2">
+          <button type="button" onclick="exportReport('EXCEL')" class="py-3.5 rounded-2xl bg-emerald-600 text-white font-extrabold text-xs shadow-lg">Export Excel (.xlsx)</button>
+          <button type="button" onclick="exportReport('PDF')" class="py-3.5 rounded-2xl bg-rose-600 text-white font-extrabold text-xs shadow-lg">Download PDF</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8. OWNER & IT ADMIN CONTROL CENTER -->
+  <div id="adminModal" class="fixed inset-0 bg-slate-950/65 backdrop-blur-sm z-[75] hidden flex items-end lg:items-center justify-center lg:p-4">
+    <div class="bottom-sheet rounded-t-[28px] w-full max-w-[480px] p-6 pb-10 space-y-4 max-h-[88vh] overflow-y-auto">
+      <div class="w-10 h-1 bg-slate-400/40 rounded-full mx-auto lg:hidden"></div>
+      <div class="flex justify-between items-center">
+        <h3 class="font-extrabold text-base">Control Center & Access</h3>
+        <button onclick="toggleModal('adminModal')" class="text-2xl opacity-60">&times;</button>
+      </div>
+
+      <div class="p-3.5 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-between">
+        <div>
+          <p class="text-xs font-extrabold">Leave Management Feature</p>
+          <p class="text-[11px] opacity-70">Paid & Loss-of-Pay Leaves in Attendance</p>
+        </div>
+        <button id="toggleLeaveFeatureBtn" onclick="toggleLeaveFeature()" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-emerald-600 text-white">Enabled</button>
+      </div>
+
+      <div class="flex justify-between items-center">
+        <h4 class="text-xs font-extrabold uppercase tracking-wider opacity-70">Staff Login Accounts (6-Digit PINs)</h4>
+        <button onclick="openAddUserModal()" class="text-xs font-bold text-indigo-500">+ New Login</button>
+      </div>
+      <div id="adminUsersList" class="space-y-2.5 text-xs"></div>
+
+      <div class="pt-2 border-t border-slate-500/15">
+        <button type="button" onclick="resetTestingDataDialog()" class="w-full py-3 rounded-2xl bg-rose-500/15 text-rose-500 font-extrabold text-xs">
+          Reset All Testing Data (Go Live)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 9. REIMBURSE SELF PURCHASE MODAL -->
+  <div id="reimburseModal" class="fixed inset-0 bg-slate-950/65 backdrop-blur-sm z-50 hidden flex items-end lg:items-center justify-center lg:p-4">
+    <div class="bottom-sheet rounded-t-[28px] w-full max-w-[480px] p-6 pb-8 space-y-4">
+      <div class="w-10 h-1 bg-slate-400/40 rounded-full mx-auto lg:hidden"></div>
+      <div class="flex justify-between items-center">
+        <h3 class="font-extrabold text-base">Reimburse Self Purchase</h3>
+        <button onclick="toggleModal('reimburseModal')" class="text-2xl opacity-60">&times;</button>
+      </div>
+      <form onsubmit="submitReimbursement(event)" class="space-y-3 text-sm">
+        <div>
+          <label class="block text-xs font-bold opacity-80 mb-1">Reimburse To *</label>
+          <input type="hidden" id="reimbPerson" />
+          <button type="button" id="reimbPersonBtn" onclick="openReimbursePersonPicker()" class="custom-select-btn w-full p-3 rounded-xl text-sm font-bold flex justify-between items-center">
+            <span>Select Staff...</span><span class="opacity-50">▾</span>
+          </button>
+        </div>
+        <input type="number" step="0.01" id="reimbAmount" placeholder="Amount ₹ *" required class="w-full p-3 rounded-xl glass-input font-bold" />
+        <div>
+          <label class="block text-xs font-bold opacity-80 mb-1">Paid From *</label>
+          <input type="hidden" id="reimbPaidFrom" value="Restaurant Cash Box" />
+          <button type="button" id="reimbPaidFromBtn" onclick="openPicker('Paid From Fund', fundOptions, 'reimbPaidFrom', 'reimbPaidFromBtn')" class="custom-select-btn w-full p-3 rounded-xl text-sm font-bold flex justify-between items-center">
+            <span>Restaurant Cash Box</span><span class="opacity-50">▾</span>
+          </button>
+        </div>
+        <button type="submit" class="w-full bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-bold py-3.5 rounded-2xl shadow-lg">Confirm Reimbursement</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 10. ADD EMPLOYEE & KYC MODAL -->
+  <div id="addEmpModal" class="fixed inset-0 bg-slate-950/65 backdrop-blur-sm z-50 hidden flex items-end lg:items-center justify-center lg:p-4">
+    <div class="bottom-sheet rounded-t-[28px] w-full max-w-[480px] p-6 pb-10 space-y-3 max-h-[88vh] overflow-y-auto">
+      <div class="w-10 h-1 bg-slate-400/40 rounded-full mx-auto lg:hidden"></div>
+      <div class="flex justify-between items-center">
+        <h3 class="font-extrabold">Add Spicy Kingdom Staff & KYC</h3>
+        <button onclick="toggleModal('addEmpModal')" class="text-2xl opacity-60">&times;</button>
+      </div>
+      <form onsubmit="submitNewEmployee(event)" class="space-y-2.5 text-sm">
+        <input type="text" id="empName" placeholder="Full Name *" required class="w-full p-2.5 rounded-xl glass-input" />
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <input type="hidden" id="empRole" value="Waiter" />
+            <button type="button" id="empRoleBtn" onclick="openPicker('Select Role', staffRoleOptions, 'empRole', 'empRoleBtn')" class="custom-select-btn w-full p-2.5 rounded-xl text-xs font-bold flex justify-between items-center">
+              <span>Waiter</span><span class="opacity-50">▾</span>
+            </button>
+          </div>
+          <input type="tel" id="empMobile" placeholder="Mobile Number *" required class="w-full p-2.5 rounded-xl glass-input" />
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <input type="hidden" id="empPayType" value="Monthly Salary" />
+          <button type="button" id="empPayTypeBtn" onclick="openPicker('Pay Structure', [{label:'Monthly Salary',value:'Monthly Salary'},{label:'Daily Wage',value:'Daily Wage'}], 'empPayType', 'empPayTypeBtn')" class="custom-select-btn w-full p-2.5 rounded-xl text-xs font-bold flex justify-between items-center">
+            <span>Monthly Salary</span><span class="opacity-50">▾</span>
+          </button>
+          <input type="number" id="empSalary" placeholder="Base Salary / Wage ₹ *" required class="w-full p-2.5 rounded-xl glass-input font-bold" />
+        </div>
+        <input type="text" id="empIdProof" placeholder="Government ID Proof (Voter ID / PAN / Driving License)" class="w-full p-2.5 rounded-xl glass-input" />
+        <input type="text" id="empAddress" placeholder="Full Residential Address" class="w-full p-2.5 rounded-xl glass-input" />
+        <input type="text" id="empBank" placeholder="Bank A/c No, IFSC & Bank Name (or UPI)" class="w-full p-2.5 rounded-xl glass-input" />
+        <button type="submit" class="w-full bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white font-bold py-3.5 rounded-2xl shadow-lg">Save Staff & KYC</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 11. ADD CASH INFLOW MODAL -->
+  <div id="inflowModal" class="fixed inset-0 bg-slate-950/65 backdrop-blur-sm z-50 hidden flex items-end lg:items-center justify-center lg:p-4">
+    <div class="bottom-sheet rounded-t-[28px] w-full max-w-[480px] p-6 pb-8 space-y-3">
+      <div class="w-10 h-1 bg-slate-400/40 rounded-full mx-auto lg:hidden"></div>
+      <div class="flex justify-between items-center">
+        <h3 class="font-extrabold">Record Cash Inflow</h3>
+        <button onclick="toggleModal('inflowModal')" class="text-2xl opacity-60">&times;</button>
+      </div>
+      <form onsubmit="submitInflow(event)" class="space-y-3 text-sm">
+        <input type="hidden" id="infSource" value="Daily Counter Sales" />
+        <button type="button" id="infSourceBtn" onclick="openPicker('Inflow Source', inflowSourceOptions, 'infSource', 'infSourceBtn')" class="custom-select-btn w-full p-3 rounded-xl text-sm font-bold flex justify-between items-center">
+          <span>Daily Counter Sales</span><span class="opacity-50">▾</span>
+        </button>
+        <input type="number" step="0.01" id="infAmount" placeholder="Amount ₹" required class="w-full p-3 rounded-xl glass-input font-bold" />
+        <input type="hidden" id="infDepositedTo" value="Restaurant Cash Box" />
+        <button type="button" id="infDepositedToBtn" onclick="openPicker('Deposit To Fund', fundOptions, 'infDepositedTo', 'infDepositedToBtn')" class="custom-select-btn w-full p-3 rounded-xl text-sm font-bold flex justify-between items-center">
+          <span>Restaurant Cash Box</span><span class="opacity-50">▾</span>
+        </button>
+        <button type="submit" class="w-full bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-bold py-3.5 rounded-2xl">Add Cash Inflow</button>
+      </form>
+    </div>
+  </div>
+  <script>
+    // ============================================================
+    // 1. LIVE APPS SCRIPT /exec URL
+    // ============================================================
+    const DEFAULT_API_URL = "https://script.google.com/macros/s/AKfycbyi6CUoUYgRzABSnQIsnjl6EeEs_WxnP3hHmLUYQrlvMpFZvtT-LljrxMT1mZtT-V4j/exec";
+    const PRIVILEGED_ROLES = ["Owner", "IT Admin", "Manager"];
+    const TAB_ORDER = ["dashboard", "purchase", "inventory", "kitchen", "staff"];
+
+    let purchaseCategories = [
+      "Groceries", "Vegetables & Fruits", "Dairy (Milk/Curd)",
+      "Meat, Chicken & Seafood", "Gas Cylinders & Fuel",
+      "Tea, Coffee & Beverages", "Packaging & Disposables", "Utility Bills & Maintenance"
+    ].map(c => ({ label: c, value: c }));
+
+    const unitOptions = ["kg", "g", "L", "ml", "pcs", "units", "cylinders", "cms"].map(u => ({ label: u, value: u }));
+    const payModeOptions = ["Cash", "UPI / QR", "Card / Bank", "Credit"].map(m => ({ label: m, value: m }));
+    const fundOptions = ["Restaurant Cash Box", "Petty Cash Fund", "Owner Direct"].map(f => ({ label: f, value: f }));
+    const inflowSourceOptions = ["Daily Counter Sales", "UPI / Online Orders", "Owner Cash Top-up", "Other Income"].map(s => ({ label: s, value: s }));
+    const staffRoleOptions = ["Manager", "Cashier", "Head Chef", "Sous Chef", "Waiter", "Server", "Kitchen Helper", "Store Keeper", "Employee"].map(r => ({ label: r, value: r }));
+    const wasteCategoryOptions = [
+      { label: "Raw Stock Spoilage / Rotten (Deducts Stock)", value: "Raw Stock Spoilage / Rotten" },
+      { label: "Expired Inventory Batch (Deducts Stock)", value: "Expired Inventory Batch" },
+      { label: "Cooked Food / Kitchen Prep Waste", value: "Cooked Food Waste" },
+      { label: "Plate / Customer Leftover Waste", value: "Plate Waste" }
+    ];
+    const reportTypeOptions = [
+      { label: "Cash Inflows & Outflows Ledger", value: "LEDGER" },
+      { label: "Stock Inventory & Valuation", value: "STOCK" },
+      { label: "Purchases & Vendor Bills", value: "PURCHASES" },
+      { label: "Staff Attendance Register", value: "ATTENDANCE" },
+      { label: "Salary, Advances & Net Payable", value: "SALARY" },
+      { label: "Waste & Spoilage Loss", value: "WASTE" }
+    ];
+    const reportPeriodOptions = [
+      { label: "Daily (Today)", value: "DAILY" },
+      { label: "Weekly (Last 7 Days)", value: "WEEKLY" },
+      { label: "Monthly (This Month)", value: "MONTHLY" },
+      { label: "Annually (This Year)", value: "ANNUALLY" }
+    ];
+
+    let pinBuffer = "";
+    let currentUser = JSON.parse(localStorage.getItem("sk_user") || "null");
+    let appData = { funds: [], inventory: [], purchases: [], kitchenLog: [], wasteLog: [], employees: [], staffActivity: [], inflows: [], selfLedger: {}, settings: {}, users: [] };
+    let invFilter = "ALL";
+    let kitchenMode = "ISSUE";
+    let transferCart = [];
+    let wasteCart = [];
+    let activeVoucherTxn = null;
+    let activeDrawerEmp = null;
+    let currentTabIdx = 0;
+
+    let activePickerConfig = null;
+    let datePickerTarget = { hiddenId: "", btnId: "", viewDate: new Date(), futureOnly: false };
+    let inAppInputCallback = null;
+
+    function isPriv() { return currentUser && PRIVILEGED_ROLES.includes(currentUser.role); }
+
+    function getLocalTodayStr() {
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    }
+
+    window.onload = async () => {
+      if (localStorage.getItem("sk_theme") === "dark") applyThemeUI(true);
+      const today = getLocalTodayStr();
+      document.getElementById("stfDate").value = today;
+      document.getElementById("stfDateLabel").textContent = today;
+      document.getElementById("heatmapMonthLabel").textContent = today.slice(0, 7);
+      setInvFilter("ALL");
+      switchTab("dashboard");
+
+      if (currentUser) {
+        showApp();
+        await refreshData(true);
+      }
+      setTimeout(() => {
+        const sp = document.getElementById("splashScreen");
+        sp.classList.add("opacity-0", "pointer-events-none");
+        setTimeout(() => sp.classList.add("hidden"), 500);
+      }, 2200);
+    };
+
+    function applyThemeUI(isDark) {
+      document.body.classList.toggle("dark-mode", isDark);
+      document.getElementById("themeIconSun").classList.toggle("hidden", !isDark);
+      document.getElementById("themeIconMoon").classList.toggle("hidden", isDark);
+      document.querySelectorAll(".login-sun").forEach(el => el.classList.toggle("hidden", !isDark));
+      document.querySelectorAll(".login-moon").forEach(el => el.classList.toggle("hidden", isDark));
+    }
+
+    function toggleTheme(notify = false) {
+      const isDark = !document.body.classList.contains("dark-mode");
+      applyThemeUI(isDark);
+      localStorage.setItem("sk_theme", isDark ? "dark" : "light");
+      if (notify) showToast(isDark ? "Dark Glass Theme Enabled" : "Light Frosted Theme Enabled");
+    }
+
+    function showToast(msg, isError = false) {
+      const t = document.getElementById("toast");
+      const ic = document.getElementById("toastIcon");
+      document.getElementById("toastMsg").textContent = msg;
+      ic.innerHTML = isError ? "!" : "✓";
+      ic.className = `w-5 h-5 rounded-full flex items-center justify-center shrink-0 text-[11px] font-extrabold ${isError ? "bg-rose-500 text-white" : "bg-emerald-500 text-white"}`;
+      t.className = `fixed top-4 left-1/2 -translate-x-1/2 lg:left-auto lg:translate-x-0 lg:right-5 z-[95] max-w-sm w-[92%] px-4 py-3 rounded-2xl shadow-2xl text-xs font-bold backdrop-blur-2xl border flex items-center gap-2.5 ${
+        isError ? "glass-card border-rose-500/40 text-rose-500" : "glass-card border-emerald-500/40 text-emerald-600"
+      }`;
+      t.classList.remove("hidden");
+      setTimeout(() => t.classList.add("hidden"), 3200);
+    }
+
+    async function callApi(payload, showSyncSpin = true) {
+      const syncSvg = document.getElementById("syncSvg");
+      if (showSyncSpin && syncSvg) syncSvg.classList.add("animate-spin");
+      try {
+        const res = await fetch(DEFAULT_API_URL, { method: "POST", body: JSON.stringify(payload) });
+        const json = await res.json();
+        if (syncSvg) syncSvg.classList.remove("animate-spin");
+        return json;
+      } catch (err) {
+        if (syncSvg) syncSvg.classList.remove("animate-spin");
+        showToast("Network connection failed.", true);
+        return { status: "error", message: err.toString() };
+      }
+    }
+
+    // ============================================================
+    // 2. LOGIN VAULT (6-Digit PIN Supporting Leading 0)
+    // ============================================================
+    function updatePinDots(waving = false) {
+      document.querySelectorAll(".pin-dot").forEach((dot, idx) => {
+        dot.classList.toggle("bg-orange-500", idx < pinBuffer.length);
+        dot.classList.toggle("border-orange-500", idx < pinBuffer.length);
+        dot.classList.toggle("scale-125", idx < pinBuffer.length && !waving);
+        dot.classList.toggle("dot-wave", waving);
+      });
+    }
+
+    function pressPin(d) {
+      if (pinBuffer.length >= 6) return;
+      pinBuffer = String(pinBuffer) + String(d);
+      updatePinDots(false);
+      if (pinBuffer.length === 6) setTimeout(submitPinLogin, 160);
+    }
+
+    function backspacePin() {
+      pinBuffer = pinBuffer.slice(0, -1);
+      updatePinDots(false);
+    }
+
+    async function submitPinLogin() {
+      if (pinBuffer.length !== 6) return showToast("Enter 6-digit security PIN", true);
+      document.getElementById("loginSubtext").textContent = "Validating PIN & Spicy Kingdom Access...";
+      updatePinDots(true);
+
+      const res = await callApi({ action: "login", pin: String(pinBuffer) }, false);
+      updatePinDots(false);
+      document.getElementById("loginSubtext").textContent = "Enter your 6-digit Spicy Kingdom PIN";
+
+      if (res.status === "success") {
+        currentUser = res.user;
+        localStorage.setItem("sk_user", JSON.stringify(currentUser));
+        pinBuffer = "";
+        updatePinDots(false);
+        showApp();
+        refreshData(false);
+      } else {
+        const dots = document.getElementById("pinDotsContainer");
+        dots.classList.add("shake");
+        setTimeout(() => dots.classList.remove("shake"), 400);
+        pinBuffer = "";
+        updatePinDots(false);
+        showToast(res.message || "Invalid 6-digit PIN", true);
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem("sk_user");
+      currentUser = null;
+      pinBuffer = "";
+      updatePinDots(false);
+      document.getElementById("appShell").classList.add("hidden");
+      document.getElementById("loginScreen").classList.remove("hidden");
+      showToast("Terminal Locked");
+    }
+
+    function showApp() {
+      document.getElementById("loginScreen").classList.add("hidden");
+      document.getElementById("appShell").classList.remove("hidden");
+      document.getElementById("welcomeBanner").textContent = `Welcome ${currentUser.designation} ${currentUser.name}`;
+
+      const priv = isPriv();
+      document.getElementById("addEmpBtn").classList.toggle("hidden", !priv);
+      document.getElementById("invAddBtn").classList.toggle("hidden", !priv);
+      document.getElementById("ownerAnalyticsSection").classList.toggle("hidden", !priv);
+      document.getElementById("adminSettingsBtn").classList.toggle("hidden", !priv);
+      document.getElementById("reportsHeaderBtn").classList.toggle("hidden", !priv);
+    }
+
+    async function refreshData(manual = false) {
+      const res = await callApi({ action: "getAllData", role: currentUser.role }, true);
+      if (res.status === "success") {
+        appData = res;
+        renderAll();
+        if (manual) showToast("Spicy Kingdom Synced");
+      }
+    }
+
+    function renderAll() {
+      renderDashboard();
+      renderCashflowChart(7);
+      renderOwnerAnalytics();
+      renderPurchasesScreen();
+      renderInventory();
+      renderKitchen();
+      renderStaff();
+    }
+
+    // ============================================================
+    // 3. DASHBOARD BENTO, CASHFLOW SVG & EOQ ANALYTICS
+    // ============================================================
+    function renderDashboard() {
+      const petty = appData.funds.find(f => f.FundName.includes("Petty")) || { FundName: "Petty Cash Fund", Balance: 0 };
+      const reg = appData.funds.find(f => f.FundName.includes("Cash Box")) || { FundName: "Restaurant Cash Box", Balance: 0 };
+      const ownerD = appData.funds.find(f => f.FundName.includes("Owner")) || { FundName: "Owner Direct", Balance: 0 };
+      const totalSelfOwed = Object.values(appData.selfLedger || {}).reduce((s, v) => s + (v > 0 ? v : 0), 0);
+
+      document.getElementById("fundsBentoGrid").innerHTML = `
+        <div class="glass-card p-3.5 lg:p-4 rounded-2xl bg-emerald-500/10 border-emerald-500/25 relative overflow-hidden">
+          <p class="text-[11px] font-bold opacity-75">${petty.FundName}</p>
+          <p class="text-lg lg:text-2xl font-extrabold text-emerald-600 tabular-nums mt-1">₹${Number(petty.Balance).toLocaleString("en-IN")}</p>
+          <span class="inline-block mt-1.5 text-[9px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-700">Drawer Ready</span>
+        </div>
+        <div class="p-3.5 lg:p-4 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/20 relative overflow-hidden">
+          <div class="flex justify-between items-start">
+            <p class="text-[11px] font-bold opacity-90">${reg.FundName}</p>
+            ${isPriv() ? `<button onclick="editFundDialog('${reg.FundName}', ${reg.Balance})" class="text-[9px] underline font-bold">Edit</button>` : ""}
+          </div>
+          <p class="text-lg lg:text-2xl font-extrabold tabular-nums mt-1">₹${Number(reg.Balance).toLocaleString("en-IN")}</p>
+          <span class="inline-block mt-1.5 text-[9px] font-extrabold px-2 py-0.5 rounded-full bg-white/20">Main Register</span>
+        </div>
+        <div class="glass-card p-3.5 lg:p-4 rounded-2xl relative overflow-hidden">
+          <div class="flex justify-between items-start">
+            <p class="text-[11px] font-bold opacity-75">${ownerD.FundName}</p>
+            ${isPriv() ? `<button onclick="editFundDialog('${ownerD.FundName}', ${ownerD.Balance})" class="text-[9px] text-purple-600 font-bold">Edit</button>` : ""}
+          </div>
+          <p class="text-lg lg:text-2xl font-extrabold text-purple-600 tabular-nums mt-1">₹${Number(ownerD.Balance).toLocaleString("en-IN")}</p>
+          <span class="inline-block mt-1.5 text-[9px] font-extrabold px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-600">Direct Settlement</span>
+        </div>
+        <div onclick="openReimburseModal()" class="cursor-pointer glass-card p-3.5 lg:p-4 rounded-2xl relative overflow-hidden active:scale-95 transition">
+          <p class="text-[11px] font-bold opacity-75">Self / Reimburse</p>
+          <p class="text-lg lg:text-2xl font-extrabold text-amber-600 tabular-nums mt-1">₹${Math.round(totalSelfOwed).toLocaleString("en-IN")}</p>
+          <span class="inline-block mt-1.5 text-[9px] font-extrabold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-600">Due Payout →</span>
+        </div>
+      `;
+
+      const entries = Object.entries(appData.selfLedger || {});
+      document.getElementById("selfLedgerList").innerHTML = entries.map(([person, owed]) => `
+        <div class="flex justify-between items-center py-1 border-b border-slate-500/10 last:border-0">
+          <span class="font-semibold">${person}</span>
+          <span class="font-extrabold tabular-nums ${owed > 0 ? "text-rose-500" : "text-emerald-500"}">
+            ${owed > 0 ? `Owed ₹${owed.toLocaleString("en-IN")}` : "Settled ₹0"}
+          </span>
+        </div>
+      `).join("") || `<p class="opacity-60">No self-paid purchases recorded yet.</p>`;
+
+      let lowCount = 0, expCount = 0;
+      const now = new Date();
+      appData.inventory.forEach(item => {
+        const storeStk = Number(item.CurrentStock) || 0;
+        if (storeStk <= Number(item.MinAlert)) lowCount++;
+        if (item.NearestExpiry && Math.ceil((new Date(item.NearestExpiry) - now) / 86400000) <= 3) expCount++;
+      });
+      document.getElementById("dashLowStockCount").textContent = lowCount;
+      document.getElementById("dashExpiryCount").textContent = expCount;
+
+      const curMonth = getLocalTodayStr().slice(0, 7);
+      const monthWaste = (appData.wasteLog || [])
+        .filter(w => String(w.Timestamp).startsWith(curMonth))
+        .reduce((s, w) => s + (Number(w.EstimatedLoss) || 0), 0);
+      document.getElementById("dashWasteLoss").textContent = "₹" + Math.round(monthWaste).toLocaleString("en-IN");
+      document.getElementById("wasteTotalBadge").textContent = "Month: ₹" + Math.round(monthWaste).toLocaleString("en-IN");
+    }
+
+    function renderCashflowChart(days) {
+      document.getElementById("cfBtn7").className = `px-2.5 py-1 rounded-lg ${days === 7 ? "bg-emerald-600 text-white" : "opacity-70"}`;
+      document.getElementById("cfBtn30").className = `px-2.5 py-1 rounded-lg ${days === 30 ? "bg-emerald-600 text-white" : "opacity-70"}`;
+
+      let buckets = [];
+      for (let i = days - 1; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+        const inf = appData.inflows.filter(x => String(x.Timestamp).startsWith(key)).reduce((s, x) => s + (Number(x.Amount) || 0), 0);
+        const out = appData.purchases.filter(x => String(x.Timestamp).startsWith(key) && x.VerifyStatus !== "Cancelled").reduce((s, x) => s + (Number(x.TotalAmount) || 0), 0);
+        buckets.push({ key, inf, out });
+      }
+      const maxVal = Math.max(1000, ...buckets.map(b => Math.max(b.inf, b.out)));
+      const w = 320, h = 100;
+      const toPts = (arr) => arr.map((v, idx) => `${(idx / Math.max(1, arr.length - 1)) * w},${h - (v / maxVal) * (h - 14) - 6}`).join(" ");
+
+      const infPts = toPts(buckets.map(b => b.inf));
+      const outPts = toPts(buckets.map(b => b.out));
+
+      document.getElementById("cashflowSvgContainer").innerHTML = `
+        <svg viewBox="0 0 ${w} ${h}" class="w-full h-full overflow-visible">
+          <defs>
+            <linearGradient id="infGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#10B981" stop-opacity="0.35"/>
+              <stop offset="100%" stop-color="#10B981" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <polygon points="0,${h} ${infPts} ${w},${h}" fill="url(#infGrad)"/>
+          <polyline fill="none" stroke="#10B981" stroke-width="2.5" stroke-linecap="round" points="${infPts}"/>
+          <polyline fill="none" stroke="#F43F5E" stroke-width="2" stroke-dasharray="4 3" stroke-linecap="round" points="${outPts}"/>
+        </svg>
+      `;
+    }
+
+    function renderOwnerAnalytics() {
+      if (!isPriv()) return;
+      const stockWorth = appData.inventory.reduce((s, i) => s + (((Number(i.CurrentStock) || 0) + (Number(i.KitchenStock) || 0)) * (Number(i.LastPrice) || 0)), 0);
+      document.getElementById("kpiStockWorth").textContent = "₹" + Math.round(stockWorth).toLocaleString("en-IN");
+
+      const curMonth = getLocalTodayStr().slice(0, 7);
+      let monthSpend = 0, catTotals = {};
+      appData.purchases.forEach(p => {
+        if (String(p.Timestamp).startsWith(curMonth) && p.VerifyStatus !== "Cancelled") {
+          const amt = Number(p.TotalAmount) || 0;
+          monthSpend += amt;
+          catTotals[p.Category] = (catTotals[p.Category] || 0) + amt;
+        }
+      });
+      document.getElementById("kpiMonthSpend").textContent = "₹" + Math.round(monthSpend).toLocaleString("en-IN");
+
+      const sortedCats = Object.entries(catTotals).sort((a, b) => b[1] - a[1]);
+      document.getElementById("categoryAnalyticsList").innerHTML = sortedCats.map(([cat, amt]) => {
+        const pct = monthSpend > 0 ? Math.round((amt / monthSpend) * 100) : 0;
+        return `
+          <div>
+            <div class="flex justify-between font-semibold mb-1"><span>${cat}</span><span class="tabular-nums">₹${Math.round(amt).toLocaleString("en-IN")} (${pct}%)</span></div>
+            <div class="w-full h-1.5 bg-slate-500/15 rounded-full overflow-hidden"><div class="h-full bg-gradient-to-r from-amber-500 to-rose-500" style="width:${pct}%"></div></div>
+          </div>
+        `;
+      }).join("") || `<p class="opacity-60">No spend recorded this month.</p>`;
+
+      const payrollSum = appData.staffActivity
+        .filter(a => String(a.Date).startsWith(curMonth) && ["ADVANCE", "DAILY_WAGE", "SALARY_PAID"].includes(a.ActivityType))
+        .reduce((s, a) => s + (Number(a.Amount) || 0), 0);
+      document.getElementById("kpiPayrollTotal").textContent = "₹" + Math.round(payrollSum).toLocaleString("en-IN");
+
+      let issuedMap = {};
+      appData.kitchenLog.filter(l => l.ActionType === "ISSUE").forEach(l => {
+        issuedMap[l.ItemName] = (issuedMap[l.ItemName] || 0) + (Number(l.Qty) || 0);
+      });
+      const topConsumed = Object.entries(issuedMap).sort((a, b) => b[1] - a[1]).slice(0, 6);
+      document.getElementById("consumptionRunwayList").innerHTML = topConsumed.map(([name, totalIssued]) => {
+        const invItem = appData.inventory.find(i => i.ItemName === name);
+        const curStock = invItem ? (Number(invItem.CurrentStock) || 0) : 0;
+        const unit = invItem ? invItem.Unit : "";
+        const price = invItem ? (Number(invItem.LastPrice) || 50) : 50;
+        const dailyRate = totalIssued / 7;
+        const monthlyDemand = dailyRate * 30;
+        const eoq = Math.max(1, Math.round(Math.sqrt((2 * monthlyDemand * 150) / Math.max(1, price * 0.15))));
+        const daysLeft = dailyRate > 0 ? Math.floor(curStock / dailyRate) : "∞";
+
+        return `
+          <div class="flex justify-between items-center py-1.5 border-b border-slate-500/10 last:border-0">
+            <div>
+              <p class="font-bold">${name}</p>
+              <p class="text-[10px] opacity-65">Store: ${curStock} ${unit} • EOQ Order: <strong class="text-indigo-500">${eoq} ${unit}</strong></p>
+            </div>
+            <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold ${daysLeft !== "∞" && daysLeft <= 2 ? "bg-rose-500/15 text-rose-500" : "bg-cyan-500/15 text-cyan-600"}">
+              ~${daysLeft}d left
+            </span>
+          </div>
+        `;
+      }).join("") || `<p class="opacity-60">Transfer stock to kitchen to calculate EOQ & runway.</p>`;
+    }
+
+    // ============================================================
+    // 4. PURCHASES, VERIFICATION & DIGITAL VOUCHER MODAL
+    // ============================================================
+    function togglePurchaseFormDrawer() {
+      document.getElementById("purchaseFormCard").classList.toggle("hidden");
+    }
+
+    function renderPurchasesScreen() {
+      const validPurchases = appData.purchases.filter(p => p.VerifyStatus !== "Cancelled");
+      const totalOut = validPurchases.reduce((s, p) => s + (Number(p.TotalAmount) || 0), 0);
+      document.getElementById("purBannerTotal").textContent = "₹" + Math.round(totalOut).toLocaleString("en-IN");
+
+      let catSum = {};
+      validPurchases.forEach(p => catSum[p.Category] = (catSum[p.Category] || 0) + (Number(p.TotalAmount) || 0));
+      const top3 = Object.entries(catSum).sort((a, b) => b[1] - a[1]).slice(0, 3);
+      const barColors = ["bg-white", "bg-amber-200", "bg-rose-200"];
+      document.getElementById("purCatStackedBar").innerHTML = top3.map(([, amt], i) => {
+        const w = totalOut > 0 ? Math.max(8, Math.round((amt / totalOut) * 100)) : 0;
+        return `<div class="${barColors[i]} h-full" style="width:${w}%"></div>`;
+      }).join("");
+      document.getElementById("purCatLegend").innerHTML = top3.map(([cat, amt]) => `<span>${cat.split(" ")[0]}: ₹${Math.round(amt)}</span>`).join("");
+
+      document.getElementById("purchaseFeedList").innerHTML = appData.purchases.slice(0, 30).map(p => {
+        const st = p.VerifyStatus || "Pending";
+        const stColor = st === "Verified" ? "bg-emerald-500/15 text-emerald-600" : st === "Disputed" ? "bg-amber-500/15 text-amber-600" : st === "Cancelled" ? "bg-rose-500/15 text-rose-500 line-through" : "bg-slate-500/15 opacity-70";
+        return `
+          <div class="glass-card p-3.5 rounded-2xl flex items-center justify-between gap-2.5">
+            <div class="w-10 h-10 rounded-xl bg-amber-500/15 text-amber-600 flex items-center justify-center shrink-0">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-1.5">
+                <p class="font-extrabold text-xs truncate">${p.ItemName} (${p.Qty} ${p.Unit})</p>
+                <span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded-full ${stColor}">${st}</span>
+              </div>
+              <p class="text-[10px] opacity-65 truncate">${p.PaidFrom} • by ${p.LoggedBy}</p>
+              <div class="flex items-center gap-1.5 mt-1">
+                <span class="text-[9px] px-2 py-0.5 rounded-full bg-slate-500/10 opacity-75">${String(p.Timestamp).slice(0,10)}</span>
+                <button type="button" onclick="openVoucherModal('${p.TxnID}')" class="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-blue-500/15 text-blue-600">View Bill</button>
+              </div>
+            </div>
+            <span class="font-extrabold text-sm text-rose-500 tabular-nums shrink-0">-₹${Number(p.TotalAmount).toLocaleString("en-IN")}</span>
+          </div>
+        `;
+      }).join("") || `<p class="text-center text-xs opacity-60 py-6">No purchases recorded yet.</p>`;
+    }
+
+    function openVoucherModal(txnId) {
+      const p = appData.purchases.find(x => x.TxnID === txnId);
+      if (!p) return;
+      activeVoucherTxn = p;
+      const st = p.VerifyStatus || "Pending";
+      document.getElementById("vchStatusBadge").textContent = `${st} Digital Voucher`;
+      document.getElementById("vchSupplier").textContent = p.Supplier || "Direct Vendor";
+      document.getElementById("vchBillNo").textContent = `#${p.BillNo && p.BillNo !== "-" ? p.BillNo : p.TxnID}`;
+      document.getElementById("vchItem").textContent = `${p.ItemName} (${p.Qty} ${p.Unit})`;
+      document.getElementById("vchSource").textContent = `${p.PaidFrom} (${p.PayMethod})`;
+      document.getElementById("vchTime").textContent = `${p.LoggedBy} • ${String(p.Timestamp).slice(0,10)}`;
+      document.getElementById("vchTotal").textContent = `₹${Number(p.TotalAmount).toLocaleString("en-IN")}`;
+
+      const hasPhoto = p.BillPhotoURL && String(p.BillPhotoURL).startsWith("http");
+      document.getElementById("vchDriveLinkBox").classList.toggle("hidden", !hasPhoto);
+      if (hasPhoto) document.getElementById("vchDriveAnchor").href = p.BillPhotoURL;
+
+      document.getElementById("vchVerifyActions").classList.toggle("hidden", !isPriv());
+      toggleModal("voucherModal");
+    }
+
+    async function setPurchaseVerifyStatus(status) {
+      if (!activeVoucherTxn) return;
+      const res = await callApi({
+        action: "updatePurchaseStatus",
+        requesterRole: currentUser.role,
+        txnId: activeVoucherTxn.TxnID,
+        verifyStatus: status
+      });
+      if (res.status === "success") {
+        showToast(res.message);
+        toggleModal("voucherModal");
+        refreshData();
+      } else showToast(res.message, true);
+    }
+
+    function openPaidFromPicker() {
+      const selfLabel = `Self: ${currentUser.name} (${currentUser.designation})`;
+      const opts = [
+        { label: "Petty Cash Fund", value: "Petty Cash Fund" },
+        { label: "Restaurant Cash Box", value: "Restaurant Cash Box" },
+        { label: "Owner Direct", value: "Owner Direct" },
+        { label: `Self — ${currentUser.name} (${currentUser.designation})`, value: selfLabel }
+      ];
+      openPicker("Select Payment Source", opts, "purPaidFrom", "purPaidFromBtn");
+    }
+
+    function normalizeStr(s) { return String(s || "").toLowerCase().replace(/[^a-z0-9]/g, ""); }
+
+    function checkExistingStock(val) {
+      const badge = document.getElementById("liveStockIndicator");
+      const clean = normalizeStr(val);
+      if (clean.length < 2) { badge.classList.add("hidden"); return; }
+      const match = appData.inventory.find(i => {
+        const target = normalizeStr(i.ItemName);
+        return target === clean || target.includes(clean) || clean.includes(target);
+      });
+      if (!match) { badge.classList.add("hidden"); return; }
+      badge.className = "mb-1.5 px-3 py-2 rounded-xl text-xs font-bold flex items-center justify-between bg-emerald-500/15 text-emerald-600";
+      badge.innerHTML = `<span>In Stock: <u>${match.ItemName}</u> (${match.CurrentStock} ${match.Unit})</span><button type="button" onclick="selectCanonicalFromName('${match.ItemName}')" class="underline">Link Exact</button>`;
+      badge.classList.remove("hidden");
+    }
+
+    function selectCanonicalFromName(name) {
+      const match = appData.inventory.find(i => i.ItemName === name);
+      if (!match) return;
+      document.getElementById("purItemName").value = match.ItemName;
+      selectDirect("purUnit", "purUnitBtn", match.Unit, match.Unit);
+      selectDirect("purCategory", "purCategoryBtn", match.Category, match.Category);
+    }
+
+    function calcPurchaseTotal() {
+      const q = parseFloat(document.getElementById("purQty").value) || 0;
+      const p = parseFloat(document.getElementById("purUnitPrice").value) || 0;
+      document.getElementById("purTotal").value = (q * p).toFixed(2);
+    }
+
+    function fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = err => reject(err);
+      });
+    }
+
+    async function submitPurchase(e) {
+      e.preventDefault();
+      const expiryVal = document.getElementById("purExpiry").value;
+      if (expiryVal && expiryVal < getLocalTodayStr()) {
+        return showToast("Cannot purchase an expired product!", true);
+      }
+
+      let photoBase64 = "";
+      const fileInput = document.getElementById("purBillPhoto");
+      if (fileInput.files.length > 0) photoBase64 = await fileToBase64(fileInput.files[0]);
+
+      const res = await callApi({
+        action: "addPurchase",
+        category: document.getElementById("purCategory").value,
+        itemName: document.getElementById("purItemName").value,
+        qty: document.getElementById("purQty").value,
+        unit: document.getElementById("purUnit").value,
+        unitPrice: document.getElementById("purUnitPrice").value,
+        totalAmount: document.getElementById("purTotal").value,
+        expiryDate: expiryVal,
+        paidFrom: document.getElementById("purPaidFrom").value,
+        payMethod: document.getElementById("purPayMethod").value,
+        supplier: document.getElementById("purSupplier").value,
+        billNo: document.getElementById("purBillNo").value,
+        photoBase64,
+        loggedBy: currentUser.name,
+        userRole: currentUser.role
+      });
+
+      if (res.status === "success") {
+        showToast(res.message);
+        document.getElementById("purchaseForm").reset();
+        document.getElementById("purExpiry").value = "";
+        document.getElementById("purExpiryBtn").querySelector("span").textContent = "Optional";
+        document.getElementById("liveStockIndicator").classList.add("hidden");
+        refreshData();
+      } else showToast(res.message, true);
+    }
+
+    // ============================================================
+    // 5. INVENTORY WITH LOW & MAX STOCK ALERT THRESHOLD EDITOR
+    // ============================================================
+    function getItemSvgIcon(name, cat) {
+      const key = `${name} ${cat}`.toLowerCase();
+      if (/(milk|curd|paneer|butter|cheese|cream|dairy)/.test(key)) {
+        return {
+          bg: "bg-sky-500/15 text-sky-600",
+          svg: `<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 2h4v3l2.5 3.5V20a2 2 0 01-2 2h-5a2 2 0 01-2-2V8.5L10 5V2z"/><path stroke-linecap="round" d="M7.5 13h9"/></svg>`
+        };
+      }
+      if (/(chicken|mutton|meat|fish|prawn|egg|beef|poultry|seafood)/.test(key)) {
+        return {
+          bg: "bg-rose-500/15 text-rose-600",
+          svg: `<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.5 4.5a4.5 4.5 0 014 7.5l-5.5 5.5a3 3 0 01-4.24 0l-.76-.76-3.5 3.5a1.5 1.5 0 11-2.12-2.12l3.5-3.5-.76-.76a3 3 0 010-4.24l5.5-5.5a4.48 4.48 0 013.88-1.12z"/></svg>`
+        };
+      }
+      if (/(veg|tomato|onion|potato|chilli|ginger|garlic|coriander|fruit|lemon|carrot)/.test(key)) {
+        return {
+          bg: "bg-emerald-500/15 text-emerald-600",
+          svg: `<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 21c8-2 14-8 16-16-8 2-14 8-16 16zm0 0l7-7"/></svg>`
+        };
+      }
+      if (/(dal|pappu|rice|wheat|atta|flour|rava|sugar|salt|grocer|masala|spice)/.test(key)) {
+        return {
+          bg: "bg-amber-500/15 text-amber-600",
+          svg: `<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v18m0-15l-3.5 3.5M12 6l3.5 3.5M12 11l-3.5 3.5M12 11l3.5 3.5M12 16l-3.5 3.5M12 16l3.5 3.5"/></svg>`
+        };
+      }
+      if (/(oil|ghee|water|vinegar|sauce|liquid)/.test(key)) {
+        return {
+          bg: "bg-yellow-500/15 text-yellow-600",
+          svg: `<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z"/></svg>`
+        };
+      }
+      if (/(gas|cylinder|lpg|fuel|coal|fire)/.test(key)) {
+        return {
+          bg: "bg-orange-500/15 text-orange-600",
+          svg: `<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"/></svg>`
+        };
+      }
+      if (/(tea|coffee|powder|juice|drink|beverage)/.test(key)) {
+        return {
+          bg: "bg-purple-500/15 text-purple-600",
+          svg: `<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18 8h1a4 4 0 010 8h-1M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8zm4-4v2m4-2v2m4-2v2"/></svg>`
+        };
+      }
+      if (/(soap|vim|clean|wash|detergent|acid|mop)/.test(key)) {
+        return {
+          bg: "bg-teal-500/15 text-teal-600",
+          svg: `<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>`
+        };
+      }
+      return {
+        bg: "bg-cyan-500/15 text-cyan-600",
+        svg: `<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>`
+      };
+    }
+
+    function setInvFilter(f) {
+      invFilter = f;
+      document.querySelectorAll(".inv-filter-btn").forEach(b => {
+        const active = b.dataset.filter === f;
+        b.className = `inv-filter-btn px-3.5 py-2 rounded-full transition font-bold ${
+          active ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-md" : "glass-card opacity-80"
+        }`;
+      });
+      renderInventory();
+    }
+
+    function openStockAlertModal(itemId) {
+      const item = appData.inventory.find(i => i.ItemID === itemId);
+      if (!item) return;
+      document.getElementById("saItemHeading").textContent = `${item.ItemName} Alerts`;
+      document.getElementById("saItemSub").textContent = `Current Store Stock: ${item.CurrentStock} ${item.Unit}`;
+      document.getElementById("saItemName").value = item.ItemName;
+      document.getElementById("saItemCat").value = item.Category;
+      document.getElementById("saItemUnit").value = item.Unit;
+      document.getElementById("saMinAlert").value = Number(item.MinAlert) || 1;
+      document.getElementById("saMaxTarget").value = Number(item.MaxTarget) || 10;
+      toggleModal("stockAlertModal");
+    }
+
+    async function saveStockAlertLimits(e) {
+      e.preventDefault();
+      const res = await callApi({
+        action: "upsertInventoryItem",
+        requesterRole: currentUser.role,
+        itemName: document.getElementById("saItemName").value,
+        category: document.getElementById("saItemCat").value,
+        currentStock: 0,
+        unit: document.getElementById("saItemUnit").value,
+        minAlert: document.getElementById("saMinAlert").value,
+        maxTarget: document.getElementById("saMaxTarget").value
+      });
+      if (res.status === "success") {
+        showToast("Low & Max stock alerts updated!");
+        toggleModal("stockAlertModal");
+        refreshData();
+      } else showToast(res.message, true);
+    }
+
+    function renderInventoryCardHtml(item, now) {
+      const storeStk = Number(item.CurrentStock) || 0;
+      const kitStk = Number(item.KitchenStock) || 0;
+      const min = Number(item.MinAlert) || 1;
+      const max = Math.max(Number(item.MaxTarget) || 10, min + 1);
+      const pct = Math.min(100, Math.round((storeStk / max) * 100));
+
+      let barColor = "bg-emerald-500", statusBadge = "";
+      if (storeStk <= min) { barColor = "bg-rose-500"; statusBadge = `<span class="text-[9px] font-extrabold px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-500">LOW</span>`; }
+      else if (pct <= 60) { barColor = "bg-amber-500"; }
+
+      let expBadge = "";
+      if (item.NearestExpiry) {
+        const days = Math.ceil((new Date(item.NearestExpiry) - now) / 86400000);
+        if (days <= 3) expBadge = `<span class="text-[9px] font-extrabold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-600">Exp ${days < 0 ? "Out" : days + "d"}</span>`;
+      }
+
+      const iconMeta = getItemSvgIcon(item.ItemName, item.Category);
+      const priv = isPriv();
+      return `
+        <div class="glass-card p-3.5 rounded-2xl space-y-2.5 flex flex-col justify-between">
+          <div class="flex items-center justify-between gap-2.5">
+            <div class="w-10 h-10 rounded-xl ${iconMeta.bg} flex items-center justify-center shrink-0">
+              ${iconMeta.svg}
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <p class="font-extrabold text-sm truncate">${item.ItemName}</p>
+                ${expBadge} ${statusBadge}
+              </div>
+              <p class="text-[11px] opacity-65">Store: <strong>${storeStk} ${item.Unit}</strong> • Kitchen: <strong>${kitStk} ${item.Unit}</strong></p>
+            </div>
+            ${priv ? `
+              <div class="flex items-center gap-1.5 shrink-0">
+                <button type="button" onclick="quickStepStock('${item.ItemID}', -1)" class="w-7 h-7 rounded-lg glass-card font-extrabold text-sm">-</button>
+                <button type="button" onclick="manualDecimalStockDialog('${item.ItemID}', '${item.ItemName}', '${item.Unit}')" class="min-w-[34px] text-center font-extrabold text-sm tabular-nums underline decoration-dotted">${storeStk}</button>
+                <button type="button" onclick="quickStepStock('${item.ItemID}', 1)" class="w-7 h-7 rounded-lg bg-blue-600 text-white font-extrabold text-sm">+</button>
+              </div>
+            ` : `<span class="font-extrabold text-sm tabular-nums">${storeStk} ${item.Unit}</span>`}
+          </div>
+          <div>
+            <div class="flex justify-between items-center text-[10px] opacity-75 font-semibold mb-1">
+              <span>Min: <strong class="text-rose-500">${min}</strong> • Max: <strong class="text-emerald-600">${max} ${item.Unit}</strong></span>
+              <div class="flex items-center gap-2">
+                <span>${pct}%</span>
+                ${priv ? `<button type="button" onclick="openStockAlertModal('${item.ItemID}')" class="px-2 py-0.5 rounded bg-indigo-500/15 text-indigo-500 font-extrabold">Limits</button>` : ""}
+              </div>
+            </div>
+            <div class="w-full h-1.5 bg-slate-500/15 rounded-full overflow-hidden">
+              <div class="${barColor} h-full rounded-full" style="width:${pct}%"></div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderInventory() {
+      const q = document.getElementById("invSearch").value.toLowerCase();
+      const now = new Date();
+      const filtered = appData.inventory.filter(item => {
+        if (!item.ItemName.toLowerCase().includes(q) && !item.Category.toLowerCase().includes(q)) return false;
+        if (invFilter === "LOW") return Number(item.CurrentStock) <= Number(item.MinAlert);
+        if (invFilter === "EXPIRY") {
+          if (!item.NearestExpiry) return false;
+          return Math.ceil((new Date(item.NearestExpiry) - now) / 86400000) <= 3;
+        }
+        return true;
+      });
+
+      const listEl = document.getElementById("inventoryList");
+      if (invFilter === "BY_CAT") {
+        let groups = {};
+        filtered.forEach(item => {
+          groups[item.Category] = groups[item.Category] || [];
+          groups[item.Category].push(item);
+        });
+        listEl.innerHTML = Object.entries(groups).map(([cat, items]) => `
+          <div class="col-span-full space-y-2">
+            <h4 class="text-xs font-extrabold uppercase tracking-wider text-cyan-600 pt-1">${cat} (${items.length})</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              ${items.map(i => renderInventoryCardHtml(i, now)).join("")}
+            </div>
+          </div>
+        `).join("") || `<p class="col-span-full text-center text-xs opacity-60 py-6">No items found.</p>`;
+      } else {
+        listEl.innerHTML = filtered.map(item => renderInventoryCardHtml(item, now)).join("") || `<p class="col-span-full text-center text-xs opacity-60 py-6">No items found.</p>`;
+      }
+    }
+
+    async function quickStepStock(itemId, delta) {
+      const res = await callApi({ action: "adjustStockDelta", requesterRole: currentUser.role, itemId, delta });
+      if (res.status === "success") { showToast(res.message); refreshData(); }
+      else showToast(res.message, true);
+    }
+
+    function manualDecimalStockDialog(itemId, name, unit) {
+      openInputDialog(`Adjust ${name} (${unit})`, "Enter + or - decimal change (e.g., 4.5 or -1.25 or 0.25)", async (val) => {
+        const delta = parseFloat(val);
+        if (isNaN(delta) || delta === 0) return showToast("Enter a valid non-zero number", true);
+        await quickStepStock(itemId, delta);
+      });
+    }
+
+    function openUpsertInvModal() {
+      document.getElementById("invFuzzyBadge").classList.add("hidden");
+      toggleModal("upsertInvModal");
+    }
+
+    function checkInvModalFuzzy(val) {
+      const badge = document.getElementById("invFuzzyBadge");
+      const clean = normalizeStr(val);
+      if (clean.length < 2) { badge.classList.add("hidden"); return; }
+      const match = appData.inventory.find(i => normalizeStr(i.ItemName).includes(clean) || clean.includes(normalizeStr(i.ItemName)));
+      if (!match) { badge.classList.add("hidden"); return; }
+      badge.innerHTML = `<span>Exists: <strong>${match.ItemName}</strong> (${match.CurrentStock} ${match.Unit}) — Will Merge</span><button type="button" onclick="document.getElementById('upInvName').value='${match.ItemName}'; document.getElementById('upInvMin').value='${match.MinAlert}'; document.getElementById('upInvMax').value='${match.MaxTarget}'; selectDirect('upInvUnit','upInvUnitBtn','${match.Unit}','${match.Unit}');" class="underline">Link</button>`;
+      badge.classList.remove("hidden");
+    }
+
+    async function submitUpsertInv(e) {
+      e.preventDefault();
+      const res = await callApi({
+        action: "upsertInventoryItem",
+        requesterRole: currentUser.role,
+        itemName: document.getElementById("upInvName").value,
+        category: document.getElementById("upInvCat").value,
+        currentStock: document.getElementById("upInvQty").value,
+        unit: document.getElementById("upInvUnit").value,
+        minAlert: document.getElementById("upInvMin").value,
+        maxTarget: document.getElementById("upInvMax").value
+      });
+      if (res.status === "success") { showToast(res.message); toggleModal("upsertInvModal"); e.target.reset(); refreshData(); }
+      else showToast(res.message, true);
+    }
+
+    // ============================================================
+    // 6. BATCH TRANSFER CART & WASTE WITH PHOTO PROOF
+    // ============================================================
+    function setKitchenMode(mode) {
+      kitchenMode = mode;
+      const isWaste = mode === "WASTE";
+      document.getElementById("kitModeIssue").className = `py-2.5 rounded-xl transition ${mode === "ISSUE" ? "bg-gradient-to-r from-orange-500 to-pink-600 text-white shadow" : "opacity-75"}`;
+      document.getElementById("kitModeReturn").className = `py-2.5 rounded-xl transition ${mode === "RETURN" ? "bg-gradient-to-r from-cyan-500 to-indigo-600 text-white shadow" : "opacity-75"}`;
+      document.getElementById("kitModeWaste").className = `py-2.5 rounded-xl transition ${mode === "WASTE" ? "bg-gradient-to-r from-rose-600 to-pink-600 text-white shadow" : "opacity-75"}`;
+
+      document.getElementById("kitchenTransferCard").classList.toggle("hidden", isWaste);
+      document.getElementById("wasteManagementCard").classList.toggle("hidden", !isWaste);
+
+      if (!isWaste) {
+        const isRet = mode === "RETURN";
+        document.getElementById("kitCardHeading").textContent = isRet ? "Return Unused Stock to Store" : "Issue Stock to Kitchen / Staff";
+        document.getElementById("kitSectionLabel").textContent = isRet ? "Returned To / From *" : "Issue To (Kitchen / Staff) *";
+        selectDirect("kitSection", "kitSectionBtn", isRet ? "Main Store" : "Main Kitchen", isRet ? "Main Store" : "Main Kitchen");
+      }
+    }
+
+    function openTransferTargetPicker() {
+      const empOpts = appData.employees.filter(e => e.Status === "Active").map(e => ({ label: `${e.Name} (${e.Role})`, value: `${e.Name} (${e.Role})` }));
+      const baseOpts = [
+        { label: "Main Kitchen", value: "Main Kitchen" },
+        { label: "Main Store", value: "Main Store" },
+        { label: "Tandoor / Grill Section", value: "Tandoor / Grill Section" },
+        { label: "Beverage & Tea Counter", value: "Beverage & Tea Counter" },
+        ...empOpts
+      ];
+      openPicker("Select Destination / Staff", baseOpts, "kitSection", "kitSectionBtn", null, true);
+    }
+
+    function openInventoryPicker(hiddenId, btnId, callback) {
+      const opts = appData.inventory.map(i => ({
+        label: i.ItemName,
+        value: i.ItemName,
+        sub: `Store: ${i.CurrentStock} ${i.Unit}`
+      }));
+      openPicker("Select Stock Item", opts, hiddenId, btnId, callback, true);
+    }
+
+    function updateKitchenUnitHint(itemName) {
+      const item = appData.inventory.find(i => i.ItemName === itemName);
+      document.getElementById("kitAvailableHint").textContent = item ? `Store: ${item.CurrentStock} ${item.Unit} • Kitchen: ${item.KitchenStock || 0} ${item.Unit}` : "";
+    }
+
+    function addToTransferCart() {
+      const itemName = document.getElementById("kitItemName").value;
+      const qty = parseFloat(document.getElementById("kitQty").value) || 0;
+      const issuedTo = document.getElementById("kitSection").value || (kitchenMode === "ISSUE" ? "Main Kitchen" : "Main Store");
+      if (!itemName || qty <= 0) return showToast("Select item and valid quantity.", true);
+
+      const item = appData.inventory.find(i => i.ItemName === itemName);
+      transferCart.push({
+        actionType: kitchenMode,
+        itemName,
+        qty,
+        unit: item ? item.Unit : "units",
+        issuedTo,
+        enteredByRole: currentUser.name
+      });
+      document.getElementById("kitQty").value = "";
+      renderTransferCart();
+    }
+
+    function renderTransferCart() {
+      document.getElementById("kitCartBadge").textContent = `${transferCart.length} in Cart`;
+      document.getElementById("transferCartList").innerHTML = transferCart.map((c, idx) => `
+        <div class="flex justify-between items-center p-2.5 rounded-xl bg-pink-500/10 text-xs font-bold">
+          <span>${c.actionType}: ${c.itemName} (${c.qty} ${c.unit}) ➔ ${c.issuedTo}</span>
+          <button type="button" onclick="transferCart.splice(${idx},1); renderTransferCart();" class="text-rose-500 px-2">✕</button>
+        </div>
+      `).join("");
+    }
+
+    async function submitBatchTransfer() {
+      if (transferCart.length === 0) return showToast("Add at least one item to the cart first.", true);
+      const res = await callApi({ action: "batchKitchenAction", items: transferCart, loggedBy: currentUser.name });
+      if (res.status === "success") {
+        showToast(res.message);
+        transferCart = [];
+        renderTransferCart();
+        refreshData();
+      } else showToast(res.message, true);
+    }
+
+    function toggleWasteMode(catVal) {
+      const isRaw = catVal.includes("Raw") || catVal.includes("Expired");
+      document.getElementById("wasteRawPickerBox").classList.toggle("hidden", !isRaw);
+      document.getElementById("wasteCookedBox").classList.toggle("hidden", isRaw);
+    }
+
+    function autoCalcWasteLoss() {
+      const catVal = document.getElementById("wasteCategory").value;
+      if (!catVal.includes("Raw") && !catVal.includes("Expired")) return;
+      const item = appData.inventory.find(i => i.ItemName === document.getElementById("wasteRawItem").value);
+      if (item) {
+        selectDirect("wasteUnit", "wasteUnitBtn", item.Unit, item.Unit);
+        const qty = parseFloat(document.getElementById("wasteQty").value) || 0;
+        if (qty > 0) document.getElementById("wasteLoss").value = (qty * (Number(item.LastPrice) || 0)).toFixed(2);
+      }
+    }
+
+    async function addToWasteCart() {
+      const catVal = document.getElementById("wasteCategory").value;
+      const isRaw = catVal.includes("Raw") || catVal.includes("Expired");
+      const itemName = isRaw ? document.getElementById("wasteRawItem").value : document.getElementById("wasteCookedName").value;
+      const qty = parseFloat(document.getElementById("wasteQty").value) || 0;
+      const estimatedLoss = parseFloat(document.getElementById("wasteLoss").value) || 0;
+      if (!itemName || qty <= 0) return showToast("Specify wasted item and quantity.", true);
+
+      let photoBase64 = "";
+      const photoEl = document.getElementById("wastePhotoInput");
+      if (photoEl && photoEl.files.length > 0) {
+        photoBase64 = await fileToBase64(photoEl.files[0]);
+      }
+
+      wasteCart.push({
+        wasteCategory: catVal,
+        itemName,
+        qty,
+        unit: document.getElementById("wasteUnit").value,
+        estimatedLoss,
+        reason: document.getElementById("wasteReason").value || "-",
+        deductFromStock: isRaw ? "YES" : "NO",
+        photoBase64
+      });
+      document.getElementById("wasteQty").value = "";
+      document.getElementById("wasteLoss").value = "";
+      if (photoEl) photoEl.value = "";
+      renderWasteCart();
+    }
+
+    function renderWasteCart() {
+      document.getElementById("wasteCartList").innerHTML = wasteCart.map((w, idx) => `
+        <div class="flex justify-between items-center p-2.5 rounded-xl bg-rose-500/10 text-xs font-bold">
+          <span>${w.itemName} (${w.qty} ${w.unit}) • ₹${w.estimatedLoss} ${w.photoBase64 ? "📷" : ""}</span>
+          <button type="button" onclick="wasteCart.splice(${idx},1); renderWasteCart();" class="text-rose-500 px-2">✕</button>
+        </div>
+      `).join("");
+    }
+
+    async function submitBatchWaste() {
+      if (wasteCart.length === 0) return showToast("Add wasted items to queue first.", true);
+      const res = await callApi({ action: "batchRecordWaste", items: wasteCart, loggedBy: currentUser.name, userRole: currentUser.role });
+      if (res.status === "success") {
+        showToast(res.message);
+        wasteCart = [];
+        renderWasteCart();
+        refreshData();
+      } else showToast(res.message, true);
+    }
+
+    async function verifyWasteEntry(wasteId, status) {
+      const res = await callApi({ action: "updateWasteStatus", requesterRole: currentUser.role, wasteId, verifyStatus: status });
+      if (res.status === "success") { showToast(res.message); refreshData(); }
+      else showToast(res.message, true);
+    }
+
+    function renderKitchen() {
+      const kLogs = appData.kitchenLog.slice(0, 12).map(l => {
+        const dest = l.IssuedTo || l.Section || (l.ActionType === "ISSUE" ? "Main Kitchen" : "Main Store");
+        return `
+          <div class="flex justify-between items-center p-2.5 rounded-xl bg-slate-500/5">
+            <div>
+              <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full ${l.ActionType === "ISSUE" ? "bg-rose-500/15 text-rose-500" : "bg-cyan-500/15 text-cyan-600"}">${l.ActionType}</span>
+              <span class="font-bold ml-1">${l.ItemName}</span>
+              <p class="text-[10px] opacity-65 mt-0.5">To: <strong>${dest}</strong> • by ${l.LoggedBy}</p>
+            </div>
+            <span class="font-extrabold tabular-nums ${l.ActionType === "ISSUE" ? "text-rose-500" : "text-cyan-600"}">${l.ActionType === "ISSUE" ? "-" : "+"}${l.Qty} ${l.Unit}</span>
+          </div>
+        `;
+      });
+
+      const wLogs = (appData.wasteLog || []).slice(0, 10).map(w => {
+        const st = w.VerifyStatus || "Pending";
+        const hasPhoto = w.PhotoURL && String(w.PhotoURL).startsWith("http");
+        return `
+          <div class="p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/20 space-y-1.5">
+            <div class="flex justify-between items-center">
+              <div>
+                <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-rose-600 text-white">WASTE</span>
+                <span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded-full ml-1 ${st === "Verified" ? "bg-emerald-500/20 text-emerald-600" : "bg-amber-500/20 text-amber-600"}">${st}</span>
+                <span class="font-bold ml-1">${w.ItemName} (${w.Qty} ${w.Unit})</span>
+                <p class="text-[10px] opacity-75 mt-0.5">${w.Reason} • by ${w.LoggedBy}</p>
+              </div>
+              <span class="font-extrabold text-rose-500 tabular-nums">-₹${Number(w.EstimatedLoss).toLocaleString("en-IN")}</span>
+            </div>
+            <div class="flex items-center justify-between pt-1 border-t border-rose-500/15">
+              ${hasPhoto ? `<a href="${w.PhotoURL}" target="_blank" class="text-[10px] font-extrabold text-blue-600 underline">View Waste Photo</a>` : `<span class="text-[10px] opacity-50">No photo attached</span>`}
+              ${isPriv() && st !== "Verified" ? `<button type="button" onclick="verifyWasteEntry('${w.WasteID}', 'Verified')" class="text-[10px] font-extrabold px-2.5 py-0.5 rounded-lg bg-emerald-600 text-white">✓ Verify Waste</button>` : ""}
+            </div>
+          </div>
+        `;
+      });
+
+      document.getElementById("kitchenLogList").innerHTML = [...wLogs, ...kLogs].join("") || `<p class="opacity-60">No transfers or waste logs yet.</p>`;
+    }
+
+    // ============================================================
+    // 7. STAFF ATTENDANCE, HALF-DAY & PAYROLL DRAWER
+    // ============================================================
+    function getInitials(name) {
+      const parts = String(name || "S K").trim().split(/\s+/);
+      return parts.length >= 2 ? (parts[0][0] + parts[1][0]).toUpperCase() : name.slice(0, 2).toUpperCase();
+    }
+
+    function openEmployeePicker() {
+      const activeEmps = appData.employees.filter(e => e.Status === "Active");
+      const opts = activeEmps.map(e => ({ label: `${e.Name} (${e.Role})`, value: e.EmpID, sub: e.PayType }));
+      openPicker("Select Staff Member", opts, "stfEmpId", "stfEmpBtn", (empId) => {
+        const emp = activeEmps.find(e => e.EmpID === empId);
+        if (emp) document.getElementById("stfEmpName").value = emp.Name;
+        renderEmployeeHeatmap();
+        autoCalcLopAmount();
+      }, true);
+    }
+
+    function openStaffActionPicker() {
+      const leavesEnabled = String(appData.settings.LEAVE_DEDUCTION_ENABLED || "TRUE").toUpperCase() !== "FALSE";
+      let opts = [
+        { label: "Present (Full Day)", value: "ATTENDANCE" },
+        { label: "Half-Day Present", value: "HALF_DAY" },
+        { label: "Absent", value: "ABSENT" },
+        { label: "Pay Salary Advance", value: "ADVANCE" },
+        { label: "Pay Daily Wage", value: "DAILY_WAGE" },
+        { label: "Pay Monthly Salary", value: "SALARY_PAID" }
+      ];
+      if (leavesEnabled) {
+        opts.splice(3, 0,
+          { label: "Leave (Without Loss of Pay)", value: "LEAVE_PAID" },
+          { label: "Leave (With Loss of Pay)", value: "LEAVE_LOP" }
+        );
+      }
+      openPicker("Select Status / Payout", opts, "stfActivityType", "stfActivityBtn", toggleStaffFields);
+    }
+
+    function toggleStaffFields() {
+      const type = document.getElementById("stfActivityType").value;
+      const showAmt = ["LEAVE_LOP", "ADVANCE", "DAILY_WAGE", "SALARY_PAID"].includes(type);
+      const showFund = ["ADVANCE", "DAILY_WAGE", "SALARY_PAID"].includes(type);
+      document.getElementById("stfAmountWrapper").classList.toggle("hidden", !showAmt);
+      document.getElementById("stfFundWrapper").classList.toggle("hidden", !showFund);
+      document.getElementById("stfAmountLabel").textContent = type === "LEAVE_LOP" ? "LOP Deduction ₹ *" : "Payment Amount ₹ *";
+      if (type === "LEAVE_LOP") autoCalcLopAmount();
+    }
+
+    function autoCalcLopAmount() {
+      if (document.getElementById("stfActivityType").value !== "LEAVE_LOP") return;
+      const emp = appData.employees.find(e => e.EmpID === document.getElementById("stfEmpId").value);
+      if (emp && emp.BaseSalary !== "RESTRICTED") {
+        const perDay = emp.PayType === "Daily Wage" ? Number(emp.BaseSalary) : Math.round(Number(emp.BaseSalary) / 30);
+        document.getElementById("stfAmount").value = perDay;
+      }
+    }
+
+    function renderStaff() {
+      const activeEmps = appData.employees.filter(e => e.Status === "Active");
+      if (!document.getElementById("stfEmpId").value && activeEmps.length > 0) {
+        document.getElementById("stfEmpId").value = activeEmps[0].EmpID;
+        document.getElementById("stfEmpName").value = activeEmps[0].Name;
+        document.getElementById("stfEmpBtn").querySelector("span").textContent = `${activeEmps[0].Name} (${activeEmps[0].Role})`;
+      }
+
+      const todayStr = getLocalTodayStr();
+      const curMonth = todayStr.slice(0, 7);
+      let presentToday = 0;
+      let totalPendingPayroll = 0;
+      const avatarColors = ["bg-indigo-600", "bg-rose-500", "bg-teal-600", "bg-amber-500", "bg-blue-600", "bg-purple-600"];
+
+      document.getElementById("employeeCardsList").innerHTML = activeEmps.map((emp, idx) => {
+        const todayLog = appData.staffActivity.find(a => a.EmpID === emp.EmpID && String(a.Date).startsWith(todayStr) && ["ATTENDANCE", "HALF_DAY", "ABSENT", "LEAVE_PAID", "LEAVE_LOP"].includes(a.ActivityType));
+        const stType = todayLog ? todayLog.ActivityType : "UNMARKED";
+        if (stType === "ATTENDANCE") presentToday += 1;
+        else if (stType === "HALF_DAY") presentToday += 0.5;
+
+        const base = emp.BaseSalary !== "RESTRICTED" ? (Number(emp.BaseSalary) || 0) : 0;
+        const empMonthLogs = appData.staffActivity.filter(a => a.EmpID === emp.EmpID && String(a.Date).startsWith(curMonth));
+        const halfDays = empMonthLogs.filter(a => a.ActivityType === "HALF_DAY").length;
+        const halfDayDed = emp.PayType === "Monthly Salary" ? Math.round((base / 30) * 0.5 * halfDays) : 0;
+        const deductions = halfDayDed + empMonthLogs.filter(a => ["ADVANCE", "DAILY_WAGE", "LEAVE_LOP"].includes(a.ActivityType)).reduce((s, a) => s + (Number(a.Amount) || 0), 0);
+        const paidSal = empMonthLogs.filter(a => a.ActivityType === "SALARY_PAID").reduce((s, a) => s + (Number(a.Amount) || 0), 0);
+        const netPay = Math.max(0, base - deductions - paidSal);
+        if (emp.BaseSalary !== "RESTRICTED") totalPendingPayroll += netPay;
+
+        const pillMap = {
+          ATTENDANCE: ["Present", "bg-emerald-500/15 text-emerald-600"],
+          HALF_DAY: ["Half-Day", "bg-amber-500/15 text-amber-600"],
+          ABSENT: ["Absent", "bg-rose-500/15 text-rose-500"],
+          LEAVE_PAID: ["Paid Leave", "bg-sky-500/15 text-sky-600"],
+          LEAVE_LOP: ["LOP Leave", "bg-amber-500/15 text-amber-600"],
+          UNMARKED: ["Mark", "bg-slate-500/15 opacity-75"]
+        };
+        const [pillLabel, pillClass] = pillMap[stType] || pillMap.UNMARKED;
+
+        return `
+          <div onclick="selectEmployeeCard('${emp.EmpID}')" class="cursor-pointer glass-card p-3.5 rounded-2xl flex items-center justify-between gap-3 active:scale-[0.99] transition">
+            <div class="w-11 h-11 rounded-2xl ${avatarColors[idx % avatarColors.length]} text-white font-extrabold text-sm flex items-center justify-center shrink-0 shadow">
+              ${getInitials(emp.Name)}
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-1.5">
+                <p class="font-extrabold text-sm truncate">${emp.Name}</p>
+                ${paidSal > 0 && netPay === 0 ? `<span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-600">PAID</span>` : ""}
+              </div>
+              <p class="text-[11px] opacity-65 truncate">${emp.Role} • ${todayLog ? "In: " + todayLog.Time : "Not marked today"}</p>
+              ${isPriv() ? `<button type="button" onclick="event.stopPropagation(); openPayrollDrawer('${emp.EmpID}')" class="text-[11px] font-extrabold text-purple-600 mt-0.5">Tap for Payroll (₹${netPay.toLocaleString("en-IN")})</button>` : ""}
+            </div>
+            <button type="button" onclick="event.stopPropagation(); quickCycleAttendance('${emp.EmpID}', '${emp.Name}')" class="px-3 py-1.5 rounded-xl text-xs font-extrabold ${pillClass} shrink-0">
+              ${pillLabel}
+            </button>
+          </div>
+        `;
+      }).join("") || `<p class="text-center text-xs opacity-60 py-4">No staff added yet.</p>`;
+
+      const totalStaff = activeEmps.length;
+      const pct = totalStaff > 0 ? Math.round((presentToday / totalStaff) * 100) : 0;
+      document.getElementById("staffHeroRatio").textContent = `${presentToday} / ${totalStaff} Present`;
+      document.getElementById("staffHeroPending").textContent = isPriv() ? `Pending Payroll: ₹${totalPendingPayroll.toLocaleString("en-IN")}` : "Spicy Kingdom Active Shift";
+      document.getElementById("staffHeroPct").textContent = `${pct}%`;
+      document.getElementById("staffDonutCircle").style.strokeDashoffset = 94.2 - (94.2 * pct) / 100;
+
+      renderEmployeeHeatmap();
+    }
+
+    function selectEmployeeCard(empId) {
+      const emp = appData.employees.find(e => e.EmpID === empId);
+      if (!emp) return;
+      document.getElementById("stfEmpId").value = emp.EmpID;
+      document.getElementById("stfEmpName").value = emp.Name;
+      document.getElementById("stfEmpBtn").querySelector("span").textContent = `${emp.Name} (${emp.Role})`;
+      renderEmployeeHeatmap();
+    }
+
+    function quickCycleAttendance(empId, empName) {
+      selectEmployeeCard(empId);
+      openStaffActionPicker();
+    }
+
+    function openPayrollDrawer(empId) {
+      const emp = appData.employees.find(e => e.EmpID === empId);
+      if (!emp) return;
+      const curMonth = document.getElementById("heatmapMonthLabel").textContent || getLocalTodayStr().slice(0, 7);
+      const base = Number(emp.BaseSalary) || 0;
+      const empLogs = appData.staffActivity.filter(a => a.EmpID === emp.EmpID && String(a.Date).startsWith(curMonth));
+      const halfDays = empLogs.filter(a => a.ActivityType === "HALF_DAY").length;
+      const halfDayDed = emp.PayType === "Monthly Salary" ? Math.round((base / 30) * 0.5 * halfDays) : 0;
+      const deductions = halfDayDed + empLogs.filter(a => ["ADVANCE", "DAILY_WAGE", "LEAVE_LOP"].includes(a.ActivityType)).reduce((s, a) => s + (Number(a.Amount) || 0), 0);
+      const paidSal = empLogs.filter(a => a.ActivityType === "SALARY_PAID").reduce((s, a) => s + (Number(a.Amount) || 0), 0);
+      const netPay = Math.max(0, base - deductions - paidSal);
+
+      activeDrawerEmp = { ...emp, netPay };
+      document.getElementById("payDrawerName").textContent = emp.Name;
+      document.getElementById("payDrawerRole").textContent = `${emp.Role} • ${emp.PayType}`;
+      document.getElementById("kycMobile").textContent = emp.Mobile || "-";
+      document.getElementById("kycId").textContent = emp.IdProof || "-";
+      document.getElementById("kycAddress").textContent = emp.Address || "-";
+      document.getElementById("kycBank").textContent = emp.BankDetails || "-";
+      document.getElementById("payDrawerBase").textContent = `₹${base.toLocaleString("en-IN")}`;
+      document.getElementById("payDrawerDed").textContent = `-₹${deductions.toLocaleString("en-IN")}`;
+      document.getElementById("payDrawerNet").textContent = `₹${netPay.toLocaleString("en-IN")}`;
+      document.getElementById("payDrawerPrivilegedBtns").classList.toggle("hidden", !isPriv());
+      toggleModal("payrollDrawerModal");
+    }
+
+    async function disburseNetSalary() {
+      if (!activeDrawerEmp || activeDrawerEmp.netPay <= 0) return showToast("Net payable is already ₹0.", true);
+      const res = await callApi({
+        action: "logStaffActivity",
+        empId: activeDrawerEmp.EmpID,
+        empName: activeDrawerEmp.Name,
+        activityType: "SALARY_PAID",
+        date: getLocalTodayStr(),
+        amount: activeDrawerEmp.netPay,
+        paidFrom: "Restaurant Cash Box",
+        loggedBy: currentUser.name
+      });
+      if (res.status === "success") { showToast(res.message); toggleModal("payrollDrawerModal"); refreshData(); }
+    }
+
+    function editDrawerSalary() {
+      if (!activeDrawerEmp) return;
+      openInputDialog(`Edit Base Salary: ${activeDrawerEmp.Name}`, "Enter new monthly salary or daily wage (₹)", async (val) => {
+        const res = await callApi({ action: "updateEmployeeStatus", empId: activeDrawerEmp.EmpID, baseSalary: val });
+        if (res.status === "success") { showToast(res.message); toggleModal("payrollDrawerModal"); refreshData(); }
+      });
+    }
+
+    function settleDrawerEmployee() {
+      if (!activeDrawerEmp) return;
+      openInputDialog(`Settle & Remove ${activeDrawerEmp.Name}?`, "Type YES to confirm final settlement & archive staff", async (val) => {
+        if (val.trim().toUpperCase() !== "YES") return showToast("Cancelled", true);
+        const res = await callApi({ action: "updateEmployeeStatus", empId: activeDrawerEmp.EmpID, status: "Settled" });
+        if (res.status === "success") { showToast(res.message); toggleModal("payrollDrawerModal"); refreshData(); }
+      });
+    }
+
+    function shiftHeatmapMonth(delta) {
+      const cur = document.getElementById("heatmapMonthLabel").textContent;
+      const [y, m] = cur.split("-").map(Number);
+      const d = new Date(y, m - 1 + delta, 1);
+      document.getElementById("heatmapMonthLabel").textContent = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+      renderEmployeeHeatmap();
+    }
+
+    function renderEmployeeHeatmap() {
+      const empId = document.getElementById("stfEmpId").value;
+      const empName = document.getElementById("stfEmpName").value;
+      const monthStr = document.getElementById("heatmapMonthLabel").textContent || getLocalTodayStr().slice(0, 7);
+      document.getElementById("heatmapTitle").textContent = empName ? `${empName} — ${monthStr}` : "Attendance Heatmap";
+
+      const [year, month] = monthStr.split("-").map(Number);
+      const daysInMonth = new Date(year, month, 0).getDate();
+      const firstDayWeekday = new Date(year, month - 1, 1).getDay();
+
+      let statusByDay = {};
+      appData.staffActivity.filter(a => a.EmpID === empId && String(a.Date).startsWith(monthStr)).forEach(a => {
+        const day = Number(String(a.Date).slice(0, 10).split("-")[2]);
+        if (["ATTENDANCE", "HALF_DAY", "ABSENT", "LEAVE_PAID", "LEAVE_LOP"].includes(a.ActivityType)) {
+          statusByDay[day] = a.ActivityType;
+        }
+      });
+
+      const headers = ["S", "M", "T", "W", "T", "F", "S"].map(d => `<div class="text-[10px] font-extrabold opacity-50 py-1">${d}</div>`).join("");
+      let blanks = Array(firstDayWeekday).fill(`<div></div>`).join("");
+      let cells = "";
+      for (let d = 1; d <= daysInMonth; d++) {
+        const st = statusByDay[d];
+        let cls = "glass-card opacity-75";
+        if (st === "ATTENDANCE") cls = "bg-emerald-500 text-white font-extrabold";
+        else if (st === "HALF_DAY" || st === "LEAVE_LOP") cls = "bg-amber-500 text-white font-extrabold";
+        else if (st === "ABSENT") cls = "bg-rose-500 text-white font-extrabold";
+        else if (st === "LEAVE_PAID") cls = "bg-sky-500 text-white font-extrabold";
+        cells += `<div class="h-8 rounded-lg flex items-center justify-center text-[11px] tabular-nums ${cls}">${d}</div>`;
+      }
+      document.getElementById("calendarHeatmapGrid").innerHTML = headers + blanks + cells;
+    }
+
+    async function submitStaffActivity(e) {
+      e.preventDefault();
+      const empId = document.getElementById("stfEmpId").value;
+      const empName = document.getElementById("stfEmpName").value;
+      if (!empId) return showToast("Select a staff member first.", true);
+      const actType = document.getElementById("stfActivityType").value;
+      const amt = Number(document.getElementById("stfAmount").value) || 0;
+
+      const res = await callApi({
+        action: "logStaffActivity",
+        empId, empName,
+        activityType: actType,
+        date: document.getElementById("stfDate").value,
+        amount: amt,
+        paidFrom: ["ADVANCE", "DAILY_WAGE", "SALARY_PAID"].includes(actType) ? document.getElementById("stfPaidFrom").value : "-",
+        loggedBy: currentUser.name
+      });
+      if (res.status === "success") { showToast(res.message); document.getElementById("stfAmount").value = ""; refreshData(); }
+      else showToast(res.message, true);
+    }
+
+    async function submitNewEmployee(e) {
+      e.preventDefault();
+      const res = await callApi({
+        action: "addEmployee",
+        name: document.getElementById("empName").value,
+        role: document.getElementById("empRole").value,
+        mobile: document.getElementById("empMobile").value,
+        payType: document.getElementById("empPayType").value,
+        baseSalary: document.getElementById("empSalary").value,
+        idProof: document.getElementById("empIdProof").value,
+        address: document.getElementById("empAddress").value,
+        bankDetails: document.getElementById("empBank").value
+      });
+      if (res.status === "success") { showToast(res.message); toggleModal("addEmpModal"); e.target.reset(); refreshData(); }
+    }
+
+    // ============================================================
+    // 8. DIRECT PDF & EXCEL REPORT EXPORT ENGINE
+    // ============================================================
+    function exportReport(format) {
+      const type = document.getElementById("repType").value;
+      const period = document.getElementById("repPeriod").value;
+      const now = new Date();
+      const todayStr = getLocalTodayStr();
+
+      const inPeriod = (dateStr) => {
+        const s = String(dateStr || "").slice(0, 10);
+        if (!s) return true;
+        if (period === "DAILY") return s === todayStr;
+        if (period === "WEEKLY") return (now - new Date(s)) <= 7 * 86400000;
+        if (period === "MONTHLY") return s.startsWith(todayStr.slice(0, 7));
+        if (period === "ANNUALLY") return s.startsWith(todayStr.slice(0, 4));
+        return true;
+      };
+
+      let rows = [];
+
+      if (type === "STOCK") {
+        rows = appData.inventory.map(i => ({
+          Item: i.ItemName, Category: i.Category,
+          StoreStock: `${i.CurrentStock} ${i.Unit}`, KitchenStock: `${i.KitchenStock || 0} ${i.Unit}`,
+          MinAlert: i.MinAlert, MaxTarget: i.MaxTarget,
+          UnitPrice: i.LastPrice, TotalWorth: Math.round(((Number(i.CurrentStock)||0)+(Number(i.KitchenStock)||0))*(Number(i.LastPrice)||0))
+        }));
+      } else if (type === "PURCHASES") {
+        rows = appData.purchases.filter(p => inPeriod(p.Timestamp)).map(p => ({
+          Date: String(p.Timestamp).slice(0,10), Item: p.ItemName, Category: p.Category,
+          Qty: `${p.Qty} ${p.Unit}`, Total: p.TotalAmount, PaidFrom: p.PaidFrom, Vendor: p.Supplier, Status: p.VerifyStatus
+        }));
+      } else if (type === "ATTENDANCE") {
+        rows = appData.staffActivity.filter(a => inPeriod(a.Date)).map(a => ({
+          Date: String(a.Date).slice(0,10), Time: a.Time, Employee: a.EmpName, Status: a.ActivityType, LoggedBy: a.LoggedBy
+        }));
+      } else if (type === "SALARY") {
+        const curM = todayStr.slice(0, 7);
+        rows = appData.employees.map(emp => {
+          const base = Number(emp.BaseSalary) || 0;
+          const logs = appData.staffActivity.filter(a => a.EmpID === emp.EmpID && String(a.Date).startsWith(curM));
+          const ded = logs.filter(a => ["ADVANCE", "DAILY_WAGE", "LEAVE_LOP"].includes(a.ActivityType)).reduce((s, a) => s + (Number(a.Amount)||0), 0);
+          const paid = logs.filter(a => a.ActivityType === "SALARY_PAID").reduce((s, a) => s + (Number(a.Amount)||0), 0);
+          return { Employee: emp.Name, Role: emp.Role, BaseSalary: base, Deductions: ded, Paid: paid, NetPayable: Math.max(0, base - ded - paid) };
+        });
+      } else if (type === "WASTE") {
+        rows = (appData.wasteLog || []).filter(w => inPeriod(w.Timestamp)).map(w => ({
+          Date: String(w.Timestamp).slice(0,10), Category: w.WasteCategory, Item: w.ItemName, Qty: `${w.Qty} ${w.Unit}`, LossRs: w.EstimatedLoss, Reason: w.Reason, Status: w.VerifyStatus
+        }));
+      } else {
+        const pRows = appData.purchases.filter(p => inPeriod(p.Timestamp)).map(p => ({ Date: String(p.Timestamp).slice(0,10), Type: "OUTFLOW", Particular: p.ItemName, Account: p.PaidFrom, Amount: -Number(p.TotalAmount) }));
+        const iRows = appData.inflows.filter(i => inPeriod(i.Timestamp)).map(i => ({ Date: String(i.Timestamp).slice(0,10), Type: "INFLOW", Particular: i.Source, Account: i.DepositedTo, Amount: Number(i.Amount) }));
+        rows = [...iRows, ...pRows];
+      }
+
+      if (rows.length === 0) return showToast("No records found for selected period.", true);
+
+      if (format === "EXCEL") {
+        const ws = XLSX.utils.json_to_sheet(rows);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, type);
+        XLSX.writeFile(wb, `SpicyKingdom_Ops_${type}_${period}.xlsx`);
+        showToast("Excel report downloaded!");
+      } else {
+        const headers = Object.keys(rows[0]);
+        const container = document.createElement("div");
+        container.style.position = "fixed";
+        container.style.left = "-9999px";
+        container.style.top = "0";
+        container.style.width = "780px";
+        container.style.background = "#FFFFFF";
+        container.innerHTML = `
+          <div style="font-family:sans-serif; padding:20px; color:#000; background:#fff;">
+            <h2 style="margin:0 0 4px; font-size:18px; font-weight:900;">SPICY KINGDOM OPS — ${type} REPORT</h2>
+            <p style="margin:0 0 12px; font-size:12px;">Period: ${period} • Generated on ${todayStr} by ${currentUser.name}</p>
+            <table style="width:100%; border-collapse:collapse; font-size:11px;">
+              <thead><tr>${headers.map(h => `<th style="border:1px solid #000; padding:6px; text-align:left; background:#f1f5f9; font-weight:800;">${h}</th>`).join("")}</tr></thead>
+              <tbody>${rows.map(r => `<tr>${headers.map(h => `<td style="border:1px solid #cbd5e1; padding:6px;">${r[h]}</td>`).join("")}</tr>`).join("")}</tbody>
+            </table>
+          </div>
+        `;
+        document.body.appendChild(container);
+        html2pdf().set({
+          margin: 10,
+          filename: `SpicyKingdom_Ops_${type}_${period}_${todayStr}.pdf`,
+          image: { type: "jpeg", quality: 0.98 },
+          html2canvas: { scale: 2 },
+          jsPDF: { unit: "mm", format: "a4", orientation: "portrait" }
+        }).from(container).save().then(() => {
+          document.body.removeChild(container);
+          showToast("PDF report downloaded!");
+        });
+      }
+      toggleModal("reportsModal");
+    }
+
+    // ============================================================
+    // 9. ADMIN CONTROL CENTER, RESET DATA & REIMBURSEMENTS
+    // ============================================================
+    function openAdminModal() {
+      const leavesEnabled = String(appData.settings.LEAVE_DEDUCTION_ENABLED || "TRUE").toUpperCase() !== "FALSE";
+      const btn = document.getElementById("toggleLeaveFeatureBtn");
+      btn.textContent = leavesEnabled ? "Enabled" : "Disabled";
+      btn.className = `px-3.5 py-1.5 rounded-xl text-xs font-bold text-white ${leavesEnabled ? "bg-emerald-600" : "bg-slate-500"}`;
+
+      document.getElementById("adminUsersList").innerHTML = (appData.users || []).map(u => `
+        <div class="p-3 rounded-xl bg-slate-500/10 flex items-center justify-between gap-2">
+          <div>
+            <p class="font-bold">${u.Name} <span class="opacity-65">(${u.Role})</span></p>
+            <p class="text-[11px] text-amber-600 font-bold">PIN: ${u.PIN}</p>
+          </div>
+          <button type="button" onclick="editUserCredentialDialog('${u.UserID}', '${u.Name}', '${u.PIN}')" class="px-3 py-1.5 rounded-lg bg-slate-900 text-white font-bold">Edit Name/PIN</button>
+        </div>
+      `).join("");
+      toggleModal("adminModal");
+    }
+
+    function editUserCredentialDialog(userId, curName, curPin) {
+      openInputDialog(`Edit ${curName} Login`, "Enter Name & 6-Digit PIN (Leading 0 supported)", async (newName, newPin) => {
+        const cleanPin = String(newPin || "").trim();
+        if (!/^\d{6}$/.test(cleanPin)) return showToast("PIN must be exactly 6 digits.", true);
+        const res = await callApi({ action: "manageUserPin", requesterRole: currentUser.role, targetUserId: userId, newName: newName || curName, newPin: cleanPin });
+        if (res.status === "success") { showToast(res.message); await refreshData(); openAdminModal(); }
+      }, curName, curPin);
+    }
+
+    function openAddUserModal() {
+      openInputDialog("Create New 6-Digit Login", "Enter Staff Name & 6-Digit PIN (Role: Cashier)", async (name, pin) => {
+        const cleanPin = String(pin || "").trim();
+        if (!name || !/^\d{6}$/.test(cleanPin)) return showToast("Enter Name and 6-digit PIN.", true);
+        const res = await callApi({ action: "addSystemUser", requesterRole: currentUser.role, name, pin: cleanPin, role: "Cashier" });
+        if (res.status === "success") { showToast(res.message); await refreshData(); openAdminModal(); }
+      }, "", "");
+    }
+
+    function resetTestingDataDialog() {
+      openInputDialog("Reset All Testing Data?", "Type RESET to wipe all test records & go live", async (val) => {
+        if (val.trim().toUpperCase() !== "RESET") return showToast("Reset cancelled", true);
+        const res = await callApi({ action: "resetTestData", requesterRole: currentUser.role });
+        if (res.status === "success") {
+          showToast(res.message);
+          toggleModal("adminModal");
+          refreshData();
+        } else showToast(res.message, true);
+      });
+    }
+
+    async function toggleLeaveFeature() {
+      const currentlyEnabled = String(appData.settings.LEAVE_DEDUCTION_ENABLED || "TRUE").toUpperCase() !== "FALSE";
+      const res = await callApi({
+        action: "updateSettings",
+        requesterRole: currentUser.role,
+        key: "LEAVE_DEDUCTION_ENABLED",
+        value: currentlyEnabled ? "FALSE" : "TRUE"
+      });
+      if (res.status === "success") { showToast(res.message); await refreshData(); openAdminModal(); }
+    }
+
+    function openReimburseModal() {
+      const entries = Object.entries(appData.selfLedger || {});
+      if (entries.length > 0) {
+        selectDirect("reimbPerson", "reimbPersonBtn", entries[0][0], `${entries[0][0]} (Owed ₹${entries[0][1]})`);
+      }
+      toggleModal("reimburseModal");
+    }
+
+    function openReimbursePersonPicker() {
+      const entries = Object.entries(appData.selfLedger || {});
+      const opts = entries.map(([person, owed]) => ({ label: person, value: person, sub: owed > 0 ? `Owed ₹${owed}` : "Settled ₹0" }));
+      openPicker("Reimburse Self Expense To", opts, "reimbPerson", "reimbPersonBtn");
+    }
+
+    async function submitReimbursement(e) {
+      e.preventDefault();
+      const personName = document.getElementById("reimbPerson").value;
+      if (!personName) return showToast("Select a staff member from Self transactions.", true);
+      const res = await callApi({
+        action: "reimburseSelf",
+        personName,
+        amount: document.getElementById("reimbAmount").value,
+        paidFrom: document.getElementById("reimbPaidFrom").value,
+        loggedBy: currentUser.name
+      });
+      if (res.status === "success") { showToast(res.message); toggleModal("reimburseModal"); e.target.reset(); refreshData(); }
+    }
+
+    async function submitInflow(e) {
+      e.preventDefault();
+      const res = await callApi({
+        action: "addInflow",
+        source: document.getElementById("infSource").value,
+        amount: document.getElementById("infAmount").value,
+        depositedTo: document.getElementById("infDepositedTo").value,
+        loggedBy: currentUser.name
+      });
+      if (res.status === "success") { showToast(res.message); toggleModal("inflowModal"); e.target.reset(); refreshData(); }
+    }
+
+    function editFundDialog(fundName, curBal) {
+      openInputDialog(`Set ${fundName} Balance`, "Enter exact cash amount (₹)", async (val) => {
+        const res = await callApi({ action: "updateFundBalance", fundName, newBalance: val });
+        if (res.status === "success") { showToast(res.message); refreshData(); }
+      }, curBal);
+    }
+
+    // ============================================================
+    // 10. UNIVERSAL PICKER, FUTURE-ONLY DATE PICKER & RESPONSIVE NAVIGATION
+    // ============================================================
+    function selectDirect(hiddenId, btnId, val, label) {
+      document.getElementById(hiddenId).value = val;
+      if (btnId && document.getElementById(btnId)) {
+        document.getElementById(btnId).querySelector("span").textContent = label;
+      }
+    }
+
+    function openPicker(title, items, hiddenInputId, buttonId, onSelectCallback = null, enableSearch = false) {
+      activePickerConfig = { items, hiddenInputId, buttonId, onSelectCallback };
+      document.getElementById("pickerTitle").textContent = title;
+      const searchBox = document.getElementById("pickerSearchInput");
+      searchBox.value = "";
+      searchBox.classList.toggle("hidden", !enableSearch && items.length < 8);
+      renderPickerList(items);
+      toggleModal("customPickerModal");
+    }
+
+    function renderPickerList(items) {
+      const currentVal = document.getElementById(activePickerConfig.hiddenInputId).value;
+      document.getElementById("pickerOptionsList").innerHTML = items.map(item => {
+        const selected = String(item.value) === String(currentVal);
+        return `
+          <button type="button" onclick="selectPickerOption('${String(item.value).replace(/'/g, "\\'")}', '${String(item.label).replace(/'/g, "\\'")}')"
+            class="w-full text-left px-4 py-3 rounded-2xl text-xs font-bold flex items-center justify-between transition ${
+              selected ? "bg-gradient-to-r from-amber-500 to-rose-600 text-white shadow" : "bg-slate-500/10"
+            }">
+            <span>${item.label}</span>
+            ${item.sub ? `<span class="text-[10px] opacity-80">${item.sub}</span>` : ""}
+          </button>
+        `;
+      }).join("") || `<p class="text-center text-xs opacity-60 py-4">No options available.</p>`;
+    }
+
+    function filterPickerOptions() {
+      const q = document.getElementById("pickerSearchInput").value.toLowerCase();
+      renderPickerList(activePickerConfig.items.filter(i => i.label.toLowerCase().includes(q)));
+    }
+
+    function selectPickerOption(val, label) {
+      selectDirect(activePickerConfig.hiddenInputId, activePickerConfig.buttonId, val, label);
+      toggleModal("customPickerModal");
+      if (activePickerConfig.onSelectCallback) activePickerConfig.onSelectCallback(val, label);
+    }
+
+    function openCustomDatePicker(title, hiddenId, btnId, futureOnly = false) {
+      datePickerTarget = { hiddenId, btnId, viewDate: new Date(), futureOnly };
+      document.getElementById("datePickerTitle").textContent = title;
+      renderCustomDateGrid();
+      toggleModal("customDateModal");
+    }
+
+    function shiftPickerMonth(delta) {
+      datePickerTarget.viewDate.setMonth(datePickerTarget.viewDate.getMonth() + delta);
+      renderCustomDateGrid();
+    }
+
+    function renderCustomDateGrid() {
+      const y = datePickerTarget.viewDate.getFullYear();
+      const m = datePickerTarget.viewDate.getMonth();
+      document.getElementById("datePickerMonthLabel").textContent = `${y}-${String(m + 1).padStart(2, "0")}`;
+      const days = new Date(y, m + 1, 0).getDate();
+      const startDay = new Date(y, m, 1).getDay();
+      const curSelected = document.getElementById(datePickerTarget.hiddenId).value;
+      const todayStr = getLocalTodayStr();
+
+      const hdr = ["S","M","T","W","T","F","S"].map(d => `<div class="text-[10px] font-bold opacity-50">${d}</div>`).join("");
+      const blanks = Array(startDay).fill(`<div></div>`).join("");
+      let cells = "";
+      for (let d = 1; d <= days; d++) {
+        const iso = `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+        const isPastDisabled = datePickerTarget.futureOnly && iso < todayStr;
+        const active = iso === curSelected;
+        if (isPastDisabled) {
+          cells += `<div class="h-9 rounded-xl flex items-center justify-center opacity-25 line-through cursor-not-allowed">${d}</div>`;
+        } else {
+          cells += `<button type="button" onclick="pickCustomDate('${iso}')" class="h-9 rounded-xl font-bold tabular-nums ${active ? "bg-gradient-to-r from-amber-500 to-rose-600 text-white shadow" : "glass-card"}">${d}</button>`;
+        }
+      }
+      document.getElementById("datePickerGrid").innerHTML = hdr + blanks + cells;
+    }
+
+    function pickCustomDate(iso) {
+      selectDirect(datePickerTarget.hiddenId, datePickerTarget.btnId, iso, iso);
+      toggleModal("customDateModal");
+    }
+
+    function openInputDialog(title, sub, cb, val1 = "", val2 = null) {
+      document.getElementById("inAppInputTitle").textContent = title;
+      document.getElementById("inAppInputSub").textContent = sub;
+      const f1 = document.getElementById("inAppInputField");
+      const f2 = document.getElementById("inAppInputField2");
+      f1.value = val1;
+      if (val2 !== null) {
+        f2.value = val2;
+        f2.classList.remove("hidden");
+      } else {
+        f2.classList.add("hidden");
+      }
+      inAppInputCallback = cb;
+      toggleModal("inAppInputModal");
+    }
+
+    function confirmInAppInput() {
+      const v1 = document.getElementById("inAppInputField").value;
+      const v2 = document.getElementById("inAppInputField2").value;
+      toggleModal("inAppInputModal");
+      if (inAppInputCallback) inAppInputCallback(v1, v2);
+    }
+
+    function switchTab(tabId) {
+      const nextIdx = TAB_ORDER.indexOf(tabId);
+      const animClass = nextIdx >= currentTabIdx ? "anim-slide-right" : "anim-slide-left";
+      currentTabIdx = nextIdx;
+
+      TAB_ORDER.forEach(t => {
+        const el = document.getElementById(`tab-${t}`);
+        el.classList.remove("anim-slide-right", "anim-slide-left");
+        if (t === tabId) {
+          el.classList.remove("hidden");
+          void el.offsetWidth;
+          el.classList.add(animClass);
+        } else {
+          el.classList.add("hidden");
+        }
+      });
+
+      document.querySelectorAll(".nav-btn").forEach(b => {
+        const active = b.dataset.tab === tabId;
+        b.className = `nav-btn flex flex-col items-center gap-1 py-1.5 rounded-2xl transition-all duration-300 ${
+          active
+            ? "bg-gradient-to-r from-amber-500 via-orange-600 to-rose-600 text-white font-extrabold shadow-lg shadow-orange-500/30 scale-105"
+            : "opacity-65 hover:opacity-100"
+        }`;
+      });
+
+      document.querySelectorAll(".desk-nav-btn").forEach(b => {
+        const active = b.dataset.tab === tabId;
+        b.className = `desk-nav-btn px-4 py-2 rounded-xl transition-all ${
+          active
+            ? "bg-gradient-to-r from-amber-500 via-orange-600 to-rose-600 text-white shadow"
+            : "opacity-75 hover:opacity-100"
+        }`;
+      });
+    }
+
+    function toggleModal(id) {
+      document.getElementById(id).classList.toggle("hidden");
+    }
+  </script>
+</body>
+</html>
