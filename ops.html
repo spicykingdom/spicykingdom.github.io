@@ -2415,40 +2415,24 @@
     }
 
     function downloadHtmlAsDirectPdf(htmlContent, filename) {
-      const container = document.createElement("div");
-      container.style.position = "fixed";
-      container.style.left = "-9999px";
-      container.style.top = "0";
-      container.style.width = "780px";
-      container.style.background = "#FFFFFF";
-      container.innerHTML = htmlContent;
-      document.body.appendChild(container);
-
-      const finishCleanup = () => {
-        if (container && container.parentNode) container.parentNode.removeChild(container);
-      };
-
       if (typeof html2pdf !== "undefined") {
         html2pdf()
           .set({
-            margin: 10,
+            margin: [10, 10, 10, 10],
             filename: filename,
             image: { type: "jpeg", quality: 0.98 },
-            html2canvas: { scale: 2, useCORS: true },
+            html2canvas: { scale: 2, useCORS: true, backgroundColor: "#FFFFFF" },
             jsPDF: { unit: "mm", format: "a4", orientation: "portrait" }
           })
-          .from(container)
+          .from(htmlContent, "string")
           .outputPdf("datauristring")
           .then(async (pdfDataUri) => {
-            finishCleanup();
             await saveBase64FileUniversal(pdfDataUri, filename, "application/pdf");
           })
-          .catch(() => {
-            finishCleanup();
-            showToast("PDF generation failed", true);
+          .catch((err) => {
+            showToast("PDF generation failed: " + (err && err.message ? err.message : ""), true);
           });
       } else {
-        finishCleanup();
         showToast("PDF library not loaded", true);
       }
     }
