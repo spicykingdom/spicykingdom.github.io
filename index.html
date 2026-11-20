@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -93,11 +94,11 @@
       }
       #thermalPrintArea {
         position: static !important;
-        width: 68mm !important;
-        max-width: 68mm !important;
+        width: 71.5mm !important;
+        max-width: 71.5mm !important;
         box-sizing: border-box !important;
-        margin: 0 auto !important;
-        padding: 1mm 1.5mm !important;
+        margin: 0 !important;
+        padding: 1mm 1.5mm 1mm 0mm !important;
         background: #FFFFFF !important;
         color: #000000 !important;
         font-family: 'Consolas', 'DejaVu Sans Mono', 'Courier New', monospace !important;
@@ -130,7 +131,7 @@
       </div>
     </div>
     <h1 class="text-2xl font-extrabold tracking-tight bg-gradient-to-r from-amber-600 via-orange-600 to-rose-600 bg-clip-text text-transparent">SPICY KINGDOM POS</h1>
-    <p class="text-xs font-semibold text-slate-600 mt-1">Initializing Tables, KDS & Register...</p>
+    <p class="text-xs font-semibold text-slate-600 mt-1">Initializing Tables, KDS & Cloud Sync...</p>
     <div class="w-48 h-1.5 bg-slate-300/60 rounded-full overflow-hidden mt-5">
       <div class="w-1/2 h-full bg-gradient-to-r from-amber-500 to-rose-600 rounded-full shimmer-bar"></div>
     </div>
@@ -140,10 +141,11 @@
   <div id="posToast" class="fixed top-3 left-1/2 -translate-x-1/2 lg:left-auto lg:translate-x-0 lg:right-4 z-[95] hidden max-w-sm w-[92%] px-4 py-3 rounded-xl shadow-xl text-xs font-bold text-white transition-all duration-200 flex items-center gap-2">
     <span id="posToastMsg">Saved!</span>
   </div>
-<!-- ============================================================
+
+  <!-- ============================================================
        SCREEN 1: ROLE-BASED 6-DIGIT PIN LOGIN VAULT
        ============================================================ -->
-	<div id="posLoginScreen" class="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-amber-50 via-orange-50 to-rose-100">
+  <div id="posLoginScreen" class="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-amber-50 via-orange-50 to-rose-100">
     <div class="relative bg-white/95 backdrop-blur-md rounded-3xl p-7 max-w-sm w-full shadow-2xl border border-orange-100 text-center space-y-5">
       <a href="ops.html" class="absolute top-4 right-4 px-3 py-1.5 rounded-full bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 text-xs font-extrabold shadow-xs active:scale-95 transition">
         Ops ↗
@@ -189,7 +191,7 @@
        ============================================================ -->
   <div id="posAppShell" class="hidden flex-1 flex flex-col">
 
-	<!-- STICKY HEADER -->
+    <!-- STICKY HEADER -->
     <header class="sticky top-0 z-30 bg-white border-b border-slate-200 px-2.5 sm:px-5 py-2 flex items-center justify-between gap-1.5 shadow-xs">
       <div class="flex items-center gap-2 min-w-0 flex-1">
         <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-br from-rose-600 to-orange-600 text-white font-extrabold text-xs sm:text-sm flex items-center justify-center shrink-0 shadow-xs">
@@ -251,7 +253,7 @@
     </header>
 
     <!-- ============================================================
-         VIEW 1: LIVE FLOOR & TABLE GRID
+         VIEW 1: LIVE FLOOR, TABLE GRID & RECENT ORDERS CARD
          ============================================================ -->
     <main id="view-FLOOR" class="flex-1 p-3 sm:p-4 max-w-7xl w-full mx-auto space-y-3.5">
       <div class="bg-white rounded-2xl p-3 border border-slate-200 flex flex-wrap items-center justify-between gap-2.5 shadow-xs">
@@ -294,10 +296,21 @@
       </div>
 
       <div id="tablesFloorGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2.5 sm:gap-3"></div>
-    </main>
 
-    <!-- ============================================================
-         VIEW 2: POS BILLING (UI-Matched Custom Dropdowns + Mobile List View)
+      <!-- RECENT ORDERS CARD (Synced Across Devices: Billed By & For Whom) -->
+      <div class="bg-white rounded-2xl p-4 border border-slate-200 space-y-3 shadow-xs">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-sm font-extrabold text-slate-900">Recent Orders (Billed By & Guest)</h3>
+            <p class="text-[11px] text-slate-500" id="floorLastSyncLabel">Live synced across all terminals</p>
+          </div>
+          <button onclick="switchPosView('REPORTS')" class="text-xs font-extrabold text-rose-600 hover:underline">Full Reports →</button>
+        </div>
+        <div id="floorRecentOrdersList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5 text-xs"></div>
+      </div>
+    </main>
+	<!-- ============================================================
+         VIEW 2: POS BILLING (UI-Matched Custom Dropdowns + Smart Offers)
          ============================================================ -->
     <main id="view-BILLING" class="hidden flex-1 max-w-7xl w-full mx-auto p-2 sm:p-3 flex flex-col">
       <div class="lg:hidden grid grid-cols-2 gap-1.5 bg-white p-1.5 rounded-2xl border border-slate-200 mb-2 text-xs font-extrabold shadow-xs">
@@ -454,7 +467,7 @@
     </main>
 
     <!-- ============================================================
-         VIEW 4: CUSTOMER MARKETING CRM
+         VIEW 4: CUSTOMER MARKETING CRM & WHATSAPP PROMO BROADCAST
          ============================================================ -->
     <main id="view-CRM" class="hidden flex-1 max-w-6xl w-full mx-auto p-3 sm:p-4 space-y-4">
       <div class="grid grid-cols-3 gap-2.5">
@@ -472,6 +485,17 @@
         </div>
       </div>
 
+      <!-- Smart Offer WhatsApp Campaign Banner -->
+      <div class="bg-gradient-to-r from-amber-50 via-orange-50 to-rose-50 rounded-2xl p-4 border border-orange-200 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h3 class="text-sm font-extrabold text-slate-900">Smart Dish Offer & WhatsApp Campaign</h3>
+          <p class="text-xs text-slate-600" id="crmActiveOffersSummary">Promote active dish discounts & combos directly to your local & repeat guests</p>
+        </div>
+        <button onclick="openPromoCampaignModal()" class="px-4 py-2 rounded-xl bg-rose-600 text-white text-xs font-extrabold shadow">
+          Create Offer Message
+        </button>
+      </div>
+
       <div class="bg-white rounded-2xl p-4 border border-slate-200 space-y-3">
         <div class="flex flex-wrap items-center justify-between gap-2">
           <div class="flex gap-1.5 text-xs font-extrabold">
@@ -486,13 +510,13 @@
     </main>
 
     <!-- ============================================================
-         VIEW 5: MENU MANAGER (Availability + Sheet Variants)
+         VIEW 5: MENU MANAGER (Availability, Variants & Smart Dish Offers)
          ============================================================ -->
     <main id="view-MENU_MGR" class="hidden flex-1 max-w-6xl w-full mx-auto p-3 sm:p-4 space-y-4">
       <div class="bg-white rounded-2xl p-4 border border-slate-200 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 class="text-base font-extrabold text-slate-900" id="menuMgrHeaderCount">Menu Catalog Manager (135 Items)</h2>
-          <p class="text-xs text-slate-500">Toggle Available / Sold Out or configure optional variants</p>
+          <p class="text-xs text-slate-500">Toggle Available / Sold Out, set Smart Offers (% Off / BOGO / Combo Deal), or edit variants</p>
         </div>
         <div class="flex gap-2">
           <button onclick="togglePosModal('importModal')" class="px-3 py-2 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-extrabold">Import Excel/CSV</button>
@@ -508,6 +532,7 @@
             <button onclick="setMgrDietFilter('VEG')" class="mgr-diet-btn px-3 py-2 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200" data-d="VEG">Veg</button>
             <button onclick="setMgrDietFilter('NON-VEG')" class="mgr-diet-btn px-3 py-2 rounded-xl bg-rose-50 text-rose-700 border border-rose-200" data-d="NON-VEG">Non-Veg</button>
             <button onclick="setMgrDietFilter('EGG')" class="mgr-diet-btn px-3 py-2 rounded-xl bg-amber-50 text-amber-700 border border-amber-200" data-d="EGG">Egg</button>
+            <button onclick="setMgrDietFilter('OFFERS')" class="mgr-diet-btn px-3 py-2 rounded-xl bg-purple-50 text-purple-700 border border-purple-200" data-d="OFFERS">Active Offers</button>
           </div>
         </div>
         <div id="mgrCategoryPills" class="flex gap-1.5 overflow-x-auto no-scrollbar text-xs font-extrabold pb-1"></div>
@@ -516,7 +541,7 @@
     </main>
 
     <!-- ============================================================
-         VIEW 6: CLEAN EXECUTIVE ANALYTICS & REPORTS DASHBOARD
+         VIEW 6: EXECUTIVE ANALYTICS & REPORTS DASHBOARD (Synced + Period Switcher)
          ============================================================ -->
     <main id="view-REPORTS" class="hidden flex-1 max-w-7xl w-full mx-auto p-3 sm:p-4 space-y-4">
       <div class="bg-white rounded-2xl p-3.5 border border-slate-200 flex flex-wrap items-center justify-between gap-2">
@@ -525,19 +550,28 @@
           <button onclick="openManualCashModal('INFLOW')" class="px-3 py-2 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-extrabold">+ Catering / Extra Sale</button>
           <button onclick="openManualCashModal('EXPENSE')" class="px-3 py-2 rounded-xl bg-rose-50 text-rose-700 border border-rose-200 text-xs font-extrabold">- Pooja / Petty Expense</button>
         </div>
-        <button onclick="togglePosModal('reportsExportModal')" class="px-4 py-2 rounded-xl bg-indigo-600 text-white text-xs font-extrabold shadow">
-          Sales, Daily X-Report & ITR (Excel / PDF)
-        </button>
+        <div class="flex flex-wrap items-center gap-2">
+          <div class="flex bg-slate-100 p-1 rounded-xl text-[11px] font-extrabold">
+            <button onclick="setDashboardScope('TODAY')" id="scopeTodayBtn" class="px-2.5 py-1 rounded-lg bg-white text-rose-600 shadow-xs">Today</button>
+            <button onclick="setDashboardScope('ALL')" id="scopeAllBtn" class="px-2.5 py-1 rounded-lg text-slate-600">All Time</button>
+          </div>
+          <button onclick="togglePosModal('reportsExportModal')" class="px-4 py-2 rounded-xl bg-indigo-600 text-white text-xs font-extrabold shadow">
+            Sales, Daily X-Report & ITR (Excel / PDF)
+          </button>
+        </div>
       </div>
 
+      <!-- PRIMARY KPI ROW -->
       <div class="grid grid-cols-2 lg:grid-cols-5 gap-3">
         <div class="bg-white p-4 rounded-2xl border border-slate-200 border-t-4 border-t-emerald-500">
-          <p class="text-[11px] font-bold text-slate-500">Today's POS Sales</p>
+          <p class="text-[11px] font-bold text-slate-500" id="kpiSalesHeading">Today's POS Sales</p>
           <p class="text-2xl font-extrabold text-slate-900 tabular-nums mt-1" id="kpiTodaySales">₹0</p>
+          <p class="text-[10px] font-bold text-emerald-700 mt-0.5 tabular-nums" id="kpiSalesModeSplit">Cash: ₹0 • Digital: ₹0</p>
         </div>
         <div class="bg-white p-4 rounded-2xl border border-slate-200 border-t-4 border-t-blue-500">
           <p class="text-[11px] font-bold text-slate-500">Settled Orders</p>
           <p class="text-2xl font-extrabold text-slate-900 tabular-nums mt-1" id="kpiTodayOrders">0</p>
+          <p class="text-[10px] font-bold text-blue-700 mt-0.5 tabular-nums" id="kpiExtraInflowHint">Extra Inflow: ₹0</p>
         </div>
         <div class="bg-white p-4 rounded-2xl border border-slate-200 border-t-4 border-t-amber-500">
           <p class="text-[11px] font-bold text-slate-500">Cumulative Staff Tips</p>
@@ -546,10 +580,35 @@
         <div class="bg-white p-4 rounded-2xl border border-slate-200 border-t-4 border-t-teal-500">
           <p class="text-[11px] font-bold text-slate-500">Ops Cash Box (Live)</p>
           <p class="text-2xl font-extrabold text-slate-900 tabular-nums mt-1" id="kpiOpsCashBox">₹0</p>
+          <p class="text-[10px] font-bold text-teal-700 mt-0.5 tabular-nums" id="kpiTotalDrawerHint">Drawer + POS Cash: ₹0</p>
         </div>
         <div class="bg-white p-4 rounded-2xl border border-slate-200 border-t-4 border-t-indigo-500 col-span-2 lg:col-span-1">
           <p class="text-[11px] font-bold text-slate-500">Ops Store Stock Worth</p>
           <p class="text-2xl font-extrabold text-slate-900 tabular-nums mt-1" id="kpiOpsStockWorth">₹0</p>
+        </div>
+      </div>
+
+      <!-- SECONDARY EXECUTIVE STATISTICS CARDS -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 border-l-4 border-l-rose-600">
+          <p class="text-[11px] font-bold text-slate-500">Highest Selling Dish</p>
+          <p class="text-sm font-extrabold text-slate-900 truncate mt-1" id="kpiBestDishName">—</p>
+          <p class="text-[11px] font-bold text-rose-600 tabular-nums mt-0.5" id="kpiBestDishMeta">0 sold • ₹0</p>
+        </div>
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 border-l-4 border-l-purple-600">
+          <p class="text-[11px] font-bold text-slate-500">Avg Order Value (AOV)</p>
+          <p class="text-xl font-extrabold text-slate-900 tabular-nums mt-1" id="kpiAvgOrderValue">₹0</p>
+          <p class="text-[11px] font-semibold text-slate-500 mt-0.5" id="kpiTotalItemsSold">0 total items sold</p>
+        </div>
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 border-l-4 border-l-orange-500">
+          <p class="text-[11px] font-bold text-slate-500">Top Revenue Category</p>
+          <p class="text-sm font-extrabold text-slate-900 truncate mt-1" id="kpiTopCategoryName">—</p>
+          <p class="text-[11px] font-bold text-orange-600 tabular-nums mt-0.5" id="kpiTopCategoryMeta">₹0 (0%)</p>
+        </div>
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 border-l-4 border-l-cyan-600">
+          <p class="text-[11px] font-bold text-slate-500">Guest Mix & Discounts</p>
+          <p class="text-sm font-extrabold text-slate-900 tabular-nums mt-1" id="kpiGuestMix">0 Local • 0 Non-Local</p>
+          <p class="text-[11px] font-bold text-cyan-700 tabular-nums mt-0.5" id="kpiTotalDiscounts">Discounts: ₹0</p>
         </div>
       </div>
 
@@ -737,7 +796,7 @@
       </div>
 
       <div id="receiptScrollWrap" class="overflow-y-auto flex-1 bg-slate-100 p-3 rounded-xl flex justify-center">
-        <div id="thermalPrintArea" class="bg-white text-black w-[68mm] p-2.5 shadow-sm font-mono text-[11px] font-bold leading-snug"></div>
+        <div id="thermalPrintArea" class="bg-white text-black w-[71.5mm] p-2.5 shadow-sm font-mono text-[11px] font-bold leading-snug"></div>
       </div>
 
       <div class="flex flex-wrap gap-2">
@@ -880,7 +939,7 @@
         </div>
         <div class="grid grid-cols-2 gap-2.5 pt-2">
           <button onclick="generatePosReport('EXCEL')" class="py-3 rounded-xl bg-emerald-600 text-white font-extrabold shadow">Download Excel (.xlsx)</button>
-          <button onclick="generatePosReport('PDF')" class="py-3 rounded-xl bg-rose-600 text-white font-extrabold shadow">Print / Save PDF</button>
+          <button onclick="generatePosReport('PDF')" class="py-3 rounded-xl bg-rose-600 text-white font-extrabold shadow">Download PDF</button>
         </div>
       </div>
     </div>
@@ -911,7 +970,7 @@
     </div>
   </div>
 
-  <!-- 9. MENU ITEM ADD / EDIT MODAL -->
+  <!-- 9. MENU ITEM ADD / EDIT MODAL + SMART OFFER BUILDER -->
   <div id="menuItemModal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-[75] hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-sm w-full p-5 space-y-3 shadow-2xl max-h-[90vh] overflow-y-auto">
       <div class="flex justify-between items-center">
@@ -957,6 +1016,21 @@
         <input type="checkbox" id="mEditAvailable" checked class="w-4 h-4 accent-emerald-600" />
       </label>
 
+      <!-- Smart Promotional Offer Builder -->
+      <div class="p-3 rounded-xl bg-purple-50/70 border border-purple-200 space-y-2 text-xs">
+        <p class="font-extrabold text-purple-900">Smart Dish Offer / Marketing Tag (Optional)</p>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-[10px] font-bold text-purple-800 mb-1">Promo Badge</label>
+            <input type="text" id="mOfferTag" placeholder="e.g. 20% OFF / BOGO" class="w-full p-1.5 rounded border border-purple-300 bg-white text-[11px] font-bold" />
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-purple-800 mb-1">Auto Discount %</label>
+            <input type="number" min="0" max="50" id="mOfferPct" placeholder="0" class="w-full p-1.5 rounded border border-purple-300 bg-white text-xs font-extrabold" />
+          </div>
+        </div>
+      </div>
+
       <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-2 text-xs">
         <p class="font-extrabold text-slate-700">Optional Variants (Leave blank for single price)</p>
         <div class="grid grid-cols-2 gap-2">
@@ -994,7 +1068,7 @@
         <button onclick="togglePosModal('addTableModal')" class="text-xl text-slate-400">&times;</button>
       </div>
       <div>
-        <label class="block text-[11px] font-bold text-slate-600 mb-1">Table Label (Auto-suggested next, or type existing like T5 to update Pax)</label>
+        <label class="block text-[11px] font-bold text-slate-600 mb-1">Table Label (Auto-suggested next, or type existing like Table 5 to update Pax)</label>
         <input type="text" id="newTableName" class="w-full p-2.5 rounded-xl border border-slate-300 text-sm font-bold" />
       </div>
       <div>
@@ -1094,7 +1168,7 @@
       </div>
 
       <div class="p-3 rounded-xl bg-emerald-50/60 border border-emerald-200 space-y-2">
-        <p class="font-extrabold text-emerald-900"> POS DB & Operations DB Bridge URLs</p>
+        <p class="font-extrabold text-emerald-900">POS DB & Operations DB Bridge URLs</p>
         <input type="url" id="setPosApiUrl" class="w-full p-2 rounded-lg border border-emerald-200 bg-white" />
         <input type="url" id="setErpBridgeUrl" class="w-full p-2 rounded-lg border border-emerald-200 bg-white" />
       </div>
@@ -1113,7 +1187,7 @@
     </div>
   </div>
 
-  <!-- 14. CUSTOM IN-APP TIP STAFF PICKER (UI-Matched Dropdown Modal) -->
+  <!-- 14. CUSTOM IN-APP TIP STAFF PICKER -->
   <div id="tipStaffPickerModal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-[85] hidden flex items-end sm:items-center justify-center p-3">
     <div class="bg-white rounded-2xl max-w-sm w-full p-4 space-y-3 shadow-2xl border border-slate-200">
       <div class="flex justify-between items-center border-b border-slate-100 pb-2">
@@ -1127,6 +1201,17 @@
     </div>
   </div>
 
+  <!-- 15. SMART PROMO WHATSAPP CAMPAIGN MODAL -->
+  <div id="promoCampaignModal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-[85] hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-5 space-y-3.5 shadow-2xl">
+      <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+        <h3 class="font-extrabold text-base text-slate-900">Smart Offer WhatsApp Broadcast</h3>
+        <button type="button" onclick="togglePosModal('promoCampaignModal')" class="text-2xl text-slate-400 leading-none">&times;</button>
+      </div>
+      <textarea id="promoMessageText" rows="4" class="w-full p-3 rounded-xl border border-slate-300 text-xs font-semibold"></textarea>
+      <div id="promoRecipientsList" class="max-h-48 overflow-y-auto space-y-1.5 text-xs"></div>
+    </div>
+  </div>
   <script>
     // ============================================================
     // 1. LIVE CONNECTED APPS SCRIPT URLS
@@ -1277,9 +1362,39 @@
 
     const PRIVILEGED_ROLES = ["Owner", "Manager", "IT Admin"];
 
+    // ============================================================
+    // IST (Asia/Kolkata) DATE & TIME FORMATTERS
+    // ============================================================
+    function getIstTodayKey() {
+      return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kolkata" }).format(new Date());
+    }
+
+    function toIstDateKey(isoStr) {
+      if (!isoStr) return getIstTodayKey();
+      const d = new Date(isoStr);
+      if (isNaN(d.getTime())) return String(isoStr).slice(0, 10);
+      return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kolkata" }).format(d);
+    }
+
+    function formatIstTime(isoStr) {
+      if (!isoStr) return "";
+      const d = new Date(isoStr);
+      if (isNaN(d.getTime())) return String(isoStr);
+      return d.toLocaleTimeString("en-IN", { timeZone: "Asia/Kolkata", hour: "2-digit", minute: "2-digit", hour12: true });
+    }
+
+    function formatIstDateTime(isoStr) {
+      if (!isoStr) return "";
+      const d = new Date(isoStr);
+      if (isNaN(d.getTime())) return String(isoStr);
+      return d.toLocaleString("en-IN", {
+        timeZone: "Asia/Kolkata", day: "2-digit", month: "short", year: "numeric",
+        hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true
+      });
+    }
+
     function createInitialTables() {
       const list = [];
-      // Section 1: Main Dining — Table 1-5 (6 Pax), Table 6-9 (4 Pax), Table 10-11 (3 Pax), Table 12 (12 Pax)
       const mainDiningPax = {
         1: 6, 2: 6, 3: 6, 4: 6, 5: 6,
         6: 4, 7: 4, 8: 4, 9: 4,
@@ -1293,7 +1408,6 @@
           discountPct: 0, tipAmt: 0, tipStaff: "Pool / All Staff", items: []
         });
       }
-      // Section 2: Daba — Table 1-9 (All 4 Pax)
       for (let j = 1; j <= 9; j++) {
         list.push({
           id: `D${j}`, baseTable: `D${j}`, label: `Table ${j}`, section: "Daba",
@@ -1308,11 +1422,11 @@
     let posState = JSON.parse(localStorage.getItem("sk_pos_state_v6") || "null") || {
       settings: {
         restoName: "SPICY KINGDOM",
-        restoAddress: "Madanapalle, AP, 517325, India",
+        restoAddress: "Madanapalle - Punganur Road, opp. Indian Oil Petrol Bunk",
         restoPhone: "9440771836",
         restoEmail: "spicykingdom2026@gmail.com",
         gstIn: "",
-        upiId: "ipbp8@ybl",
+        upiId: "7095530087@pthdfc",
         logoDataUrl: "",
         gstEnabled: true,
         gstInclusive: false,
@@ -1340,7 +1454,6 @@
       tableLayoutV2Applied: true
     };
 
-    // Migrate cached floor sections/tables once if all tables are currently vacant
     if (!posState.tableLayoutV2Applied) {
       const hasOccupied = Array.isArray(posState.tables) && posState.tables.some(t => t.status !== "VACANT");
       if (!hasOccupied) {
@@ -1363,6 +1476,7 @@
     let mgrCatFilter = "ALL";
     let mgrDietFilter = "ALL";
     let crmFilter = "ALL";
+    let dashboardScope = "TODAY";
     let editingCartIdx = -1;
     let selectedSettleMode = "Cash";
     let lastPrintedBillObj = null;
@@ -1465,7 +1579,7 @@
         const sp = document.getElementById("posSplashScreen");
         sp.classList.add("opacity-0", "pointer-events-none");
         setTimeout(() => sp.classList.add("hidden"), 500);
-      }, 2200);
+      }, 1800);
 
       if (currentPosUser) {
         unlockPosUi();
@@ -1476,11 +1590,11 @@
         if (currentPosUser && document.getElementById("settingsModal").classList.contains("hidden")) {
           syncFromCloud(false);
         }
-      }, 45000);
+      }, 30000);
     };
 
     // ============================================================
-    // 3. ROLE-BASED 6-DIGIT PIN LOGIN & TIP-ELIGIBLE STAFF (Excl. Owner & IT Admin)
+    // 3. LOGIN, SMART DROPDOWNS & FULL CROSS-DEVICE CLOUD SYNC
     // ============================================================
     function updatePosPinDots() {
       document.querySelectorAll(".p-dot").forEach((d, i) => {
@@ -1500,7 +1614,7 @@
 
     async function submitPosLogin() {
       if (posPinBuffer.length !== 6) return showPosToast("Enter 6-digit PIN", true);
-      document.getElementById("posLoginSub").textContent = "Validating PIN & Role...";
+      document.getElementById("posLoginSub").textContent = "Validating PIN & Syncing Cloud...";
       const apiUrl = getPosApiUrl();
 
       if (apiUrl) {
@@ -1512,7 +1626,7 @@
             localStorage.setItem("sk_pos_user", JSON.stringify(currentPosUser));
             clearPosPin();
             unlockPosUi();
-            syncFromCloud(false);
+            await syncFromCloud(false);
             return;
           } else {
             triggerPinShake(res.message || "Invalid PIN");
@@ -1533,7 +1647,7 @@
         localStorage.setItem("sk_pos_user", JSON.stringify(currentPosUser));
         clearPosPin();
         unlockPosUi();
-        syncFromCloud(false);
+        await syncFromCloud(false);
       } else {
         triggerPinShake("Invalid 6-digit PIN");
       }
@@ -1556,7 +1670,6 @@
       showPosToast("Logged Out");
     }
 
-    // Excludes Owner & IT Admin from Tip Pool Dropdown & Equal Tip Distribution
     function getTipEligibleStaff() {
       const excludedNames = new Set();
       if (Array.isArray(cloudUsers)) {
@@ -1670,6 +1783,83 @@
       switchPosView("FLOOR");
     }
 
+    // Normalizes Sheet invoice rows regardless of old/new column order so Mac, Phone & APK stay 100% synced
+    function normalizeCloudInvoice(raw) {
+      let items = [];
+      try {
+        const jStr = raw.ItemsJSON || raw.itemsJSON || "[]";
+        items = typeof jStr === "string" ? JSON.parse(jStr) : (Array.isArray(jStr) ? jStr : []);
+      } catch (e) { items = []; }
+
+      const itemsSum = items.reduce((s, it) => s + ((Number(it.price) || 0) * (Number(it.qty) || 0)), 0);
+      let subtotal = Number(raw.Subtotal);
+      if (isNaN(subtotal) || subtotal <= 0) subtotal = itemsSum;
+
+      let cgst = Number(raw.CgstAmt) || 0;
+      let sgst = Number(raw.SgstAmt) || 0;
+      let discAmt = Number(raw.DiscountAmt) || 0;
+      let tip = Number(raw.TipAmt) || 0;
+
+      // Handle shifted column format seen in early test rows (where CgstAmt held GrandTotal & SgStAmt held Tip)
+      let grandTotal = Number(raw.GrandTotal);
+      if ((isNaN(grandTotal) || grandTotal <= 0) && itemsSum > 0) {
+        if (cgst >= itemsSum && sgst < itemsSum) {
+          tip = sgst;
+          cgst = 0;
+          sgst = 0;
+          grandTotal = itemsSum + tip;
+        } else {
+          grandTotal = Math.max(0, subtotal - discAmt + cgst + sgst + tip);
+        }
+      }
+
+      // Detect shifted Channel/Session columns if SessionId was written into Channel
+      let channel = String(raw.Channel || "Dine-In");
+      let sessionId = String(raw.SessionId || "");
+      let tableRef = String(raw.TableOrRef || raw.TableRef || "");
+      let customerName = String(raw.CustomerName || "Walk-in");
+      let customerPhone = String(raw.CustomerPhone || "-");
+      let customerType = String(raw.CustomerType || "Local");
+
+      if (channel.startsWith("Restaurant/")) {
+        sessionId = channel;
+        const shiftedDate = String(raw.TableOrRef || "");
+        const shiftedChan = String(raw.CustomerName || "Dine-In");
+        const shiftedTable = String(raw.CustomerPhone || "");
+        const shiftedGuest = String(raw.Subtotal || "Walk-in");
+        const shiftedType = String(raw.DiscountAmt || "Local");
+        channel = shiftedChan;
+        tableRef = shiftedTable;
+        customerName = shiftedGuest === "-" ? "Walk-in" : shiftedGuest;
+        customerPhone = "-";
+        customerType = (shiftedType === "Non-Local") ? "Non-Local" : "Local";
+        discAmt = 0;
+        subtotal = itemsSum;
+      }
+
+      return {
+        invoiceNo: String(raw.InvoiceNo || "INV-0000"),
+        orderNo: String(raw.OrderNo || raw.Timestamp || ""),
+        sessionId: sessionId || "Restaurant/00001",
+        timestamp: raw.Timestamp && !String(raw.Timestamp).startsWith("ORD-") ? String(raw.Timestamp) : new Date().toISOString(),
+        channel: channel || "Dine-In",
+        tableRef: tableRef || "-",
+        customerName: customerName || "Walk-in",
+        customerPhone: customerPhone || "-",
+        customerType: customerType || "Local",
+        items,
+        subtotal,
+        discAmt,
+        cgst,
+        sgst,
+        tip,
+        grandTotal: Math.round(grandTotal * 100) / 100,
+        tipStaff: String(raw.TipStaff || "Pool / All Staff"),
+        paymentMode: String(raw.PaymentMode || "Cash"),
+        cashier: String(raw.Cashier || raw.LoggedBy || "Staff")
+      };
+    }
+
     async function syncFromCloud(manual = false) {
       const apiUrl = getPosApiUrl();
       if (!apiUrl) return;
@@ -1702,8 +1892,51 @@
             posState.sessionCounter = res.totalSessionsCount + 1;
           }
 
+          // Hydrate & Merge Cloud Invoices so Mac, Phone & APK show identical orders & KPIs
+          if (Array.isArray(res.invoices)) {
+            const cloudInvs = res.invoices.map(normalizeCloudInvoice);
+            const mergedMap = new Map();
+            cloudInvs.forEach(ci => mergedMap.set(ci.invoiceNo, ci));
+            (posState.invoices || []).forEach(li => {
+              if (!mergedMap.has(li.invoiceNo)) mergedMap.set(li.invoiceNo, li);
+            });
+            posState.invoices = Array.from(mergedMap.values()).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+            // Advance invoice & order counters past max cloud numbers
+            posState.invoices.forEach(inv => {
+              const invNum = parseInt(String(inv.invoiceNo).replace(/\D/g, ""), 10);
+              if (!isNaN(invNum) && invNum >= posState.invoiceCounter) posState.invoiceCounter = invNum + 1;
+              const ordNum = parseInt(String(inv.orderNo).replace(/\D/g, ""), 10);
+              if (!isNaN(ordNum) && ordNum >= posState.orderCounter) posState.orderCounter = ordNum + 1;
+            });
+          }
+
+          // Sync KOT count & advance KOT counter from cloud
+          if (Array.isArray(res.kots)) {
+            posState.kotPrintCount = Math.max(posState.kotPrintCount || 0, res.kots.length);
+            res.kots.forEach(k => {
+              const kNum = parseInt(String(k.KotNo || "").replace(/\D/g, ""), 10);
+              if (!isNaN(kNum) && kNum >= posState.kotCounter) posState.kotCounter = kNum + 1;
+            });
+          }
+
+          if (Array.isArray(res.manualCash)) {
+            posState.manualCash = res.manualCash.map(m => ({
+              sessionId: m.SessionId || "Restaurant/00001",
+              timestamp: m.Timestamp || new Date().toISOString(),
+              entryType: m.EntryType || "INFLOW",
+              category: m.Category || "General",
+              particulars: m.Particulars || "",
+              amount: Number(m.Amount) || 0,
+              account: m.Account || "Restaurant Cash Box",
+              loggedBy: m.LoggedBy || "Staff"
+            }));
+          }
+
           if (Array.isArray(res.menu) && res.menu.length > 0) {
+            const oldMenuMap = new Map((posState.menu || []).map(x => [String(x.code), x]));
             posState.menu = res.menu.map(m => {
+              const prev = oldMenuMap.get(String(m.Code)) || {};
               let variants = [];
               if (m.Variant1Label && String(m.Variant1Label).trim() !== "") {
                 variants.push({ label: String(m.Variant1Label).trim(), price: Number(m.Variant1Price) || Number(m.Price) || 0 });
@@ -1718,7 +1951,9 @@
                 price: Number(m.Price) || 0,
                 diet: String(m.DietType || "VEG"),
                 available: String(m.Available || "YES").toUpperCase() !== "NO",
-                variants: variants.length > 0 ? variants : null
+                variants: variants.length > 0 ? variants : null,
+                offerTag: m.OfferTag || prev.offerTag || "",
+                offerPct: Number(m.OfferPct) || prev.offerPct || 0
               };
             });
           }
@@ -1735,14 +1970,18 @@
           }
 
           if (res.erpSnapshot) erpSnapshot = res.erpSnapshot;
+          const syncLbl = document.getElementById("floorLastSyncLabel");
+          if (syncLbl) syncLbl.textContent = `Synced at ${formatIstTime(new Date().toISOString())} IST • ${posState.invoices.length} total cloud invoices`;
+
           populateEmployeeDropdowns();
           updateSessionHeaderPill();
           saveState();
           renderFloor();
           if (!document.getElementById("view-BILLING").classList.contains("hidden")) renderPosMenu();
           if (!document.getElementById("view-MENU_MGR").classList.contains("hidden")) renderMenuManagerList();
+          if (!document.getElementById("view-CRM").classList.contains("hidden")) renderCrmView();
           if (!document.getElementById("view-REPORTS").classList.contains("hidden")) renderDashboard();
-          if (manual) showPosToast("Synced with POS & Operations DB!");
+          if (manual) showPosToast(`Synced ${posState.invoices.length} orders from Cloud!`);
         }
       } catch (e) {
         if (icon) icon.classList.remove("animate-spin");
@@ -1812,10 +2051,10 @@
       if (posState.activeSession) {
         const shortNum = posState.activeSession.sessionId.split("/")[1] || posState.sessionCounter;
         txt.textContent = `Reg #${Number(shortNum)}`;
-        pill.className = "whitespace-nowrap px-2.5 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] sm:text-xs font-extrabold flex items-center gap-1";
+        pill.className = "whitespace-nowrap px-2 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] sm:text-xs font-extrabold flex items-center gap-1";
       } else {
         txt.textContent = `Open Reg #${posState.sessionCounter}`;
-        pill.className = "whitespace-nowrap px-2.5 py-1.5 rounded-xl bg-rose-50 text-rose-600 border border-rose-200 text-[10px] sm:text-xs font-extrabold flex items-center gap-1";
+        pill.className = "whitespace-nowrap px-2 py-1.5 rounded-xl bg-rose-50 text-rose-600 border border-rose-200 text-[10px] sm:text-xs font-extrabold flex items-center gap-1";
       }
     }
 
@@ -1856,7 +2095,7 @@
       } else {
         const st = getSessionStats(sess);
         document.getElementById("regModalHeading").textContent = "Closing Register";
-        document.getElementById("regSessionSub").textContent = `${sess.sessionId} • Opened ${new Date(sess.openedAt).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}`;
+        document.getElementById("regSessionSub").textContent = `${sess.sessionId} • Opened ${formatIstTime(sess.openedAt)}`;
         document.getElementById("regOpenBox").classList.add("hidden");
         document.getElementById("regCloseBox").classList.remove("hidden");
 
@@ -1965,7 +2204,7 @@
       const bd = buildCategoryBreakdown(st.sInvs);
       const s = posState.settings;
       const logoHtml = s.logoDataUrl
-        ? `<img src="${s.logoDataUrl}" style="max-height:46px; max-width:58mm; margin:0 auto 4px auto; display:block;" />`
+        ? `<img src="${s.logoDataUrl}" style="max-height:46px; max-width:60mm; margin:0 auto 4px auto; display:block;" />`
         : `<div style="font-size:15px; font-weight:900; color:#000;">${s.restoName}</div>`;
 
       document.getElementById("receiptModalTitle").textContent = `80mm Z-Report (${sess.sessionId})`;
@@ -1978,7 +2217,7 @@
           </div>
           ${Object.entries(info.dishes).map(([dName, dInfo]) => `
             <div style="display:flex; justify-content:space-between; font-size:10px; font-weight:800; padding-left:4px; color:#000;">
-              <span style="max-width:44mm; word-wrap:break-word;">${dInfo.qty}x ${dName}</span><span>₹${dInfo.amount.toFixed(2)}</span>
+              <span style="max-width:46mm; word-wrap:break-word;">${dInfo.qty}x ${dName}</span><span>₹${dInfo.amount.toFixed(2)}</span>
             </div>
           `).join("")}
         </div>
@@ -2009,7 +2248,7 @@
         <div style="border-top:1.5px dashed #000; margin-top:6px; padding-top:5px; font-size:9.5px; font-weight:800; color:#000;">
           <div style="word-wrap:break-word;">${s.restoAddress}</div>
           <div>Tel: ${s.restoPhone}${s.restoEmail ? ` • ${s.restoEmail}` : ""}</div>
-          <div style="margin-top:3px;">${new Date().toLocaleString()}</div>
+          <div style="margin-top:3px;">${formatIstDateTime(new Date().toISOString())} IST</div>
         </div>
       `;
       togglePosModal("receiptModal");
@@ -2042,7 +2281,6 @@
         }
       }
 
-      // Desktop & Mobile Web Browser Download
       const byteChars = atob(cleanBase64);
       const byteNumbers = new Array(byteChars.length);
       for (let i = 0; i < byteChars.length; i++) byteNumbers[i] = byteChars.charCodeAt(i);
@@ -2057,54 +2295,39 @@
       showPosToast(`Downloaded ${filename}`);
     }
 
+    // In-viewport invisible capture container prevents blank white PDF pages in html2canvas
     function downloadHtmlAsDirectPdf(htmlContent, filename) {
-      const container = document.createElement("div");
-      container.style.position = "fixed";
-      container.style.left = "-9999px";
-      container.style.top = "0";
-      container.style.width = "780px";
-      container.style.background = "#FFFFFF";
-      container.innerHTML = htmlContent;
-      document.body.appendChild(container);
-
-      const finishCleanup = () => {
-        if (container && container.parentNode) container.parentNode.removeChild(container);
-      };
-
       if (typeof html2pdf !== "undefined") {
         html2pdf()
           .set({
-            margin: 10,
+            margin: [10, 10, 10, 10],
             filename: filename,
             image: { type: "jpeg", quality: 0.98 },
-            html2canvas: { scale: 2, useCORS: true },
+            html2canvas: { scale: 2, useCORS: true, backgroundColor: "#FFFFFF" },
             jsPDF: { unit: "mm", format: "a4", orientation: "portrait" }
           })
-          .from(container)
+          .from(htmlContent, "string")
           .outputPdf("datauristring")
           .then(async (pdfDataUri) => {
-            finishCleanup();
             await saveBase64FileUniversal(pdfDataUri, filename, "application/pdf");
           })
-          .catch(() => {
-            finishCleanup();
-            showPosToast("PDF generation failed", true);
+          .catch((err) => {
+            showPosToast("PDF generation failed: " + (err && err.message ? err.message : ""), true);
           });
       } else {
-        finishCleanup();
         showPosToast("PDF library not loaded", true);
       }
     }
 
     function printDailySalesReportX(period = "DAILY") {
       const now = new Date();
-      const todayStr = now.toISOString().slice(0, 10);
+      const todayKey = getIstTodayKey();
       const invs = posState.invoices.filter(i => {
-        const d = String(i.timestamp || "").slice(0, 10);
-        if (period === "DAILY") return d === todayStr;
-        if (period === "WEEKLY") return (now - new Date(d)) <= 7 * 86400000;
-        if (period === "MONTHLY") return d.startsWith(todayStr.slice(0, 7));
-        if (period === "YEARLY") return d.startsWith(todayStr.slice(0, 4));
+        const dKey = toIstDateKey(i.timestamp);
+        if (period === "DAILY") return dKey === todayKey;
+        if (period === "WEEKLY") return (now - new Date(dKey)) <= 7 * 86400000;
+        if (period === "MONTHLY") return dKey.startsWith(todayKey.slice(0, 7));
+        if (period === "YEARLY") return dKey.startsWith(todayKey.slice(0, 4));
         return true;
       });
 
@@ -2119,8 +2342,8 @@
           <p style="margin: 4px 0; font-weight: 600;">${s.restoAddress}<br>Tel: ${s.restoPhone} • ${s.restoEmail || ""}</p>
           <h2 style="margin: 16px 0 6px; font-size: 16px; border-bottom: 2px solid #000; padding-bottom: 4px;">Daily Sales Report X (${period})</h2>
           <p><strong>Session ID:</strong> ${sess.sessionId}<br>
-          <strong>Opening Date:</strong> ${new Date(sess.openedAt).toLocaleString()}<br>
-          <strong>Generated As Of:</strong> ${now.toLocaleString()}</p>
+          <strong>Opening Date:</strong> ${formatIstDateTime(sess.openedAt)} IST<br>
+          <strong>Generated As Of:</strong> ${formatIstDateTime(now.toISOString())} IST</p>
 
           <h2 style="margin: 16px 0 6px; font-size: 16px; border-bottom: 2px solid #000; padding-bottom: 4px;">Sales Breakdown</h2>
           <table style="width: 100%; border-collapse: collapse; margin-top: 8px;">
@@ -2150,11 +2373,11 @@
         </div>
       `;
 
-      downloadHtmlAsDirectPdf(htmlBody, `SpicyKingdom_Daily_X_Report_${period}_${todayStr}.pdf`);
+      downloadHtmlAsDirectPdf(htmlBody, `SpicyKingdom_Daily_X_Report_${period}_${todayKey}.pdf`);
     }
 
     // ============================================================
-    // 5. FLOOR, TABLES, CUSTOMER CRM & BILLING ENGINE
+    // 5. FLOOR, RECENT ORDERS CARD, SMART OFFERS & BILLING ENGINE
     // ============================================================
     function setFloorSection(sec) { floorSectionFilter = sec; renderFloor(); }
 
@@ -2227,7 +2450,7 @@
 
     function calcOrderTotals(orderObj) {
       const rawSum = (orderObj.items || []).reduce((s, it) => s + (Number(it.price) * Number(it.qty)), 0);
-      const safeDiscPct = Math.min(15, Math.max(0, Number(orderObj.discountPct) || 0));
+      const safeDiscPct = Math.min(25, Math.max(0, Number(orderObj.discountPct) || 0));
       const discAmt = Math.round(rawSum * (safeDiscPct / 100) * 100) / 100;
       const afterDisc = Math.max(0, rawSum - discAmt);
 
@@ -2339,6 +2562,30 @@
           </div>
         `;
       }).join("");
+
+      const recentList = document.getElementById("floorRecentOrdersList");
+      if (recentList) {
+        recentList.innerHTML = posState.invoices.slice(0, 6).map((inv, idx) => `
+          <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-2">
+            <div class="min-w-0">
+              <div class="flex items-center gap-1.5">
+                <span class="font-extrabold text-slate-900">${inv.invoiceNo}</span>
+                <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-200 text-slate-700">${inv.tableRef}</span>
+              </div>
+              <p class="text-[11px] text-slate-600 truncate mt-0.5">
+                For: <strong>${inv.customerName || "Walk-in"}</strong> (${inv.customerType || "Local"})
+              </p>
+              <p class="text-[10px] text-slate-500 truncate">
+                By: <strong class="text-slate-700">${inv.cashier || "Staff"}</strong> • ${formatIstTime(inv.timestamp)} • ${inv.paymentMode}
+              </p>
+            </div>
+            <div class="flex flex-col items-end gap-1 shrink-0">
+              <span class="font-extrabold text-sm text-emerald-700 tabular-nums">₹${Number(inv.grandTotal).toFixed(2)}</span>
+              <button onclick="render80mmCustomerReceipt(posState.invoices[${idx}])" class="px-2 py-0.5 rounded bg-blue-50 text-blue-700 text-[10px] font-extrabold">80mm</button>
+            </div>
+          </div>
+        `).join("") || `<p class="col-span-full text-center text-slate-400 py-4">No completed orders synced yet. Tap Sync if orders were placed on another device.</p>`;
+      }
     }
 
     function deleteTableById(tableId) {
@@ -2537,7 +2784,11 @@
       document.getElementById("posMenuGrid").innerHTML = filtered.map(m => {
         const isAvail = m.available !== false;
         const hasVar = Array.isArray(m.variants) && m.variants.length > 0;
+        const hasOffer = (m.offerTag && m.offerTag.trim() !== "") || Number(m.offerPct) > 0;
         const qtyBadge = inCartMap[m.code] ? `<span class="px-2 py-0.5 rounded-full bg-rose-600 text-white text-[10px] font-extrabold shrink-0">${inCartMap[m.code]}x</span>` : "";
+        const offerBadge = hasOffer
+          ? `<span class="px-1.5 py-0.5 rounded bg-purple-100 text-purple-800 text-[9px] font-extrabold shrink-0">${m.offerTag || (m.offerPct + "% OFF")}</span>`
+          : "";
         const statusTag = !isAvail
           ? `<span class="px-1.5 py-0.5 rounded bg-slate-200 text-slate-600 text-[9px] font-extrabold uppercase shrink-0">Sold Out</span>`
           : hasVar
@@ -2557,6 +2808,7 @@
                 <p class="font-extrabold text-xs text-slate-900 leading-snug break-words ${!isAvail ? "line-through text-slate-500" : ""}">${m.name}</p>
                 <div class="flex items-center gap-1.5 mt-1 flex-wrap">
                   <span class="text-[10px] font-bold text-slate-400">#${m.code}</span>
+                  ${offerBadge}
                   ${statusTag}
                 </div>
               </div>
@@ -2591,7 +2843,7 @@
       addVariantItemToCart(m.code, "", Number(m.price));
     }
 
-    function addVariantItemToCart(code, variantLabel, finalPrice) {
+    function addVariantItemToCart(code, variantLabel, rawPrice) {
       const order = getActiveOrderObj();
       const menuItem = posState.menu.find(m => String(m.code) === String(code));
       if (!order || !menuItem) return;
@@ -2603,13 +2855,18 @@
       }
       order.waiter = currentPosUser.name;
 
-      const fullName = variantLabel ? `${menuItem.name} (${variantLabel})` : menuItem.name;
+      // Apply Smart Dish Offer if configured on item
+      const offerPct = Number(menuItem.offerPct) || 0;
+      const finalPrice = offerPct > 0 ? Math.round(rawPrice * (1 - offerPct / 100)) : Number(rawPrice);
+      const offerSuffix = menuItem.offerTag ? ` [${menuItem.offerTag}]` : (offerPct > 0 ? ` [${offerPct}% OFF]` : "");
+
+      const fullName = (variantLabel ? `${menuItem.name} (${variantLabel})` : menuItem.name) + offerSuffix;
       const itemKey = variantLabel ? `${code}-${variantLabel}` : String(code);
 
       const existing = order.items.find(i => String(i.code) === itemKey && !i.note);
       if (existing) existing.qty += 1;
       else {
-        order.items.push({ code: itemKey, name: fullName, price: Number(finalPrice), qty: 1, sentQty: 0, note: "" });
+        order.items.push({ code: itemKey, name: fullName, price: finalPrice, qty: 1, sentQty: 0, note: "" });
       }
       saveState();
       renderPosMenu();
@@ -2745,7 +3002,7 @@
       const order = getActiveOrderObj();
       if (!order) return;
       let val = parseFloat(pct) || 0;
-      if (val > 15) { val = 15; showPosToast("Maximum allowed discount is 15%", true); }
+      if (val > 25) { val = 25; showPosToast("Maximum allowed discount is 25%", true); }
       order.discountPct = Math.max(0, val);
       saveState();
       renderActiveCart();
@@ -2868,7 +3125,7 @@
           <div style="font-size:13px; font-weight:900;">KOT #${kot.kotNo} (${kot.kotType})</div>
           <div style="font-size:11px; font-weight:900;">Order: ${kot.orderNo} | ${kot.tableRef}</div>
           ${kot.customerName ? `<div style="font-size:11px; font-weight:900;">Guest: ${kot.customerName}</div>` : ""}
-          <div style="font-size:10px; font-weight:800;">${new Date(kot.createdAt).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})} • ${kot.waiter}</div>
+          <div style="font-size:10px; font-weight:800;">${formatIstTime(kot.createdAt)} • ${kot.waiter}</div>
         </div>
         <table style="width:100%; table-layout:fixed; border-collapse:collapse; font-size:11px; font-weight:800; color:#000;">
           <thead>
@@ -2946,7 +3203,7 @@
     }
 
     // ============================================================
-    // 7. PROFORMA & TAX INVOICE (68MM INSIDE MARGIN, THICK & DARK)
+    // 7. PROFORMA & TAX INVOICE (71.5MM FLUSH-LEFT, IST TIME, THICK & DARK)
     // ============================================================
     function printBillAction() {
       const order = getActiveOrderObj();
@@ -2983,7 +3240,7 @@
       const printableGrandTotal = Math.round((Number(inv.subtotal) + Number(inv.cgst) + Number(inv.sgst) + printableTip) * 100) / 100;
 
       const headerBrandHtml = s.logoDataUrl
-        ? `<img src="${s.logoDataUrl}" style="max-height:48px; max-width:58mm; margin:0 auto 4px auto; display:block;" />`
+        ? `<img src="${s.logoDataUrl}" style="max-height:48px; max-width:60mm; margin:0 auto 4px auto; display:block;" />`
         : `<div style="font-size:15px; font-weight:900; color:#000;">${s.restoName}</div>`;
 
       const gstHeader = s.gstIn ? `<div style="font-weight:900; color:#000;">GSTIN: ${s.gstIn}</div>` : "";
@@ -3002,7 +3259,7 @@
         <div style="font-size:10px; font-weight:800; border-bottom:1.5px dashed #000; padding-bottom:4px; margin-bottom:5px; color:#000;">
           <div>Bill: <strong style="font-weight:900;">${inv.invoiceNo}</strong> | <strong style="font-weight:900;">${inv.orderNo || ""}</strong></div>
           <div>Table/Ref: ${inv.tableRef} (${inv.channel})</div>
-          <div>Date: ${new Date(inv.timestamp).toLocaleString()}</div>
+          <div>Date: ${formatIstDateTime(inv.timestamp)}</div>
           ${inv.customerName && inv.customerName !== "Walk-in" ? `<div>Guest: <strong style="font-weight:900;">${inv.customerName}</strong></div>` : ""}
           ${inv.customerPhone && inv.customerPhone !== "-" ? `<div>Mobile: ${inv.customerPhone}</div>` : ""}
         </div>
@@ -3045,7 +3302,7 @@
         </div>
       `;
 
-      const upiUri = `upi://pay?pa=${encodeURIComponent(s.upiId || "ipbp8@ybl")}&pn=${encodeURIComponent(s.restoName)}&am=${printableGrandTotal.toFixed(2)}&cu=INR`;
+      const upiUri = `upi://pay?pa=${encodeURIComponent(s.upiId || "7095530087@pthdfc")}&pn=${encodeURIComponent(s.restoName)}&am=${printableGrandTotal.toFixed(2)}&cu=INR`;
       new QRCode(document.getElementById("receiptQrBox"), { text: upiUri, width: 92, height: 92 });
       togglePosModal("receiptModal");
     }
@@ -3129,12 +3386,14 @@
       const invoiceNo = `INV-${posState.invoiceCounter++}`;
       const channel = activeOrderTarget.type === "TABLE" ? `Dine-In (${order.section})` : order.channel;
       const cleanPhone = String(order.customerPhone || "").replace(/\D/g, "");
+      const istTimestamp = formatIstDateTime(new Date().toISOString());
 
       const settledInv = {
         invoiceNo,
         orderNo: order.orderNo,
         sessionId: posState.activeSession.sessionId,
         timestamp: new Date().toISOString(),
+        istTimestamp,
         channel,
         tableRef: order.label,
         customerName: order.customerName || "Walk-in",
@@ -3157,12 +3416,12 @@
           existingC.spent += totals.grandTotal;
           existingC.type = order.customerType || existingC.type;
           if (order.customerName) existingC.name = order.customerName;
-          existingC.lastVisit = new Date().toISOString().slice(0, 10);
+          existingC.lastVisit = getIstTodayKey();
         } else {
           posState.customers.unshift({
             mobile: cleanPhone, name: order.customerName || "Guest",
             type: order.customerType || "Local", visits: 1,
-            spent: totals.grandTotal, lastVisit: new Date().toISOString().slice(0, 10)
+            spent: totals.grandTotal, lastVisit: getIstTodayKey()
           });
         }
       }
@@ -3205,7 +3464,7 @@
     }
 
     // ============================================================
-    // 8. CUSTOMER CRM, MENU MANAGER, DIRECT PDF REPORTS & DASHBOARD
+    // 8. CUSTOMER CRM, PROMO CAMPAIGNS, MENU MANAGER & REPORTS
     // ============================================================
     function setCrmFilter(f) {
       crmFilter = f;
@@ -3225,6 +3484,14 @@
       document.getElementById("crmLocalCount").textContent = locals.length;
       document.getElementById("crmRepeatCount").textContent = repeats.length;
 
+      const activeOffers = posState.menu.filter(m => (m.offerTag && m.offerTag.trim() !== "") || Number(m.offerPct) > 0);
+      const sumEl = document.getElementById("crmActiveOffersSummary");
+      if (sumEl) {
+        sumEl.textContent = activeOffers.length > 0
+          ? `${activeOffers.length} active dish offers ready to share: ${activeOffers.slice(0, 3).map(o => `${o.name} (${o.offerTag || o.offerPct + "% OFF"})`).join(", ")}`
+          : "Set offers on any dish in Menu Manager and broadcast them on WhatsApp with one tap.";
+      }
+
       const list = crmFilter === "LOCAL" ? locals : crmFilter === "REPEAT" ? repeats : all;
       document.getElementById("crmCustomerList").innerHTML = list.map(c => `
         <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-2">
@@ -3243,6 +3510,30 @@
       `).join("") || `<p class="col-span-full text-center text-xs text-slate-400 py-8">Capture guest mobile numbers during billing to build your marketing list.</p>`;
     }
 
+    function openPromoCampaignModal() {
+      const offers = posState.menu.filter(m => (m.offerTag && m.offerTag.trim() !== "") || Number(m.offerPct) > 0);
+      const offerLines = offers.length > 0
+        ? offers.map(o => `• *${o.name}* — ${o.offerTag || o.offerPct + "% OFF"} (Now ₹${o.offerPct > 0 ? Math.round(o.price * (1 - o.offerPct / 100)) : o.price})`).join("\n")
+        : "• Flat 10% OFF on Family Biriyani Combos today!\n• Complimentary Goli Soda with Special Starters";
+
+      document.getElementById("promoMessageText").value = `🔥 *${posState.settings.restoName} — Today's Special Offers!* 🔥\n\n${offerLines}\n\n📍 ${posState.settings.restoAddress}\n📞 Order / Reserve: ${posState.settings.restoPhone}`;
+
+      const guests = (posState.customers || []).filter(c => String(c.mobile).replace(/\D/g, "").length >= 10);
+      document.getElementById("promoRecipientsList").innerHTML = guests.map(g => {
+        const clean = String(g.mobile).replace(/\D/g, "");
+        const num = clean.length === 10 ? `91${clean}` : clean;
+        return `
+          <div class="flex items-center justify-between p-2 rounded-xl bg-slate-50 border border-slate-200">
+            <span class="font-bold text-slate-800">${g.name} (${g.mobile})</span>
+            <button type="button" onclick="window.open('https://wa.me/${num}?text=' + encodeURIComponent(document.getElementById('promoMessageText').value), '_blank')" class="px-2.5 py-1 rounded-lg bg-emerald-600 text-white font-extrabold text-[10px]">
+              Send Offer
+            </button>
+          </div>
+        `;
+      }).join("") || `<p class="text-slate-400 text-center py-4">Add customer mobile numbers during billing to send 1-tap WhatsApp offers.</p>`;
+      togglePosModal("promoCampaignModal");
+    }
+
     function exportCustomersExcel() {
       const list = (posState.customers || []).map(c => ({
         Name: c.name, Mobile: c.mobile, Segment: c.type, Visits: c.visits, TotalSpent: c.spent, LastVisit: c.lastVisit
@@ -3251,8 +3542,8 @@
       const ws = XLSX.utils.json_to_sheet(list);
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Customers");
-      XLSX.writeFile(wb, `SpicyKingdom_Customers_CRM.xlsx`);
-      showPosToast("Customer marketing list exported!");
+      const wbBase64 = XLSX.write(wb, { bookType: "xlsx", type: "base64" });
+      saveBase64FileUniversal(wbBase64, "SpicyKingdom_Customers_CRM.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
     }
 
     function setMgrDietFilter(d) {
@@ -3275,7 +3566,8 @@
       const q = document.getElementById("mgrMenuSearch").value.toLowerCase().trim();
       const filtered = posState.menu.filter(m => {
         if (mgrCatFilter !== "ALL" && m.category !== mgrCatFilter) return false;
-        if (mgrDietFilter !== "ALL" && m.diet !== mgrDietFilter) return false;
+        if (mgrDietFilter === "OFFERS" && !m.offerTag && !(Number(m.offerPct) > 0)) return false;
+        else if (mgrDietFilter !== "ALL" && mgrDietFilter !== "OFFERS" && m.diet !== mgrDietFilter) return false;
         if (q && !m.name.toLowerCase().includes(q) && !String(m.code).includes(q)) return false;
         return true;
       });
@@ -3283,12 +3575,13 @@
       document.getElementById("menuManagerGrid").innerHTML = filtered.map(m => {
         const realIdx = posState.menu.findIndex(x => x.code === m.code && x.name === m.name);
         const isAvail = m.available !== false;
+        const hasOffer = (m.offerTag && m.offerTag.trim() !== "") || Number(m.offerPct) > 0;
         return `
           <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-2">
             <div class="flex items-center gap-2 min-w-0">
               ${getDietBadgeHtml(m.diet)}
               <div class="min-w-0">
-                <p class="text-xs font-extrabold text-slate-900 break-words">#${m.code} • ${m.name}</p>
+                <p class="text-xs font-extrabold text-slate-900 break-words">#${m.code} • ${m.name} ${hasOffer ? `<span class="px-1.5 py-0.5 rounded bg-purple-100 text-purple-800 text-[9px]">${m.offerTag || m.offerPct + "% OFF"}</span>` : ""}</p>
                 <p class="text-[11px] text-slate-500">${m.category} • <strong class="text-rose-600">₹${m.price}</strong> ${m.variants ? `• ${m.variants.map(v=>v.label+" ₹"+v.price).join(" / ")}` : ""}</p>
               </div>
             </div>
@@ -3326,6 +3619,8 @@
         document.getElementById("mEditPrice").value = m.price;
         document.getElementById("mEditDiet").value = m.diet;
         document.getElementById("mEditAvailable").checked = m.available !== false;
+        document.getElementById("mOfferTag").value = m.offerTag || "";
+        document.getElementById("mOfferPct").value = m.offerPct || "";
         document.getElementById("mVar1Label").value = (m.variants && m.variants[0]) ? m.variants[0].label : "";
         document.getElementById("mVar1Price").value = (m.variants && m.variants[0]) ? m.variants[0].price : "";
         document.getElementById("mVar2Label").value = (m.variants && m.variants[1]) ? m.variants[1].label : "";
@@ -3338,6 +3633,8 @@
         document.getElementById("mEditPrice").value = "";
         document.getElementById("mEditDiet").value = "NON-VEG";
         document.getElementById("mEditAvailable").checked = true;
+        document.getElementById("mOfferTag").value = "";
+        document.getElementById("mOfferPct").value = "";
         document.getElementById("mVar1Label").value = "";
         document.getElementById("mVar1Price").value = "";
         document.getElementById("mVar2Label").value = "";
@@ -3365,6 +3662,8 @@
         price: basePrice,
         diet: document.getElementById("mEditDiet").value,
         available: document.getElementById("mEditAvailable").checked,
+        offerTag: document.getElementById("mOfferTag").value.trim(),
+        offerPct: Math.min(50, Math.max(0, parseFloat(document.getElementById("mOfferPct").value) || 0)),
         variants: variants.length > 0 ? variants : null
       };
       if (!dish.name) return showPosToast("Enter dish name", true);
@@ -3417,7 +3716,7 @@
           const price = parseFloat(r["Sales Price"] || r["Price"] || 0) || 0;
           const low = `${name} ${rawCat}`.toLowerCase();
           const diet = /(chicken|mutton|fish|prawn|non veg|kodi|royyala|meat)/.test(low) ? "NON-VEG" : /egg/.test(low) ? "EGG" : "VEG";
-          return { name, category: mapCat(rawCat), price, diet, available: true, variants: null };
+          return { name, category: mapCat(rawCat), price, diet, available: true, offerTag: "", offerPct: 0, variants: null };
         }).filter(x => x.name);
 
         const rank = { VEG: 1, EGG: 2, "NON-VEG": 3 };
@@ -3496,14 +3795,14 @@
       }
 
       const now = new Date();
-      const todayStr = now.toISOString().slice(0, 10);
+      const todayKey = getIstTodayKey();
       const inPeriod = (iso) => {
-        const d = String(iso || "").slice(0, 10);
+        const d = toIstDateKey(iso);
         if (!d) return true;
-        if (period === "DAILY") return d === todayStr;
+        if (period === "DAILY") return d === todayKey;
         if (period === "WEEKLY") return (now - new Date(d)) <= 7 * 86400000;
-        if (period === "MONTHLY") return d.startsWith(todayStr.slice(0, 7));
-        if (period === "YEARLY") return d.startsWith(todayStr.slice(0, 4));
+        if (period === "MONTHLY") return d.startsWith(todayKey.slice(0, 7));
+        if (period === "YEARLY") return d.startsWith(todayKey.slice(0, 4));
         return true;
       };
 
@@ -3514,13 +3813,14 @@
       if (type === "DAILY_X" || type === "SALES") {
         rows = invs.map(i => ({
           InvoiceNo: i.invoiceNo, OrderNo: i.orderNo, Session: i.sessionId || "-",
-          Date: String(i.timestamp).slice(0, 10), Channel: i.channel, TableRef: i.tableRef,
-          Guest: i.customerName, Mobile: i.customerPhone, Subtotal: i.subtotal,
-          Discount: i.discAmt, CGST: i.cgst, SGST: i.sgst, GrandTotal: i.grandTotal, PaymentMode: i.paymentMode
+          DateIST: toIstDateKey(i.timestamp), TimeIST: formatIstTime(i.timestamp),
+          Channel: i.channel, TableRef: i.tableRef, Guest: i.customerName,
+          BilledBy: i.cashier || "-", Subtotal: i.subtotal, Discount: i.discAmt,
+          CGST: i.cgst, SGST: i.sgst, GrandTotal: i.grandTotal, PaymentMode: i.paymentMode
         }));
       } else if (type === "CASHFLOW") {
-        const sRows = invs.map(i => ({ Date: String(i.timestamp).slice(0, 10), Type: "POS SALE", Particular: `${i.invoiceNo} (${i.channel})`, Amount: Number(i.grandTotal) }));
-        const mRows = mCash.map(m => ({ Date: String(m.timestamp).slice(0, 10), Type: m.entryType, Particular: `${m.category}: ${m.particulars}`, Amount: m.entryType === "INFLOW" ? Number(m.amount) : -Number(m.amount) }));
+        const sRows = invs.map(i => ({ Date: toIstDateKey(i.timestamp), Type: "POS SALE", Particular: `${i.invoiceNo} (${i.channel})`, Amount: Number(i.grandTotal) }));
+        const mRows = mCash.map(m => ({ Date: toIstDateKey(m.timestamp), Type: m.entryType, Particular: `${m.category}: ${m.particulars}`, Amount: m.entryType === "INFLOW" ? Number(m.amount) : -Number(m.amount) }));
         rows = [...sRows, ...mRows];
       } else if (type === "ITR") {
         const grossSales = invs.reduce((s, i) => s + (Number(i.grandTotal) || 0), 0);
@@ -3540,7 +3840,7 @@
         }];
       } else {
         rows = invs.filter(i => Number(i.tip) > 0).map(i => ({
-          Date: String(i.timestamp).slice(0, 10), Invoice: i.invoiceNo, Staff: i.tipStaff || "Pool", TipAmount: i.tip, PayMode: i.paymentMode
+          Date: toIstDateKey(i.timestamp), Invoice: i.invoiceNo, Staff: i.tipStaff || "Pool", TipAmount: i.tip, PayMode: i.paymentMode
         }));
       }
 
@@ -3552,27 +3852,33 @@
         XLSX.utils.book_append_sheet(wb, ws, type);
         const wbBase64 = XLSX.write(wb, { bookType: "xlsx", type: "base64" });
         saveBase64FileUniversal(wbBase64, `SpicyKingdom_POS_${type}_${period}.xlsx`, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-        showPosToast("Excel report downloaded!");
       } else {
         const headers = Object.keys(rows[0]);
         const htmlBody = `
           <div style="font-family: Arial, sans-serif; padding: 20px; color: #000; background: #fff;">
             <h2 style="margin: 0 0 4px; font-size: 18px; font-weight: 900;">${posState.settings.restoName} — ${type} REPORT (${period})</h2>
-            <p style="margin: 0 0 12px; font-size: 12px;">GSTIN: ${posState.settings.gstIn || "N/A"} • Generated: ${todayStr} by ${currentPosUser.name}</p>
+            <p style="margin: 0 0 12px; font-size: 12px;">GSTIN: ${posState.settings.gstIn || "N/A"} • Generated: ${formatIstDateTime(new Date().toISOString())} IST by ${currentPosUser.name}</p>
             <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
               <thead><tr>${headers.map(h => `<th style="border: 1px solid #000; padding: 6px; text-align: left; background: #f1f5f9; font-weight: 800;">${h}</th>`).join("")}</tr></thead>
               <tbody>${rows.map(r => `<tr>${headers.map(h => `<td style="border: 1px solid #cbd5e1; padding: 6px;">${r[h]}</td>`).join("")}</tr>`).join("")}</tbody>
             </table>
           </div>
         `;
-        downloadHtmlAsDirectPdf(htmlBody, `SpicyKingdom_POS_${type}_${period}_${todayStr}.pdf`);
+        downloadHtmlAsDirectPdf(htmlBody, `SpicyKingdom_POS_${type}_${period}_${todayKey}.pdf`);
       }
       togglePosModal("reportsExportModal");
     }
 
     // ============================================================
-    // 10. SHIFT/MERGE TABLES, SETTINGS & DASHBOARD
+    // 10. SHIFT/MERGE TABLES, SETTINGS & DASHBOARD WITH TODAY / ALL-TIME SCOPE
     // ============================================================
+    function setDashboardScope(scope) {
+      dashboardScope = scope;
+      document.getElementById("scopeTodayBtn").className = scope === "TODAY" ? "px-2.5 py-1 rounded-lg bg-white text-rose-600 shadow-xs" : "px-2.5 py-1 rounded-lg text-slate-600";
+      document.getElementById("scopeAllBtn").className = scope === "ALL" ? "px-2.5 py-1 rounded-lg bg-white text-rose-600 shadow-xs" : "px-2.5 py-1 rounded-lg text-slate-600";
+      renderDashboard();
+    }
+
     function openShiftTableModal() {
       const cur = getActiveOrderObj();
       if (!cur || cur.items.length === 0) return showPosToast("Current table has no active items.", true);
@@ -3711,14 +4017,90 @@
     }
 
     function renderDashboard() {
-      const todayKey = new Date().toISOString().slice(0, 10);
-      const todayInvs = posState.invoices.filter(i => String(i.timestamp).startsWith(todayKey));
-      const totalSales = todayInvs.reduce((s, i) => s + (Number(i.grandTotal) || 0), 0);
-      const totalTips = posState.invoices.reduce((s, i) => s + (Number(i.tip) || 0), 0);
+      const todayKey = getIstTodayKey();
+      const scopedInvs = dashboardScope === "TODAY"
+        ? posState.invoices.filter(i => toIstDateKey(i.timestamp) === todayKey)
+        : posState.invoices;
 
+      const totalSales = scopedInvs.reduce((s, i) => s + (Number(i.grandTotal) || 0), 0);
+      const totalTips = scopedInvs.reduce((s, i) => s + (Number(i.tip) || 0), 0);
+
+      let cashSalesSum = 0, digitalSalesSum = 0;
+      scopedInvs.forEach(i => {
+        const mode = String(i.paymentMode || "").toLowerCase();
+        if (mode === "cash") cashSalesSum += Number(i.grandTotal) || 0;
+        else if (mode.includes("split")) {
+          cashSalesSum += Number(i.splitCash) || 0;
+          digitalSalesSum += Number(i.splitUpi) || 0;
+        } else {
+          digitalSalesSum += Number(i.grandTotal) || 0;
+        }
+      });
+
+      const extraInflowSum = (posState.manualCash || [])
+        .filter(m => m.entryType === "INFLOW" && (dashboardScope === "ALL" || toIstDateKey(m.timestamp) === todayKey))
+        .reduce((s, m) => s + (Number(m.amount) || 0), 0);
+
+      document.getElementById("kpiSalesHeading").textContent = dashboardScope === "TODAY" ? "Today's POS Sales (All Modes)" : "All-Time POS Sales";
       document.getElementById("kpiTodaySales").textContent = `₹${Math.round(totalSales).toLocaleString("en-IN")}`;
-      document.getElementById("kpiTodayOrders").textContent = todayInvs.length;
+      document.getElementById("kpiSalesModeSplit").textContent = `Cash: ₹${Math.round(cashSalesSum).toLocaleString("en-IN")} • UPI/Card: ₹${Math.round(digitalSalesSum).toLocaleString("en-IN")}`;
+      document.getElementById("kpiTodayOrders").textContent = scopedInvs.length;
+      document.getElementById("kpiExtraInflowHint").textContent = `Extra Inflow: ₹${Math.round(extraInflowSum).toLocaleString("en-IN")}`;
       document.getElementById("kpiTotalTips").textContent = `₹${Math.round(totalTips).toLocaleString("en-IN")}`;
+
+      let chTotals = {}, payTotals = {}, dishStats = {}, catTotals = {};
+      let totalItemsQty = 0, localOrders = 0, nonLocalOrders = 0, totalDiscounts = 0;
+
+      scopedInvs.forEach(i => {
+        chTotals[i.channel] = (chTotals[i.channel] || 0) + (Number(i.grandTotal) || 0);
+        payTotals[i.paymentMode] = (payTotals[i.paymentMode] || 0) + (Number(i.grandTotal) || 0);
+        totalDiscounts += Number(i.discAmt) || 0;
+        if (String(i.customerType || "Local") === "Non-Local") nonLocalOrders++;
+        else localOrders++;
+
+        (i.items || []).forEach(it => {
+          const qty = Number(it.qty) || 0;
+          const rev = qty * (Number(it.price) || 0);
+          totalItemsQty += qty;
+
+          dishStats[it.name] = dishStats[it.name] || { qty: 0, rev: 0 };
+          dishStats[it.name].qty += qty;
+          dishStats[it.name].rev += rev;
+
+          const baseCode = String(it.code || "").split("-")[0];
+          const mItem = posState.menu.find(m => String(m.code) === baseCode || m.name === it.name);
+          const cat = mItem ? mItem.category : "General";
+          catTotals[cat] = (catTotals[cat] || 0) + rev;
+        });
+      });
+
+      const sortedDishesByQty = Object.entries(dishStats).sort((a, b) => b[1].qty - a[1].qty || b[1].rev - a[1].rev);
+      if (sortedDishesByQty.length > 0) {
+        const [bestName, bestInfo] = sortedDishesByQty[0];
+        document.getElementById("kpiBestDishName").textContent = bestName;
+        document.getElementById("kpiBestDishMeta").textContent = `${bestInfo.qty} sold • ₹${Math.round(bestInfo.rev).toLocaleString("en-IN")}`;
+      } else {
+        document.getElementById("kpiBestDishName").textContent = "—";
+        document.getElementById("kpiBestDishMeta").textContent = "0 sold • ₹0";
+      }
+
+      const aov = scopedInvs.length > 0 ? Math.round(totalSales / scopedInvs.length) : 0;
+      document.getElementById("kpiAvgOrderValue").textContent = `₹${aov.toLocaleString("en-IN")}`;
+      document.getElementById("kpiTotalItemsSold").textContent = `${totalItemsQty} total items sold`;
+
+      const sortedCats = Object.entries(catTotals).sort((a, b) => b[1] - a[1]);
+      if (sortedCats.length > 0) {
+        const [topCat, topCatRev] = sortedCats[0];
+        const catPct = totalSales > 0 ? Math.round((topCatRev / totalSales) * 100) : 0;
+        document.getElementById("kpiTopCategoryName").textContent = topCat;
+        document.getElementById("kpiTopCategoryMeta").textContent = `₹${Math.round(topCatRev).toLocaleString("en-IN")} (${catPct}%)`;
+      } else {
+        document.getElementById("kpiTopCategoryName").textContent = "—";
+        document.getElementById("kpiTopCategoryMeta").textContent = "₹0 (0%)";
+      }
+
+      document.getElementById("kpiGuestMix").textContent = `${localOrders} Local • ${nonLocalOrders} Non-Local`;
+      document.getElementById("kpiTotalDiscounts").textContent = `Discounts: ₹${Math.round(totalDiscounts).toLocaleString("en-IN")}`;
 
       let tipsByWorker = {};
       posState.invoices.forEach(i => {
@@ -3736,7 +4118,10 @@
 
       if (erpSnapshot && erpSnapshot.funds) {
         const cashBox = erpSnapshot.funds.find(f => f.FundName.includes("Cash Box"));
-        document.getElementById("kpiOpsCashBox").textContent = cashBox ? `₹${Math.round(Number(cashBox.Balance)).toLocaleString("en-IN")}` : "₹0";
+        const opsCashBal = cashBox ? Math.round(Number(cashBox.Balance)) : 0;
+        document.getElementById("kpiOpsCashBox").textContent = `₹${opsCashBal.toLocaleString("en-IN")}`;
+        document.getElementById("kpiTotalDrawerHint").textContent = `All-Time POS Collected: ₹${Math.round(posState.invoices.reduce((s,i)=>s+(Number(i.grandTotal)||0),0)).toLocaleString("en-IN")}`;
+
         const stockWorth = (erpSnapshot.inventory || []).reduce((s, i) => s + (((Number(i.CurrentStock)||0)+(Number(i.KitchenStock)||0))*(Number(i.LastPrice)||0)), 0);
         document.getElementById("kpiOpsStockWorth").textContent = `₹${Math.round(stockWorth).toLocaleString("en-IN")}`;
 
@@ -3757,15 +4142,6 @@
         }).join("") || `<p class="text-slate-400">No kitchen stock issued in Operations DB yet.</p>`;
       }
 
-      let chTotals = {}, payTotals = {}, dishRev = {};
-      todayInvs.forEach(i => {
-        chTotals[i.channel] = (chTotals[i.channel] || 0) + (Number(i.grandTotal) || 0);
-        payTotals[i.paymentMode] = (payTotals[i.paymentMode] || 0) + (Number(i.grandTotal) || 0);
-        (i.items || []).forEach(it => {
-          dishRev[it.name] = (dishRev[it.name] || 0) + (Number(it.price) * Number(it.qty));
-        });
-      });
-
       document.getElementById("channelBreakdownList").innerHTML = Object.entries(chTotals).map(([ch, amt]) => {
         const pct = totalSales > 0 ? Math.round((amt / totalSales) * 100) : 0;
         return `
@@ -3774,29 +4150,29 @@
             <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden"><div class="h-full bg-rose-600" style="width:${pct}%"></div></div>
           </div>
         `;
-      }).join("") || `<p class="text-slate-400">No settled sales today.</p>`;
+      }).join("") || `<p class="text-slate-400">No settled sales in selected period.</p>`;
 
       document.getElementById("paymentModeBreakdown").innerHTML = Object.entries(payTotals).map(([m, amt]) => `
         <div class="flex justify-between font-bold"><span>${m}</span><span class="text-emerald-700">₹${Math.round(amt).toLocaleString("en-IN")}</span></div>
       `).join("");
 
-      const topDishes = Object.entries(dishRev).sort((a, b) => b[1] - a[1]).slice(0, 6);
-      const maxDishRev = topDishes.length > 0 ? topDishes[0][1] : 1;
-      document.getElementById("topDishesList").innerHTML = topDishes.map(([dish, rev], idx) => {
-        const pct = Math.round((rev / maxDishRev) * 100);
+      const topDishes = Object.entries(dishStats).sort((a, b) => b[1].rev - a[1].rev).slice(0, 6);
+      const maxDishRev = topDishes.length > 0 ? topDishes[0][1].rev : 1;
+      document.getElementById("topDishesList").innerHTML = topDishes.map(([dish, info], idx) => {
+        const pct = Math.round((info.rev / maxDishRev) * 100);
         return `
           <div>
-            <div class="flex justify-between font-bold mb-1"><span class="truncate pr-2">${idx + 1}. ${dish}</span><span class="text-emerald-700 shrink-0">₹${Math.round(rev).toLocaleString("en-IN")}</span></div>
+            <div class="flex justify-between font-bold mb-1"><span class="truncate pr-2">${idx + 1}. ${dish} (${info.qty}x)</span><span class="text-emerald-700 shrink-0">₹${Math.round(info.rev).toLocaleString("en-IN")}</span></div>
             <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden"><div class="h-full bg-emerald-600" style="width:${pct}%"></div></div>
           </div>
         `;
       }).join("") || `<p class="text-slate-400">Settle orders to see top dishes.</p>`;
 
-      document.getElementById("settledInvoicesList").innerHTML = posState.invoices.slice(0, 30).map((inv, idx) => `
+      document.getElementById("settledInvoicesList").innerHTML = posState.invoices.slice(0, 40).map((inv, idx) => `
         <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-2">
           <div>
             <p class="font-extrabold text-slate-900">${inv.invoiceNo} • ${inv.orderNo || ""} • ${inv.tableRef} <span class="text-slate-500 font-normal">(${inv.paymentMode})</span></p>
-            <p class="text-[11px] text-slate-500">${new Date(inv.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})} • Guest: ${inv.customerName} (${inv.customerType || "Local"})</p>
+            <p class="text-[11px] text-slate-500">${formatIstDateTime(inv.timestamp)} • Guest: ${inv.customerName} (${inv.customerType || "Local"}) • By: ${inv.cashier || "-"}</p>
           </div>
           <div class="flex items-center gap-2 shrink-0">
             <span class="font-extrabold text-emerald-700 tabular-nums">₹${Number(inv.grandTotal).toFixed(2)}</span>
