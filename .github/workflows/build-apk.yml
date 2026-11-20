@@ -27,7 +27,7 @@ jobs:
         run: |
           mkdir -p www assets
           cp index.html www/index.html
-          [ -f operations.html ] && cp operations.html www/operations.html
+          [ -f ops.html ] && cp ops.html www/ops.html
 
           # 1. Initialize Capacitor + Filesystem & Share plugins for native APK downloads
           npm init -y
