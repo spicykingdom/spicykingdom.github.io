@@ -189,15 +189,15 @@
        ============================================================ -->
   <div id="posAppShell" class="hidden flex-1 flex flex-col">
 
-    <!-- STICKY HEADER -->
-    <header class="sticky top-0 z-30 bg-white border-b border-slate-200 px-3 sm:px-5 py-2 flex items-center justify-between gap-2 shadow-xs">
-      <div class="flex items-center gap-2 min-w-0">
-        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-rose-600 to-orange-600 text-white font-extrabold text-sm flex items-center justify-center shrink-0 shadow-xs">
+	<!-- STICKY HEADER -->
+    <header class="sticky top-0 z-30 bg-white border-b border-slate-200 px-2.5 sm:px-5 py-2 flex items-center justify-between gap-1.5 shadow-xs">
+      <div class="flex items-center gap-2 min-w-0 flex-1">
+        <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-br from-rose-600 to-orange-600 text-white font-extrabold text-xs sm:text-sm flex items-center justify-center shrink-0 shadow-xs">
           SK
         </div>
-        <div class="min-w-0">
-          <h1 class="text-xs sm:text-sm font-extrabold tracking-tight text-slate-900 truncate" id="headerRestoName">SPICY KINGDOM</h1>
-          <p class="text-[10px] font-semibold text-slate-500 truncate" id="posOperatorBadge">Owner</p>
+        <div class="min-w-0 flex-1">
+          <h1 class="text-[11px] sm:text-sm font-extrabold tracking-tight text-slate-900 whitespace-nowrap overflow-hidden text-ellipsis" id="headerRestoName">SPICY KINGDOM</h1>
+          <p class="text-[10px] sm:text-[11px] font-bold text-slate-600 whitespace-nowrap overflow-hidden text-ellipsis" id="posOperatorBadge">Name • Role</p>
         </div>
       </div>
 
@@ -231,24 +231,22 @@
       </nav>
 
       <!-- Right Controls -->
-      <div class="flex items-center gap-1.5 shrink-0">
-        <button onclick="openSessionRegisterModal()" id="sessionStatusPill" class="whitespace-nowrap px-2.5 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] sm:text-xs font-extrabold flex items-center gap-1">
+      <div class="flex items-center gap-1 shrink-0">
+        <button onclick="openSessionRegisterModal()" id="sessionStatusPill" class="whitespace-nowrap px-2 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] sm:text-xs font-extrabold flex items-center gap-1">
           <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
           <span id="sessionPillText">Reg #1</span>
         </button>
-        <button id="posSettingsBtn" onclick="openSettingsModal()" class="hidden p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition" title="Settings">
+        <a href="operations.html" class="px-2 py-1.5 rounded-xl bg-amber-50 text-amber-700 border border-amber-200 text-[10px] sm:text-xs font-extrabold" title="Open Operations & ERP">Ops</a>
+        <button id="posSettingsBtn" onclick="openSettingsModal()" class="hidden p-1.5 sm:p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition" title="Settings">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
         </button>
-        <button onclick="syncFromCloud(true)" class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-cyan-700 transition" title="Sync Sheets">
+        <button onclick="syncFromCloud(true)" class="p-1.5 sm:p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-cyan-700 transition" title="Sync Sheets">
           <svg id="posSyncIcon" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
         </button>
-        <button onclick="logoutPos()" class="p-2 sm:px-2.5 sm:py-1.5 rounded-xl bg-rose-50 text-rose-600 text-xs font-extrabold flex items-center gap-1" title="Logout">
+        <button onclick="logoutPos()" class="p-1.5 sm:px-2.5 sm:py-1.5 rounded-xl bg-rose-50 text-rose-600 text-xs font-extrabold flex items-center gap-1" title="Logout">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
           <span class="hidden sm:inline">Logout</span>
         </button>
-		<a href="ops.html" class="px-2.5 py-1.5 rounded-xl bg-amber-50 text-amber-700 border border-amber-200 text-xs font-extrabold flex items-center gap-1" title="Open Operations & ERP">
-		<span>Ops</span>
-		</a>
       </div>
     </header>
 
@@ -1656,7 +1654,7 @@
       document.getElementById("posLoginScreen").classList.add("hidden");
       document.getElementById("posAppShell").classList.remove("hidden");
       document.getElementById("headerRestoName").textContent = posState.settings.restoName;
-      document.getElementById("posOperatorBadge").textContent = `${currentPosUser.role} • ${currentPosUser.name}`;
+      document.getElementById("posOperatorBadge").textContent = `${currentPosUser.name} • ${currentPosUser.role}`;
 
       const priv = isPosPriv();
       document.getElementById("navMenuMgr").classList.toggle("hidden", !priv);
