@@ -90,20 +90,21 @@
       100% { transform: translateX(200%); }
     }
     .shimmer-bar { animation: shimmer 1.4s infinite linear; }
-    @keyframes iosSlideRight {
-      from { opacity: 0; transform: translateX(20px) scale(0.99); }
-      to { opacity: 1; transform: translateX(0) scale(1); }
-    }
-    @keyframes iosSlideLeft {
-      from { opacity: 0; transform: translateX(-20px) scale(0.99); }
-      to { opacity: 1; transform: translateX(0) scale(1); }
-    }
-    .anim-slide-right { animation: iosSlideRight 0.25s cubic-bezier(0.22, 1, 0.36, 1); }
-    .anim-slide-left { animation: iosSlideLeft 0.25s cubic-bezier(0.22, 1, 0.36, 1); }
     .key-tile:active { transform: scale(0.92); background: rgba(234, 88, 12, 0.22); }
   </style>
 </head>
 <body class="pb-28 lg:pb-8 transition-colors duration-300">
+
+  <!-- GLOBAL INSTANT PROCESSING OVERLAY -->
+  <div id="opsBusyOverlay" class="fixed inset-0 z-[110] bg-slate-950/60 backdrop-blur-xs hidden flex items-center justify-center p-4">
+    <div class="glass-card rounded-3xl px-6 py-5 shadow-2xl flex flex-col items-center text-center max-w-xs w-full space-y-3">
+      <div class="w-10 h-10 rounded-full border-4 border-orange-600 border-t-transparent animate-spin"></div>
+      <div>
+        <p class="text-sm font-extrabold" id="opsBusyTitle">Processing...</p>
+        <p class="text-[11px] font-semibold opacity-70 mt-0.5" id="opsBusySub">Syncing with Spicy Kingdom Sheets</p>
+      </div>
+    </div>
+  </div>
 
   <!-- AMBIENT RESTAURANT MESH ORBS -->
   <div class="mesh-bg">
@@ -246,21 +247,22 @@
     </header>
 
     <!-- ============================================================
-         TAB 1: DASHBOARD (Date-Wise Opening/Closing Table + Gross UPI Card)
+         TAB 1: DASHBOARD (POS-Style From-To Date Bar + Gross UPI Card)
          ============================================================ -->
     <section id="tab-dashboard" class="p-4 lg:p-6 space-y-4 lg:space-y-6">
-      <!-- Date Filter & Action Bar -->
       <div class="glass-card rounded-2xl p-3 flex flex-wrap items-center justify-between gap-2">
         <div class="flex flex-wrap items-center gap-2">
-          <div class="flex items-center gap-1.5 glass-input px-2.5 py-1.5 rounded-xl">
-            <span class="text-[11px] font-extrabold opacity-70">Date:</span>
-            <input type="date" id="opsDashDateInput" onchange="setOpsDashDate(this.value)" class="bg-transparent text-xs font-extrabold focus:outline-none" />
+          <div class="flex items-center gap-1.5 glass-input px-2.5 py-1.5 rounded-xl text-xs font-extrabold">
+            <span class="opacity-70">From:</span>
+            <input type="date" id="opsFromDateInput" onchange="applyOpsCustomRange()" class="bg-transparent focus:outline-none" />
+            <span class="opacity-70">To:</span>
+            <input type="date" id="opsToDateInput" onchange="applyOpsCustomRange()" class="bg-transparent focus:outline-none" />
           </div>
           <div class="flex bg-slate-500/10 p-1 rounded-xl text-[11px] font-extrabold">
-            <button onclick="setOpsDashScope('DATE')" id="opsScopeDateBtn" class="px-2.5 py-1 rounded-lg bg-orange-600 text-white shadow-xs">Selected Date</button>
-            <button onclick="setOpsDashScope('WEEK')" id="opsScopeWeekBtn" class="px-2.5 py-1 rounded-lg opacity-75">7 Days</button>
-            <button onclick="setOpsDashScope('MONTH')" id="opsScopeMonthBtn" class="px-2.5 py-1 rounded-lg opacity-75">Month</button>
-            <button onclick="setOpsDashScope('ALL')" id="opsScopeAllBtn" class="px-2.5 py-1 rounded-lg opacity-75">All</button>
+            <button type="button" onclick="setOpsDashScope('TODAY')" id="opsScopeTODAY" class="px-2.5 py-1 rounded-lg bg-orange-600 text-white shadow-xs transition">Today</button>
+            <button type="button" onclick="setOpsDashScope('WEEK')" id="opsScopeWEEK" class="px-2.5 py-1 rounded-lg opacity-75 transition">7 Days</button>
+            <button type="button" onclick="setOpsDashScope('MONTH')" id="opsScopeMONTH" class="px-2.5 py-1 rounded-lg opacity-75 transition">Month</button>
+            <button type="button" onclick="setOpsDashScope('ALL')" id="opsScopeALL" class="px-2.5 py-1 rounded-lg opacity-75 transition">All Time</button>
           </div>
         </div>
         <button onclick="toggleModal('inflowModal')" class="text-xs font-bold bg-gradient-to-r from-emerald-500 to-teal-600 text-white px-3.5 py-2 rounded-full shadow-lg shadow-emerald-500/25 active:scale-95 transition">
@@ -268,10 +270,8 @@
         </button>
       </div>
 
-      <!-- 4 Treasury Cards (UPI Sales shown Gross without Owner Direct subtraction) -->
       <div id="fundsBentoGrid" class="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4"></div>
 
-      <!-- TABULAR DATE-WISE OPENING & CLOSING BALANCE STATEMENT -->
       <div class="glass-card rounded-3xl p-4 lg:p-5 space-y-3">
         <div class="flex flex-wrap items-center justify-between gap-2">
           <div>
@@ -302,7 +302,6 @@
         </div>
       </div>
 
-      <!-- CUMULATIVE WEEKLY & MONTHLY LEDGER TABLE -->
       <div class="glass-card rounded-3xl p-4 lg:p-5 space-y-3">
         <div>
           <h3 class="text-sm font-extrabold">Cumulative Weekly & Monthly Summary (Revenue vs. Expenditure)</h3>
@@ -378,7 +377,6 @@
         </div>
       </div>
 
-      <!-- OWNER / MANAGER EXECUTIVE INSIGHTS & EOQ ENGINE -->
       <div id="ownerAnalyticsSection" class="hidden space-y-3 lg:space-y-4">
         <div class="flex items-center justify-between pt-1">
           <h3 class="text-xs lg:text-sm font-extrabold uppercase tracking-wider text-indigo-500">Executive Analytics & EOQ</h3>
@@ -415,16 +413,17 @@
       </div>
     </section>
 	<!-- ============================================================
-         TAB 2: PURCHASES (Responsive 2-Column Desktop Layout)
+         TAB 2: PURCHASES (Responsive 2-Column Desktop Layout + Totals & Edit)
          ============================================================ -->
     <section id="tab-purchase" class="hidden p-4 lg:p-6 space-y-4">
       <div class="rounded-3xl p-4 lg:p-5 text-white bg-gradient-to-br from-amber-500 via-orange-600 to-rose-600 shadow-xl shadow-orange-500/20">
-        <div class="flex justify-between items-start">
+        <div class="flex justify-between items-start gap-2">
           <div>
             <p class="text-[11px] lg:text-xs font-semibold opacity-85">Total Recorded Outflows (Selected Period)</p>
             <p class="text-2xl lg:text-3xl font-extrabold tabular-nums mt-0.5" id="purBannerTotal">₹0</p>
+            <p class="text-[11px] font-bold opacity-90 mt-1 tabular-nums" id="purBannerSplit">Cash/Petty Funds: ₹0 • Owner Direct (Sep.): ₹0</p>
           </div>
-          <button onclick="togglePurchaseFormDrawer()" class="bg-white text-orange-600 text-xs font-extrabold px-3.5 py-2 rounded-full shadow-md active:scale-95 transition">
+          <button onclick="togglePurchaseFormDrawer()" class="bg-white text-orange-600 text-xs font-extrabold px-3.5 py-2 rounded-full shadow-md active:scale-95 transition shrink-0">
             + Record Purchase
           </button>
         </div>
@@ -435,11 +434,12 @@
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
         <div id="purchaseFormCard" class="lg:col-span-5 glass-card rounded-3xl p-4 lg:p-5 border-t-4 border-amber-500">
           <div class="flex justify-between items-center mb-3">
-            <h3 class="text-sm font-extrabold">New Purchase Entry</h3>
+            <h3 class="text-sm font-extrabold" id="purFormHeading">New Purchase Entry</h3>
             <button type="button" onclick="togglePurchaseFormDrawer()" class="text-xs opacity-60 font-bold lg:hidden">Hide</button>
           </div>
 
           <form id="purchaseForm" onsubmit="submitPurchase(event)" class="space-y-3">
+            <input type="hidden" id="purEditTxnId" value="" />
             <div>
               <div class="flex justify-between items-center mb-1">
                 <label class="text-xs font-bold opacity-80">Category *</label>
@@ -525,7 +525,7 @@
               <input type="file" accept="image/*" capture="environment" id="purBillPhoto" class="w-full text-xs file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-amber-500/20 file:text-amber-600" />
             </div>
 
-            <button type="submit" class="w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white font-bold py-3.5 rounded-2xl shadow-lg active:scale-[0.99] transition">
+            <button type="submit" id="purSubmitBtn" class="w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white font-bold py-3.5 rounded-2xl shadow-lg active:scale-[0.99] transition">
               Submit Purchase & Update Stock
             </button>
           </form>
@@ -536,9 +536,16 @@
     </section>
 
     <!-- ============================================================
-         TAB 3: STOCK INVENTORY
+         TAB 3: STOCK INVENTORY (With Live Stock Valuation Totals Bar)
          ============================================================ -->
     <section id="tab-inventory" class="hidden p-4 lg:p-6 space-y-4">
+      <div class="glass-card rounded-2xl p-3.5 flex flex-wrap items-center justify-between gap-2 text-xs font-extrabold">
+        <span id="opsInvSummaryItems">Items: 0</span>
+        <span class="text-cyan-600" id="opsInvSummaryStoreWorth">Store Worth: ₹0</span>
+        <span class="text-teal-600" id="opsInvSummaryKitchenWorth">Kitchen Worth: ₹0</span>
+        <span class="text-emerald-600" id="opsInvSummaryTotalWorth">Total Stock Worth: ₹0</span>
+      </div>
+
       <div class="flex flex-wrap items-center justify-between gap-2.5">
         <input type="text" id="invSearch" oninput="renderInventory()" placeholder="Search stock item..." class="flex-1 min-w-[220px] max-w-md p-2.5 rounded-xl glass-input text-sm" />
         <div class="flex items-center gap-2">
@@ -688,7 +695,7 @@
     </section>
 
     <!-- ============================================================
-         TAB 5: STAFF ATTENDANCE & PAYROLL
+         TAB 5: STAFF ATTENDANCE, SALARY, ADVANCES & ACTIVITY LOG
          ============================================================ -->
     <section id="tab-staff" class="hidden p-4 lg:p-6 space-y-4">
       <div class="rounded-3xl p-5 text-white bg-gradient-to-br from-purple-600 via-fuchsia-600 to-pink-600 shadow-xl shadow-purple-500/25 flex items-center justify-between">
@@ -783,9 +790,22 @@
           </div>
         </div>
 
-        <div class="lg:col-span-7 space-y-2.5">
-          <h3 class="text-xs font-extrabold uppercase tracking-wider text-purple-500">Active Staff Roster</h3>
-          <div id="employeeCardsList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-2.5"></div>
+        <div class="lg:col-span-7 space-y-4">
+          <div class="space-y-2.5">
+            <h3 class="text-xs font-extrabold uppercase tracking-wider text-purple-500">Active Staff Roster</h3>
+            <div id="employeeCardsList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-2.5"></div>
+          </div>
+
+          <div class="glass-card rounded-3xl p-4 space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <h3 class="text-sm font-extrabold">All Staff Activity, Attendance, Salary & Advances</h3>
+                <p class="text-[11px] opacity-70" id="opsStaffLogTotals">Advances: ₹0 • Salary/Wages: ₹0 • Present Logs: 0</p>
+              </div>
+              <input type="text" id="opsStaffLogFilter" oninput="renderStaffActivityHistory()" placeholder="Filter staff / ADVANCE / SALARY..." class="px-3 py-1.5 rounded-xl glass-input text-xs font-semibold" />
+            </div>
+            <div id="opsStaffActivityHistoryList" class="space-y-2 text-xs max-h-96 overflow-y-auto"></div>
+          </div>
         </div>
       </div>
     </section>
@@ -816,10 +836,60 @@
       </div>
     </nav>
   </div>
-
   <!-- ============================================================
        IN-APP MODALS & DRAWERS
        ============================================================ -->
+
+  <!-- 0B. EDIT STAFF ACTIVITY / SALARY / ADVANCE MODAL -->
+  <div id="editStaffActivityModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-[82] hidden flex items-end lg:items-center justify-center lg:p-4">
+    <div class="bottom-sheet rounded-t-[28px] w-full max-w-[440px] p-6 pb-8 space-y-3.5">
+      <div class="w-10 h-1 bg-slate-400/40 rounded-full mx-auto lg:hidden"></div>
+      <div class="flex justify-between items-center">
+        <div>
+          <h3 class="font-extrabold text-base" id="editStfActHeading">Edit Staff Activity</h3>
+          <p class="text-[11px] opacity-65">Fix amount, date, or type for any salary/advance/attendance log</p>
+        </div>
+        <button onclick="toggleModal('editStaffActivityModal')" class="text-2xl opacity-60">&times;</button>
+      </div>
+      <input type="hidden" id="editStfActId" value="" />
+      <div class="grid grid-cols-2 gap-2.5 text-xs">
+        <div>
+          <label class="block font-bold opacity-80 mb-1">Date</label>
+          <input type="date" id="editStfActDate" class="w-full p-2.5 rounded-xl glass-input font-bold" />
+        </div>
+        <div>
+          <label class="block font-bold opacity-80 mb-1">Type</label>
+          <select id="editStfActType" class="w-full p-2.5 rounded-xl glass-input font-bold">
+            <option value="ATTENDANCE">ATTENDANCE (Present)</option>
+            <option value="HALF_DAY">HALF_DAY</option>
+            <option value="ABSENT">ABSENT</option>
+            <option value="PAID_LEAVE">PAID_LEAVE</option>
+            <option value="LOP_LEAVE">LOP_LEAVE</option>
+            <option value="ADVANCE">ADVANCE</option>
+            <option value="SALARY_PAID">SALARY_PAID</option>
+            <option value="DAILY_WAGE">DAILY_WAGE</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-2.5 text-xs">
+        <div>
+          <label class="block font-bold opacity-80 mb-1">Amount (₹)</label>
+          <input type="number" step="0.01" id="editStfActAmt" class="w-full p-2.5 rounded-xl glass-input font-extrabold tabular-nums" />
+        </div>
+        <div>
+          <label class="block font-bold opacity-80 mb-1">Notes</label>
+          <input type="text" id="editStfActNotes" class="w-full p-2.5 rounded-xl glass-input font-semibold" />
+        </div>
+      </div>
+      <label class="flex items-center gap-2 text-[11px] font-bold cursor-pointer">
+        <input type="checkbox" id="editStfActAdjCash" checked class="w-4 h-4 accent-emerald-600" />
+        <span>Adjust Restaurant Cash Box balance for payout delta</span>
+      </label>
+      <button type="button" onclick="saveEditedStaffActivity()" class="w-full bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white font-bold py-3.5 rounded-2xl shadow-lg">
+        Save Staff Activity Changes
+      </button>
+    </div>
+  </div>
 
   <!-- 1. UNIVERSAL IN-APP PICKER -->
   <div id="customPickerModal" class="fixed inset-0 bg-slate-950/65 backdrop-blur-sm z-[85] hidden flex items-end lg:items-center justify-center lg:p-4">
@@ -1167,7 +1237,7 @@
   </div>
   <script>
     // ============================================================
-    // 1. LIVE APPS SCRIPT /exec URLS
+    // 1. LIVE APPS SCRIPT /exec URLS & SHARED CONSTANTS
     // ============================================================
     const DEFAULT_API_URL = "https://script.google.com/macros/s/AKfycbyi6CUoUYgRzABSnQIsnjl6EeEs_WxnP3hHmLUYQrlvMpFZvtT-LljrxMT1mZtT-V4j/exec";
     const DEFAULT_POS_BRIDGE_URL = "https://script.google.com/macros/s/AKfycbyS3qN0tRF0tSphQh8tMkNEQDrteH4hGot1PlAYRUhrmJcuwmmL-9GC48wbui08rq6gbg/exec";
@@ -1220,13 +1290,7 @@
     let activeVoucherTxn = null;
     let activeDrawerEmp = null;
     let currentTabIdx = 0;
-
-    let opsDashScope = "DATE";
-    let opsSelectedDate = "";
-
-    let activePickerConfig = null;
-    let datePickerTarget = { hiddenId: "", btnId: "", viewDate: new Date(), futureOnly: false };
-    let inAppInputCallback = null;
+    let isOpsBusy = false;
 
     function isPriv() { return currentUser && PRIVILEGED_ROLES.includes(currentUser.role); }
 
@@ -1236,17 +1300,41 @@
 
     function toIstDateKey(isoStr) {
       if (!isoStr) return getLocalTodayStr();
-      const d = new Date(isoStr);
-      if (isNaN(d.getTime())) return String(isoStr).slice(0, 10);
+      const s = String(isoStr).trim();
+      if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+      const d = new Date(s);
+      if (isNaN(d.getTime())) return s.slice(0, 10);
       return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kolkata" }).format(d);
+    }
+
+    let opsDashScope = "TODAY";
+    let opsSelectedDate = getLocalTodayStr();
+    let opsFromDate = getLocalTodayStr();
+    let opsToDate = getLocalTodayStr();
+
+    let activePickerConfig = null;
+    let datePickerTarget = { hiddenId: "", btnId: "", viewDate: new Date(), futureOnly: false };
+    let inAppInputCallback = null;
+
+    function setOpsBusy(busy, title = "Processing...", sub = "Syncing with Spicy Kingdom Sheets") {
+      isOpsBusy = busy;
+      const ov = document.getElementById("opsBusyOverlay");
+      if (!ov) return;
+      document.getElementById("opsBusyTitle").textContent = title;
+      document.getElementById("opsBusySub").textContent = sub;
+      ov.classList.toggle("hidden", !busy);
     }
 
     window.onload = async () => {
       if (localStorage.getItem("sk_theme") === "dark") applyThemeUI(true);
       const today = getLocalTodayStr();
       opsSelectedDate = today;
-      const dashDateEl = document.getElementById("opsDashDateInput");
-      if (dashDateEl) dashDateEl.value = today;
+      opsFromDate = today;
+      opsToDate = today;
+      const fEl = document.getElementById("opsFromDateInput");
+      const tEl = document.getElementById("opsToDateInput");
+      if (fEl) fEl.value = opsFromDate;
+      if (tEl) tEl.value = opsToDate;
 
       document.getElementById("stfDate").value = today;
       document.getElementById("stfDateLabel").textContent = today;
@@ -1262,7 +1350,7 @@
         const sp = document.getElementById("splashScreen");
         sp.classList.add("opacity-0", "pointer-events-none");
         setTimeout(() => sp.classList.add("hidden"), 500);
-      }, 2000);
+      }, 1200);
     };
 
     function applyThemeUI(isDark) {
@@ -1336,8 +1424,10 @@
       if (pinBuffer.length !== 6) return showToast("Enter 6-digit security PIN", true);
       document.getElementById("loginSubtext").textContent = "Validating PIN & Spicy Kingdom Access...";
       updatePinDots(true);
+      setOpsBusy(true, "Verifying PIN...", "Checking Operations Access");
 
       const res = await callApi({ action: "login", pin: String(pinBuffer) }, false);
+      setOpsBusy(false);
       updatePinDots(false);
       document.getElementById("loginSubtext").textContent = "Enter your 6-digit Spicy Kingdom PIN";
 
@@ -1396,15 +1486,16 @@
     }
 
     async function refreshData(manual = false) {
-      const [res] = await Promise.all([
-        callApi({ action: "getAllData", role: currentUser.role }, true),
-        syncPosSnapshotForOps()
-      ]);
+      const res = await callApi({ action: "getAllData", role: currentUser.role }, true);
       if (res.status === "success") {
         appData = res;
         renderAll();
         if (manual) showToast("Spicy Kingdom Synced");
       }
+      syncPosSnapshotForOps().then(() => {
+        renderDashboard();
+        renderOwnerAnalytics();
+      });
     }
 
     function renderAll() {
@@ -1415,43 +1506,52 @@
       renderInventory();
       renderKitchen();
       renderStaff();
+      renderStaffActivityHistory();
     }
 
     // ============================================================
-    // 3. DATE-WISE OPENING/CLOSING STATEMENT & GROSS UPI TREASURY
+    // 3. FROM-TO DATE RANGE, OPENING/CLOSING STATEMENT & GROSS UPI
     // ============================================================
-    function setOpsDashDate(val) {
-      if (!val) return;
-      opsSelectedDate = val;
-      setOpsDashScope("DATE");
+    function applyOpsCustomRange() {
+      let f = document.getElementById("opsFromDateInput").value;
+      let t = document.getElementById("opsToDateInput").value;
+      if (f && t && f > t) { t = f; document.getElementById("opsToDateInput").value = t; }
+      if (f) opsFromDate = f;
+      if (t) { opsToDate = t; opsSelectedDate = t; }
+      opsDashScope = "CUSTOM";
+      ["TODAY", "WEEK", "MONTH", "ALL"].forEach(s => {
+        const el = document.getElementById(`opsScope${s}`);
+        if (el) el.className = "px-2.5 py-1 rounded-lg opacity-75 transition";
+      });
+      renderAll();
     }
 
     function setOpsDashScope(scope) {
       opsDashScope = scope;
-      const map = { DATE: "opsScopeDateBtn", WEEK: "opsScopeWeekBtn", MONTH: "opsScopeMonthBtn", ALL: "opsScopeAllBtn" };
-      Object.entries(map).forEach(([k, id]) => {
-        const el = document.getElementById(id);
-        if (el) {
-          el.className = (k === scope)
-            ? "px-2.5 py-1 rounded-lg bg-orange-600 text-white shadow-xs"
-            : "px-2.5 py-1 rounded-lg opacity-75";
-        }
+      const today = getLocalTodayStr();
+      if (scope === "TODAY") { opsFromDate = today; opsToDate = today; }
+      else if (scope === "WEEK") { const d = new Date(); d.setDate(d.getDate() - 6); opsFromDate = toIstDateKey(d.toISOString()); opsToDate = today; }
+      else if (scope === "MONTH") { opsFromDate = today.slice(0, 7) + "-01"; opsToDate = today; }
+      else { opsFromDate = "2020-01-01"; opsToDate = today; }
+      opsSelectedDate = opsToDate;
+
+      const fEl = document.getElementById("opsFromDateInput");
+      const tEl = document.getElementById("opsToDateInput");
+      if (fEl) fEl.value = opsFromDate;
+      if (tEl) tEl.value = opsToDate;
+
+      ["TODAY", "WEEK", "MONTH", "ALL"].forEach(s => {
+        const el = document.getElementById(`opsScope${s}`);
+        if (el) el.className = (s === scope) ? "px-2.5 py-1 rounded-lg bg-orange-600 text-white shadow-xs transition" : "px-2.5 py-1 rounded-lg opacity-75 transition";
       });
-      renderDashboard();
-      renderOwnerAnalytics();
-      renderPurchasesScreen();
+      renderAll();
     }
 
     function isOpsDateInScope(isoStr) {
+      if (opsDashScope === "ALL") return true;
       const dKey = toIstDateKey(isoStr);
       if (!dKey) return true;
-      if (opsDashScope === "DATE") return dKey === opsSelectedDate;
-      if (opsDashScope === "WEEK") {
-        const diff = (new Date(opsSelectedDate) - new Date(dKey)) / 86400000;
-        return diff >= 0 && diff < 7;
-      }
-      if (opsDashScope === "MONTH") return dKey.startsWith(opsSelectedDate.slice(0, 7));
-      return true;
+      return dKey >= opsFromDate && dKey <= opsToDate;
     }
 
     function buildOpsDateWiseLedgerRows() {
@@ -1468,7 +1568,6 @@
       let runningCashBox = 0;
 
       const rowsAsc = sortedAsc.map(dKey => {
-        // Gross Cash & UPI Sales from POS Invoices (or Ops Inflows if POS invoices aren't loaded)
         const dayPosInvs = (posCloudInvoices || []).filter(i => toIstDateKey(i.Timestamp) === dKey);
         let cashSales = 0, upiSales = 0;
 
@@ -1487,21 +1586,18 @@
           });
         }
 
-        // Manual non-POS Cash Box inflows (e.g., Owner Cash Top-up)
         const extraCashTopup = (appData.inflows || [])
           .filter(inf => toIstDateKey(inf.Timestamp) === dKey && String(inf.DepositedTo).includes("Cash Box") && !String(inf.Source).includes("POS"))
           .reduce((s, inf) => s + (Number(inf.Amount) || 0), 0);
 
-        // Cashbox expenses only (Restaurant Cash Box purchases + staff cash payouts)
         const cashboxPurExp = (appData.purchases || [])
           .filter(p => p.VerifyStatus !== "Cancelled" && toIstDateKey(p.Timestamp) === dKey && String(p.PaidFrom).includes("Cash Box"))
           .reduce((s, p) => s + (Number(p.TotalAmount) || 0), 0);
 
         const cashboxStaffExp = (appData.staffActivity || [])
-          .filter(a => toIstDateKey(a.Date) === dKey && ["ADVANCE", "DAILY_WAGE", "SALARY_PAID"].includes(a.ActivityType) && String(a.PaidFrom).includes("Cash Box"))
+          .filter(a => toIstDateKey(a.Date) === dKey && ["ADVANCE", "DAILY_WAGE", "SALARY_PAID"].includes(a.ActivityType) && String(a.PaidFrom || "Restaurant Cash Box").includes("Cash Box"))
           .reduce((s, a) => s + (Number(a.Amount) || 0), 0);
 
-        // Owner Direct tracked completely separately (never deducted from UPI Sales)
         const ownerDirectExp = (appData.purchases || [])
           .filter(p => p.VerifyStatus !== "Cancelled" && toIstDateKey(p.Timestamp) === dKey && String(p.PaidFrom).includes("Owner Direct"))
           .reduce((s, p) => s + (Number(p.TotalAmount) || 0), 0);
@@ -1565,10 +1661,8 @@
     function renderDashboard() {
       const petty = appData.funds.find(f => f.FundName.includes("Petty")) || { FundName: "Petty Cash Fund", Balance: 0 };
       const reg = appData.funds.find(f => f.FundName.includes("Cash Box")) || { FundName: "Restaurant Cash Box", Balance: 0 };
-      const ownerD = appData.funds.find(f => f.FundName.includes("Owner")) || { FundName: "Owner Direct", Balance: 0 };
       const totalSelfOwed = Object.values(appData.selfLedger || {}).reduce((s, v) => s + (v > 0 ? v : 0), 0);
 
-      // Compute Gross UPI Sales for selected scope (without deducting negative Owner Direct)
       const dateRows = buildOpsDateWiseLedgerRows();
       const scopedRows = dateRows.filter(r => isOpsDateInScope(r.date));
       const grossUpiInScope = scopedRows.reduce((s, r) => s + r.upiSales, 0);
@@ -1600,7 +1694,6 @@
         </div>
       `;
 
-      // Render Date-Wise Opening & Closing Balance Table
       document.getElementById("opsDateWiseStatementBody").innerHTML = dateRows.slice(0, 15).map(r => `
         <tr class="${r.date === opsSelectedDate ? "bg-amber-500/10 font-extrabold" : ""}">
           <td class="p-2.5 font-extrabold">${r.date}</td>
@@ -1614,7 +1707,6 @@
         </tr>
       `).join("") || `<tr><td colspan="8" class="p-4 text-center opacity-60">No date-wise transactions available yet.</td></tr>`;
 
-      // Render Cumulative Weekly & Monthly Ledger Table
       const baseD = new Date(opsSelectedDate);
       const weekRows = dateRows.filter(r => {
         const diff = (baseD - new Date(r.date)) / 86400000;
@@ -1768,14 +1860,21 @@
     }
 
     // ============================================================
-    // 4. PURCHASES, INVENTORY, KITCHEN & STAFF
+    // 4. PURCHASES, INVENTORY, KITCHEN & STAFF (WITH EDIT/DELETE & TOTALS)
     // ============================================================
-    function togglePurchaseFormDrawer() { document.getElementById("purchaseFormCard").classList.toggle("hidden"); }
+    function togglePurchaseFormDrawer() {
+      document.getElementById("purchaseFormCard").classList.toggle("hidden");
+    }
 
     function renderPurchasesScreen() {
       const validPurchases = appData.purchases.filter(p => p.VerifyStatus !== "Cancelled" && isOpsDateInScope(p.Timestamp));
       const totalOut = validPurchases.reduce((s, p) => s + (Number(p.TotalAmount) || 0), 0);
+      const cashOrPetty = validPurchases.filter(p => !String(p.PaidFrom || "").toLowerCase().includes("owner direct")).reduce((s, p) => s + (Number(p.TotalAmount) || 0), 0);
+      const ownerDirect = validPurchases.filter(p => String(p.PaidFrom || "").toLowerCase().includes("owner direct")).reduce((s, p) => s + (Number(p.TotalAmount) || 0), 0);
+
       document.getElementById("purBannerTotal").textContent = "₹" + Math.round(totalOut).toLocaleString("en-IN");
+      const purSplitEl = document.getElementById("purBannerSplit");
+      if (purSplitEl) purSplitEl.textContent = `Cash/Petty Funds: ₹${Math.round(cashOrPetty).toLocaleString("en-IN")} • Owner Direct (Sep.): ₹${Math.round(ownerDirect).toLocaleString("en-IN")}`;
 
       let catSum = {};
       validPurchases.forEach(p => catSum[p.Category] = (catSum[p.Category] || 0) + (Number(p.TotalAmount) || 0));
@@ -1788,23 +1887,32 @@
       document.getElementById("purCatLegend").innerHTML = top3.map(([cat, amt]) => `<span>${cat.split(" ")[0]}: ₹${Math.round(amt)}</span>`).join("");
 
       const scopedFeed = appData.purchases.filter(p => isOpsDateInScope(p.Timestamp));
-      document.getElementById("purchaseFeedList").innerHTML = scopedFeed.slice(0, 40).map(p => {
+      const idKey = (p) => p.TxnID || p.PurchaseID || "";
+      document.getElementById("purchaseFeedList").innerHTML = scopedFeed.slice(0, 60).map(p => {
         const st = p.VerifyStatus || "Pending";
         const stColor = st === "Verified" ? "bg-emerald-500/15 text-emerald-600" : st === "Disputed" ? "bg-amber-500/15 text-amber-600" : st === "Cancelled" ? "bg-rose-500/15 text-rose-500 line-through" : "bg-slate-500/15 opacity-70";
+        const isOwnerDirect = String(p.PaidFrom || "").toLowerCase().includes("owner direct");
+        const nextRoute = isOwnerDirect ? "Restaurant Cash Box" : "Owner Direct";
+        const rowId = idKey(p);
+
         return `
           <div class="glass-card p-3.5 rounded-2xl flex items-center justify-between gap-2.5">
             <div class="w-10 h-10 rounded-xl bg-amber-500/15 text-amber-600 flex items-center justify-center shrink-0">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
             </div>
             <div class="flex-1 min-w-0">
-              <div class="flex items-center gap-1.5">
+              <div class="flex items-center gap-1.5 flex-wrap">
                 <p class="font-extrabold text-xs truncate">${p.ItemName} (${p.Qty} ${p.Unit})</p>
                 <span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded-full ${stColor}">${st}</span>
               </div>
               <p class="text-[10px] opacity-65 truncate">${p.PaidFrom} • by ${p.LoggedBy}</p>
-              <div class="flex items-center gap-1.5 mt-1">
+              <div class="flex items-center gap-1.5 mt-1 flex-wrap">
                 <span class="text-[9px] px-2 py-0.5 rounded-full bg-slate-500/10 opacity-75">${toIstDateKey(p.Timestamp)}</span>
-                <button type="button" onclick="openVoucherModal('${p.TxnID}')" class="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-blue-500/15 text-blue-600">View Bill</button>
+                <button type="button" onclick="openVoucherModal('${rowId}')" class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-blue-500/15 text-blue-600">View Bill</button>
+                ${isPriv() && rowId ? `
+                  <button type="button" onclick="loadPurchaseIntoForm('${rowId}')" class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-700">Edit</button>
+                  <button type="button" onclick="quickRoutePurchase('${rowId}', '${nextRoute}')" class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-700">→ ${isOwnerDirect ? "Cash Box" : "Owner Direct"}</button>
+                ` : ""}
               </div>
             </div>
             <span class="font-extrabold text-sm text-rose-500 tabular-nums shrink-0">-₹${Number(p.TotalAmount).toLocaleString("en-IN")}</span>
@@ -1813,14 +1921,44 @@
       }).join("") || `<p class="text-center text-xs opacity-60 py-6">No purchases recorded for selected date/period.</p>`;
     }
 
+    function loadPurchaseIntoForm(rowId) {
+      const p = appData.purchases.find(x => (x.TxnID || x.PurchaseID) === rowId);
+      if (!p) return;
+      document.getElementById("purchaseFormCard").classList.remove("hidden");
+      document.getElementById("purFormHeading").textContent = `Edit Purchase (${rowId})`;
+      document.getElementById("purEditTxnId").value = rowId;
+      selectDirect("purCategory", "purCategoryBtn", p.Category || "Groceries", p.Category || "Groceries");
+      document.getElementById("purItemName").value = p.ItemName || "";
+      document.getElementById("purQty").value = p.Qty || 1;
+      selectDirect("purUnit", "purUnitBtn", p.Unit || "kg", p.Unit || "kg");
+      document.getElementById("purUnitPrice").value = p.UnitPrice || 0;
+      document.getElementById("purTotal").value = p.TotalAmount || 0;
+      selectDirect("purPaidFrom", "purPaidFromBtn", p.PaidFrom || "Restaurant Cash Box", p.PaidFrom || "Restaurant Cash Box");
+      selectDirect("purPayMethod", "purPayMethodBtn", p.PayMethod || "Cash", p.PayMethod || "Cash");
+      document.getElementById("purSupplier").value = p.Supplier || "";
+      document.getElementById("purBillNo").value = p.BillNo || "";
+      document.getElementById("purSubmitBtn").textContent = "Update Purchase & Adjust Funds";
+      showToast(`Loaded ${p.ItemName} for editing`);
+    }
+
+    async function quickRoutePurchase(purchaseId, nextPaidFrom) {
+      if (isOpsBusy) return;
+      setOpsBusy(true, "Routing Payment Source...", `Switching ${purchaseId} to ${nextPaidFrom}`);
+      const res = await callApi({ action: "updatePurchasePaidFrom", purchaseId, paidFrom: nextPaidFrom }, true);
+      await refreshData(false);
+      setOpsBusy(false);
+      if (res.status === "success") showToast(res.message || `Routed to ${nextPaidFrom}`);
+      else showToast(res.message || "Update failed", true);
+    }
+
     function openVoucherModal(txnId) {
-      const p = appData.purchases.find(x => x.TxnID === txnId);
+      const p = appData.purchases.find(x => (x.TxnID || x.PurchaseID) === txnId);
       if (!p) return;
       activeVoucherTxn = p;
       const st = p.VerifyStatus || "Pending";
       document.getElementById("vchStatusBadge").textContent = `${st} Digital Voucher`;
       document.getElementById("vchSupplier").textContent = p.Supplier || "Direct Vendor";
-      document.getElementById("vchBillNo").textContent = `#${p.BillNo && p.BillNo !== "-" ? p.BillNo : p.TxnID}`;
+      document.getElementById("vchBillNo").textContent = `#${p.BillNo && p.BillNo !== "-" ? p.BillNo : (p.TxnID || p.PurchaseID)}`;
       document.getElementById("vchItem").textContent = `${p.ItemName} (${p.Qty} ${p.Unit})`;
       document.getElementById("vchSource").textContent = `${p.PaidFrom} (${p.PayMethod})`;
       document.getElementById("vchTime").textContent = `${p.LoggedBy} • ${toIstDateKey(p.Timestamp)}`;
@@ -1835,9 +1973,13 @@
     }
 
     async function setPurchaseVerifyStatus(status) {
-      if (!activeVoucherTxn) return;
-      const res = await callApi({ action: "updatePurchaseStatus", requesterRole: currentUser.role, txnId: activeVoucherTxn.TxnID, verifyStatus: status });
-      if (res.status === "success") { showToast(res.message); toggleModal("voucherModal"); refreshData(); }
+      if (!activeVoucherTxn || isOpsBusy) return;
+      const rowId = activeVoucherTxn.TxnID || activeVoucherTxn.PurchaseID;
+      setOpsBusy(true, `Marking ${status}...`, "Updating Voucher Status");
+      const res = await callApi({ action: "updatePurchaseStatus", requesterRole: currentUser.role, txnId: rowId, purchaseId: rowId, verifyStatus: status });
+      await refreshData(false);
+      setOpsBusy(false);
+      if (res.status === "success") { showToast(res.message); toggleModal("voucherModal"); }
       else showToast(res.message, true);
     }
 
@@ -1890,14 +2032,20 @@
 
     async function submitPurchase(e) {
       e.preventDefault();
+      if (isOpsBusy) return;
       const expiryVal = document.getElementById("purExpiry").value;
       if (expiryVal && expiryVal < getLocalTodayStr()) return showToast("Cannot purchase an expired product!", true);
       let photoBase64 = "";
       const fileInput = document.getElementById("purBillPhoto");
       if (fileInput.files.length > 0) photoBase64 = await fileToBase64(fileInput.files[0]);
 
+      const editTxnId = document.getElementById("purEditTxnId").value;
+      setOpsBusy(true, editTxnId ? "Updating Purchase..." : "Saving Purchase...", "Syncing Purchases & Funds");
+
       const res = await callApi({
-        action: "addPurchase",
+        action: editTxnId ? "editPurchase" : "addPurchase",
+        txnId: editTxnId,
+        purchaseId: editTxnId,
         category: document.getElementById("purCategory").value,
         itemName: document.getElementById("purItemName").value,
         qty: document.getElementById("purQty").value,
@@ -1914,18 +2062,23 @@
         userRole: currentUser.role
       });
 
+      await refreshData(false);
+      setOpsBusy(false);
+
       if (res.status === "success") {
         showToast(res.message);
         document.getElementById("purchaseForm").reset();
+        document.getElementById("purEditTxnId").value = "";
+        document.getElementById("purFormHeading").textContent = "New Purchase Entry";
+        document.getElementById("purSubmitBtn").textContent = "Submit Purchase & Update Stock";
         document.getElementById("purExpiry").value = "";
         document.getElementById("purExpiryBtn").querySelector("span").textContent = "Optional";
         document.getElementById("liveStockIndicator").classList.add("hidden");
-        refreshData();
       } else showToast(res.message, true);
     }
 
     // ============================================================
-    // 5. INVENTORY, KITCHEN, STAFF & REPORT EXPORTS
+    // 5. INVENTORY, KITCHEN, STAFF & FULL STAFF ACTIVITY LOG
     // ============================================================
     function setInvFilter(f) {
       invFilter = f;
@@ -1937,7 +2090,7 @@
     }
 
     function openStockAlertModal(itemId) {
-      const item = appData.inventory.find(i => i.ItemID === itemId);
+      const item = appData.inventory.find(i => (i.ItemID || i.ItemName) === itemId);
       if (!item) return;
       document.getElementById("saItemHeading").textContent = `${item.ItemName} Alerts`;
       document.getElementById("saItemSub").textContent = `Current Store Stock: ${item.CurrentStock} ${item.Unit}`;
@@ -1951,6 +2104,8 @@
 
     async function saveStockAlertLimits(e) {
       e.preventDefault();
+      if (isOpsBusy) return;
+      setOpsBusy(true, "Saving Alert Limits...", "Updating Stock Thresholds");
       const res = await callApi({
         action: "upsertInventoryItem", requesterRole: currentUser.role,
         itemName: document.getElementById("saItemName").value,
@@ -1960,7 +2115,9 @@
         minAlert: document.getElementById("saMinAlert").value,
         maxTarget: document.getElementById("saMaxTarget").value
       });
-      if (res.status === "success") { showToast("Low & Max stock alerts updated!"); toggleModal("stockAlertModal"); refreshData(); }
+      await refreshData(false);
+      setOpsBusy(false);
+      if (res.status === "success") { showToast("Low & Max stock alerts updated!"); toggleModal("stockAlertModal"); }
       else showToast(res.message, true);
     }
 
@@ -1972,6 +2129,7 @@
       const pct = Math.min(100, Math.round((storeStk / max) * 100));
       let barColor = storeStk <= min ? "bg-rose-500" : pct <= 60 ? "bg-amber-500" : "bg-emerald-500";
       const priv = isPriv();
+      const itemKey = item.ItemID || item.ItemName;
       return `
         <div class="glass-card p-3.5 rounded-2xl space-y-2.5 flex flex-col justify-between">
           <div class="flex items-center justify-between gap-2.5">
@@ -1981,16 +2139,16 @@
             </div>
             ${priv ? `
               <div class="flex items-center gap-1.5 shrink-0">
-                <button type="button" onclick="quickStepStock('${item.ItemID}', -1)" class="w-7 h-7 rounded-lg glass-card font-extrabold text-sm">-</button>
-                <button type="button" onclick="manualDecimalStockDialog('${item.ItemID}', '${item.ItemName}', '${item.Unit}')" class="min-w-[34px] text-center font-extrabold text-sm tabular-nums underline decoration-dotted">${storeStk}</button>
-                <button type="button" onclick="quickStepStock('${item.ItemID}', 1)" class="w-7 h-7 rounded-lg bg-blue-600 text-white font-extrabold text-sm">+</button>
+                <button type="button" onclick="quickStepStock('${itemKey}', -1)" class="w-7 h-7 rounded-lg glass-card font-extrabold text-sm">-</button>
+                <button type="button" onclick="manualDecimalStockDialog('${itemKey}', '${item.ItemName}', '${item.Unit}')" class="min-w-[34px] text-center font-extrabold text-sm tabular-nums underline decoration-dotted">${storeStk}</button>
+                <button type="button" onclick="quickStepStock('${itemKey}', 1)" class="w-7 h-7 rounded-lg bg-blue-600 text-white font-extrabold text-sm">+</button>
               </div>
             ` : `<span class="font-extrabold text-sm tabular-nums">${storeStk} ${item.Unit}</span>`}
           </div>
           <div>
             <div class="flex justify-between items-center text-[10px] opacity-75 font-semibold mb-1">
               <span>Min: <strong class="text-rose-500">${min}</strong> • Max: <strong class="text-emerald-600">${max} ${item.Unit}</strong></span>
-              ${priv ? `<button type="button" onclick="openStockAlertModal('${item.ItemID}')" class="px-2 py-0.5 rounded bg-indigo-500/15 text-indigo-500 font-extrabold">Limits</button>` : ""}
+              ${priv ? `<button type="button" onclick="openStockAlertModal('${itemKey}')" class="px-2 py-0.5 rounded bg-indigo-500/15 text-indigo-500 font-extrabold">Limits</button>` : ""}
             </div>
             <div class="w-full h-1.5 bg-slate-500/15 rounded-full overflow-hidden"><div class="${barColor} h-full rounded-full" style="width:${pct}%"></div></div>
           </div>
@@ -1999,6 +2157,21 @@
     }
 
     function renderInventory() {
+      let storeWorth = 0, kitchenWorth = 0;
+      (appData.inventory || []).forEach(item => {
+        const rate = Number(item.LastPrice) || 0;
+        storeWorth += (Number(item.CurrentStock) || 0) * rate;
+        kitchenWorth += (Number(item.KitchenStock) || 0) * rate;
+      });
+      const elItems = document.getElementById("opsInvSummaryItems");
+      if (elItems) elItems.textContent = `Items: ${(appData.inventory || []).length}`;
+      const elSW = document.getElementById("opsInvSummaryStoreWorth");
+      if (elSW) elSW.textContent = `Store Worth: ₹${Math.round(storeWorth).toLocaleString("en-IN")}`;
+      const elKW = document.getElementById("opsInvSummaryKitchenWorth");
+      if (elKW) elKW.textContent = `Kitchen Worth: ₹${Math.round(kitchenWorth).toLocaleString("en-IN")}`;
+      const elTW = document.getElementById("opsInvSummaryTotalWorth");
+      if (elTW) elTW.textContent = `Total Stock Worth: ₹${Math.round(storeWorth + kitchenWorth).toLocaleString("en-IN")}`;
+
       const q = document.getElementById("invSearch").value.toLowerCase();
       const now = new Date();
       const filtered = appData.inventory.filter(item => {
@@ -2011,8 +2184,12 @@
     }
 
     async function quickStepStock(itemId, delta) {
+      if (isOpsBusy) return;
+      setOpsBusy(true, "Adjusting Stock...", `Updating stock by ${delta}`);
       const res = await callApi({ action: "adjustStockDelta", requesterRole: currentUser.role, itemId, delta });
-      if (res.status === "success") { showToast(res.message); refreshData(); }
+      await refreshData(false);
+      setOpsBusy(false);
+      if (res.status === "success") showToast(res.message);
       else showToast(res.message, true);
     }
 
@@ -2028,13 +2205,17 @@
     function checkInvModalFuzzy(val) {}
     async function submitUpsertInv(e) {
       e.preventDefault();
+      if (isOpsBusy) return;
+      setOpsBusy(true, "Saving Stock Item...", "Updating Inventory Sheet");
       const res = await callApi({
         action: "upsertInventoryItem", requesterRole: currentUser.role,
         itemName: document.getElementById("upInvName").value, category: document.getElementById("upInvCat").value,
         currentStock: document.getElementById("upInvQty").value, unit: document.getElementById("upInvUnit").value,
         minAlert: document.getElementById("upInvMin").value, maxTarget: document.getElementById("upInvMax").value
       });
-      if (res.status === "success") { showToast(res.message); toggleModal("upsertInvModal"); e.target.reset(); refreshData(); }
+      await refreshData(false);
+      setOpsBusy(false);
+      if (res.status === "success") { showToast(res.message); toggleModal("upsertInvModal"); e.target.reset(); }
     }
 
     function setKitchenMode(mode) {
@@ -2084,9 +2265,12 @@
     }
 
     async function submitBatchTransfer() {
-      if (transferCart.length === 0) return showToast("Add items to cart first.", true);
+      if (transferCart.length === 0 || isOpsBusy) return showToast("Add items to cart first.", true);
+      setOpsBusy(true, "Transferring Stock...", "Updating Store & Kitchen Balances");
       const res = await callApi({ action: "batchKitchenAction", items: transferCart, loggedBy: currentUser.name });
-      if (res.status === "success") { showToast(res.message); transferCart = []; renderTransferCart(); refreshData(); }
+      await refreshData(false);
+      setOpsBusy(false);
+      if (res.status === "success") { showToast(res.message); transferCart = []; renderTransferCart(); }
     }
 
     function toggleWasteMode(catVal) {
@@ -2126,9 +2310,12 @@
     }
 
     async function submitBatchWaste() {
-      if (wasteCart.length === 0) return showToast("Add waste items first.", true);
+      if (wasteCart.length === 0 || isOpsBusy) return showToast("Add waste items first.", true);
+      setOpsBusy(true, "Recording Wastage...", "Updating Waste Log & Stock");
       const res = await callApi({ action: "batchRecordWaste", items: wasteCart, loggedBy: currentUser.name, userRole: currentUser.role });
-      if (res.status === "success") { showToast(res.message); wasteCart = []; renderWasteCart(); refreshData(); }
+      await refreshData(false);
+      setOpsBusy(false);
+      if (res.status === "success") { showToast(res.message); wasteCart = []; renderWasteCart(); }
     }
 
     function renderKitchen() {
@@ -2142,7 +2329,7 @@
     }
 
     function openEmployeePicker() {
-      const activeEmps = appData.employees.filter(e => e.Status === "Active");
+      const activeEmps = appData.employees.filter(e => String(e.Status || "Active") === "Active");
       openPicker("Select Staff Member", activeEmps.map(e => ({ label: `${e.Name} (${e.Role})`, value: e.EmpID })), "stfEmpId", "stfEmpBtn", (empId) => {
         const emp = activeEmps.find(e => e.EmpID === empId);
         if (emp) document.getElementById("stfEmpName").value = emp.Name;
@@ -2164,51 +2351,214 @@
     }
 
     function renderStaff() {
-      const activeEmps = appData.employees.filter(e => e.Status === "Active");
-      const todayStr = getLocalTodayStr();
-      let presentToday = 0;
+      const activeEmps = (appData.employees || []).filter(e => String(e.Status || "Active") === "Active");
+      const targetDate = document.getElementById("stfDate").value || getLocalTodayStr();
+      const attendanceTypes = ["ATTENDANCE", "PRESENT", "HALF_DAY", "ABSENT", "PAID_LEAVE", "LOP_LEAVE"];
+      let presentCount = 0;
+
       document.getElementById("employeeCardsList").innerHTML = activeEmps.map(emp => {
-        const todayLog = appData.staffActivity.find(a => a.EmpID === emp.EmpID && String(a.Date).startsWith(todayStr));
-        if (todayLog && todayLog.ActivityType === "ATTENDANCE") presentToday++;
+        const log = (appData.staffActivity || []).find(a =>
+          toIstDateKey(a.Date) === targetDate &&
+          ((emp.EmpID && String(a.EmpID || "").trim() === String(emp.EmpID).trim()) || String(a.EmpName || "").trim() === String(emp.Name || "").trim()) &&
+          attendanceTypes.includes(String(a.ActivityType || "").trim())
+        );
+        const statusText = log ? String(log.ActivityType).trim() : "Unmarked";
+        if (statusText === "ATTENDANCE" || statusText === "PRESENT") presentCount++;
+        else if (statusText === "HALF_DAY") presentCount += 0.5;
+
+        const badgeCls = statusText === "Unmarked"
+          ? "bg-slate-500/15 opacity-70"
+          : statusText === "HALF_DAY"
+            ? "bg-amber-500/20 text-amber-700"
+            : statusText === "ABSENT"
+              ? "bg-rose-500/20 text-rose-600"
+              : "bg-emerald-500/15 text-emerald-600";
+
         return `
-          <div class="glass-card p-3.5 rounded-2xl flex items-center justify-between">
-            <div><p class="font-extrabold text-sm">${emp.Name}</p><p class="text-[11px] opacity-65">${emp.Role}</p></div>
-            <span class="px-3 py-1 rounded-xl text-xs font-extrabold bg-emerald-500/15 text-emerald-600">${todayLog ? todayLog.ActivityType : "Unmarked"}</span>
+          <div onclick="selectDirect('stfEmpId','stfEmpBtn','${emp.EmpID}','${emp.Name} (${emp.Role})'); document.getElementById('stfEmpName').value='${emp.Name}';" class="cursor-pointer glass-card p-3.5 rounded-2xl flex items-center justify-between hover:border-purple-400 transition">
+            <div>
+              <p class="font-extrabold text-sm">${emp.Name}</p>
+              <p class="text-[11px] opacity-65">${emp.Role} • Base: ₹${Number(emp.BaseSalary || 0).toLocaleString("en-IN")}</p>
+            </div>
+            <span class="px-3 py-1 rounded-xl text-xs font-extrabold ${badgeCls}">${statusText}</span>
           </div>
         `;
       }).join("");
-      document.getElementById("staffHeroRatio").textContent = `${presentToday} / ${activeEmps.length} Present`;
+
+      document.getElementById("staffHeroRatio").textContent = `${presentCount} / ${activeEmps.length} Present`;
+      const pct = activeEmps.length > 0 ? Math.round((presentCount / activeEmps.length) * 100) : 0;
+      document.getElementById("staffHeroPct").textContent = `${pct}%`;
+      const circle = document.getElementById("staffDonutCircle");
+      if (circle) circle.setAttribute("stroke-dashoffset", String(94.2 - (94.2 * pct) / 100));
       renderEmployeeHeatmap();
+    }
+
+    function renderStaffActivityHistory() {
+      const listEl = document.getElementById("opsStaffActivityHistoryList");
+      if (!listEl) return;
+      const q = (document.getElementById("opsStaffLogFilter")?.value || "").toLowerCase().trim();
+
+      const rows = (appData.staffActivity || []).filter(a => {
+        if (!isOpsDateInScope(a.Date)) return false;
+        if (!q) return true;
+        return `${a.RecordID || a.ActivityID || ""} ${a.EmpName || ""} ${a.ActivityType || ""} ${a.Notes || ""}`.toLowerCase().includes(q);
+      });
+
+      const advSum = rows.filter(a => a.ActivityType === "ADVANCE").reduce((s, a) => s + (Number(a.Amount) || 0), 0);
+      const salSum = rows.filter(a => ["SALARY_PAID", "DAILY_WAGE"].includes(a.ActivityType)).reduce((s, a) => s + (Number(a.Amount) || 0), 0);
+      const presentCnt = rows.filter(a => ["ATTENDANCE", "PRESENT"].includes(a.ActivityType)).length;
+
+      const totEl = document.getElementById("opsStaffLogTotals");
+      if (totEl) totEl.textContent = `Advances: ₹${Math.round(advSum).toLocaleString("en-IN")} • Salary/Wages: ₹${Math.round(salSum).toLocaleString("en-IN")} • Present Logs: ${presentCnt}`;
+
+      listEl.innerHTML = rows.map(a => {
+        const actId = a.RecordID || a.ActivityID || "";
+        const amt = Number(a.Amount) || 0;
+        return `
+          <div class="p-3 rounded-2xl bg-slate-500/5 border border-slate-500/15 flex items-center justify-between gap-2">
+            <div class="min-w-0">
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <span class="font-extrabold text-xs">${a.EmpName}</span>
+                <span class="text-[9px] font-extrabold px-2 py-0.5 rounded-full ${a.ActivityType === "ADVANCE" ? "bg-amber-500/20 text-amber-700" : "bg-purple-500/20 text-purple-700"}">${a.ActivityType}</span>
+                <span class="text-[10px] opacity-65">${toIstDateKey(a.Date)}</span>
+              </div>
+              <p class="text-[10px] opacity-65 truncate mt-0.5">${a.Notes || a.PaidFrom || "-"} • By ${a.LoggedBy || "-"}</p>
+            </div>
+            <div class="flex items-center gap-1.5 shrink-0">
+              ${amt > 0 ? `<span class="font-extrabold text-xs tabular-nums mr-1">₹${amt.toLocaleString("en-IN")}</span>` : ""}
+              ${isPriv() && actId ? `
+                <button type="button" onclick="openEditStaffActivityModal('${actId}')" class="px-2 py-1 rounded-lg bg-amber-500/20 text-amber-700 text-[10px] font-extrabold">Edit</button>
+                <button type="button" onclick="deleteStaffActivityItem('${actId}', '${a.EmpName}', '${a.ActivityType}', ${amt})" class="px-2 py-1 rounded-lg bg-rose-500/15 text-rose-500 text-[10px] font-extrabold">Delete</button>
+              ` : ""}
+            </div>
+          </div>
+        `;
+      }).join("") || `<p class="opacity-60 text-center py-4">No staff activity, salary, or advance records in selected scope.</p>`;
+    }
+
+    function openEditStaffActivityModal(actId) {
+      const a = (appData.staffActivity || []).find(x => String(x.RecordID || x.ActivityID) === String(actId));
+      if (!a) return;
+      document.getElementById("editStfActHeading").textContent = `Edit ${a.EmpName} (${actId})`;
+      document.getElementById("editStfActId").value = actId;
+      document.getElementById("editStfActDate").value = toIstDateKey(a.Date);
+      document.getElementById("editStfActType").value = a.ActivityType || "ADVANCE";
+      document.getElementById("editStfActAmt").value = Number(a.Amount) || 0;
+      document.getElementById("editStfActNotes").value = a.Notes || "";
+      document.getElementById("editStfActAdjCash").checked = true;
+      toggleModal("editStaffActivityModal");
+    }
+
+    async function saveEditedStaffActivity() {
+      if (isOpsBusy) return;
+      const activityId = document.getElementById("editStfActId").value;
+      if (!activityId) return;
+      toggleModal("editStaffActivityModal");
+      setOpsBusy(true, "Updating Staff Entry...", `Saving ${activityId}`);
+      const res = await callApi({
+        action: "editStaffActivity",
+        activityId,
+        date: document.getElementById("editStfActDate").value,
+        activityType: document.getElementById("editStfActType").value,
+        amount: parseFloat(document.getElementById("editStfActAmt").value) || 0,
+        notes: document.getElementById("editStfActNotes").value.trim(),
+        adjustCashBox: document.getElementById("editStfActAdjCash").checked
+      }, false);
+      setOpsBusy(false);
+      if (res && res.status === "success") {
+        showToast(res.message || "Staff activity updated!");
+        callApi({ action: "getAllData", role: currentUser.role }, false).then(fresh => {
+          if (fresh && fresh.status === "success") { appData = fresh; renderAll(); }
+        });
+      } else showToast((res && res.message) || "Update failed", true);
+    }
+
+    async function deleteStaffActivityItem(activityId, empName, actType, amt) {
+      if (isOpsBusy) return;
+      const ok = confirm(`Delete ${actType} (₹${amt}) for ${empName}?\nClick OK to remove it and refund Restaurant Cash Box if applicable.`);
+      if (!ok) return;
+      setOpsBusy(true, "Deleting Staff Entry...", `Removing ${activityId}`);
+      const res = await callApi({ action: "deleteStaffActivity", activityId, refundCashBox: true }, false);
+      setOpsBusy(false);
+      if (res && res.status === "success") {
+        appData.staffActivity = (appData.staffActivity || []).filter(x => String(x.RecordID || x.ActivityID) !== String(activityId));
+        renderStaff();
+        renderStaffActivityHistory();
+        showToast(res.message || `Deleted ${activityId}`);
+        callApi({ action: "getAllData", role: currentUser.role }, false).then(fresh => {
+          if (fresh && fresh.status === "success") { appData = fresh; renderAll(); }
+        });
+      } else showToast((res && res.message) || "Delete failed", true);
     }
 
     function renderEmployeeHeatmap() {
       document.getElementById("calendarHeatmapGrid").innerHTML = `<div class="col-span-7 text-xs opacity-60 py-2">Select employee above to inspect monthly attendance</div>`;
     }
     function shiftHeatmapMonth() {}
+
     async function submitStaffActivity(e) {
       e.preventDefault();
+      if (isOpsBusy) return;
+      const empId = document.getElementById("stfEmpId").value;
+      const empName = document.getElementById("stfEmpName").value;
+      const activityType = document.getElementById("stfActivityType").value;
+      const date = document.getElementById("stfDate").value || getLocalTodayStr();
+      const amount = Number(document.getElementById("stfAmount").value) || 0;
+      const paidFrom = document.getElementById("stfPaidFrom").value;
+
+      if (!empName) return showToast("Please select a staff member first!", true);
+
+      setOpsBusy(true, "Saving Staff Record...", `${empName} • ${activityType}`);
       const res = await callApi({
-        action: "logStaffActivity",
-        empId: document.getElementById("stfEmpId").value,
-        empName: document.getElementById("stfEmpName").value,
-        activityType: document.getElementById("stfActivityType").value,
-        date: document.getElementById("stfDate").value,
-        amount: Number(document.getElementById("stfAmount").value) || 0,
-        paidFrom: document.getElementById("stfPaidFrom").value,
-        loggedBy: currentUser.name
-      });
-      if (res.status === "success") { showToast(res.message); refreshData(); }
+        action: "recordStaffActivity",
+        empId, empName, activityType, date, amount, paidFrom,
+        loggedBy: currentUser ? currentUser.name : "Manager"
+      }, false);
+
+      if (res && res.status === "success") {
+        const attendanceTypes = ["ATTENDANCE", "PRESENT", "HALF_DAY", "ABSENT", "PAID_LEAVE", "LOP_LEAVE"];
+        if (attendanceTypes.includes(activityType)) {
+          const existing = (appData.staffActivity || []).find(a =>
+            toIstDateKey(a.Date) === date && ((empId && a.EmpID === empId) || a.EmpName === empName) && attendanceTypes.includes(a.ActivityType)
+          );
+          if (existing) {
+            existing.ActivityType = activityType;
+          } else {
+            appData.staffActivity.unshift({
+              RecordID: res.recordId || ("STF-" + Date.now()),
+              Date: date, EmpID: empId, EmpName: empName,
+              ActivityType: activityType, Amount: amount, PaidFrom: paidFrom,
+              LoggedBy: currentUser ? currentUser.name : "Manager"
+            });
+          }
+        }
+        renderStaff();
+        renderStaffActivityHistory();
+        setOpsBusy(false);
+        showToast(res.message || `Updated ${empName} (${activityType})!`);
+        callApi({ action: "getAllData", role: currentUser.role }, false).then(fresh => {
+          if (fresh && fresh.status === "success") { appData = fresh; renderAll(); }
+        });
+      } else {
+        setOpsBusy(false);
+        showToast((res && res.message) || "Failed to save staff record", true);
+      }
     }
+
     async function submitNewEmployee(e) {
       e.preventDefault();
+      if (isOpsBusy) return;
+      setOpsBusy(true, "Saving Staff Profile...", "Updating Employees Sheet");
       const res = await callApi({
         action: "addEmployee",
         name: document.getElementById("empName").value, role: document.getElementById("empRole").value,
         mobile: document.getElementById("empMobile").value, payType: document.getElementById("empPayType").value,
         baseSalary: document.getElementById("empSalary").value, idProof: document.getElementById("empIdProof").value,
         address: document.getElementById("empAddress").value, bankDetails: document.getElementById("empBank").value
-      });
-      if (res.status === "success") { showToast(res.message); toggleModal("addEmpModal"); refreshData(); }
+      }, false);
+      await refreshData(false);
+      setOpsBusy(false);
+      if (res.status === "success") { showToast(res.message); toggleModal("addEmpModal"); }
     }
 
     // ============================================================
@@ -2316,18 +2666,29 @@
     }
     async function submitReimbursement(e) {
       e.preventDefault();
-      const res = await callApi({ action: "reimburseSelf", personName: document.getElementById("reimbPerson").value, amount: document.getElementById("reimbAmount").value, paidFrom: document.getElementById("reimbPaidFrom").value, loggedBy: currentUser.name });
-      if (res.status === "success") { showToast(res.message); toggleModal("reimburseModal"); refreshData(); }
+      if (isOpsBusy) return;
+      setOpsBusy(true, "Processing Reimbursement...", "Updating Funds & Self Ledger");
+      const res = await callApi({ action: "reimburseSelf", personName: document.getElementById("reimbPerson").value, amount: document.getElementById("reimbAmount").value, paidFrom: document.getElementById("reimbPaidFrom").value, loggedBy: currentUser.name }, false);
+      await refreshData(false);
+      setOpsBusy(false);
+      if (res.status === "success") { showToast(res.message); toggleModal("reimburseModal"); }
     }
     async function submitInflow(e) {
       e.preventDefault();
-      const res = await callApi({ action: "addInflow", source: document.getElementById("infSource").value, amount: document.getElementById("infAmount").value, depositedTo: document.getElementById("infDepositedTo").value, loggedBy: currentUser.name });
-      if (res.status === "success") { showToast(res.message); toggleModal("inflowModal"); refreshData(); }
+      if (isOpsBusy) return;
+      setOpsBusy(true, "Recording Inflow...", "Updating Fund Balance");
+      const res = await callApi({ action: "addInflow", source: document.getElementById("infSource").value, amount: document.getElementById("infAmount").value, depositedTo: document.getElementById("infDepositedTo").value, loggedBy: currentUser.name }, false);
+      await refreshData(false);
+      setOpsBusy(false);
+      if (res.status === "success") { showToast(res.message); toggleModal("inflowModal"); }
     }
     function editFundDialog(fundName, curBal) {
       openInputDialog(`Set ${fundName} Balance`, "Enter exact cash amount (₹)", async (val) => {
-        const res = await callApi({ action: "updateFundBalance", fundName, newBalance: val });
-        if (res.status === "success") { showToast(res.message); refreshData(); }
+        setOpsBusy(true, "Updating Fund Balance...", fundName);
+        const res = await callApi({ action: "updateFundBalance", fundName, newBalance: val }, false);
+        await refreshData(false);
+        setOpsBusy(false);
+        if (res.status === "success") showToast(res.message);
       }, curBal);
     }
 
@@ -2379,7 +2740,7 @@
       let cells = Array(startDay).fill(`<div></div>`).join("");
       for (let d = 1; d <= days; d++) {
         const iso = `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
-        cells += `<button type="button" onclick="selectDirect('${datePickerTarget.hiddenId}','${datePickerTarget.btnId}','${iso}','${iso}'); toggleModal('customDateModal');" class="h-9 rounded-xl font-bold glass-card">${d}</button>`;
+        cells += `<button type="button" onclick="selectDirect('${datePickerTarget.hiddenId}','${datePickerTarget.btnId}','${iso}','${iso}'); toggleModal('customDateModal'); if('${datePickerTarget.hiddenId}'==='stfDate') renderStaff();" class="h-9 rounded-xl font-bold glass-card">${d}</button>`;
       }
       document.getElementById("datePickerGrid").innerHTML = cells;
     }
